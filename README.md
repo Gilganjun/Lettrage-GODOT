@@ -14,13 +14,15 @@ Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 | Phase 0 — Foundation | **Complete** |
 | Phase 1 — Assets, SpriteFrames, animation test | **Complete** |
 | Phase 2A — Movement, collision, editable baked level | **Complete** |
-| Phase 2B — Enemy, letters, scoring, health, gameplay | **Not started** |
+| Phase 2B1 — Player letters, spelling, dictionary, score | **Implemented** — manual F5 pending |
+| Phase 2B2+ — Enemy AI, health, etc. | **Not started** |
 
 ## Scenes
 
 | Purpose | Scene |
 |---------|-------|
-| **F5 — play movement test** | `scenes/test/phase2a_movement_corrected.tscn` |
+| **F5 — play word game test** | `scenes/test/phase2b1_word_game_test.tscn` |
+| Phase 2A movement reference | `scenes/test/phase2a_movement_corrected.tscn` |
 | **Edit level in Godot 2D** | `scenes/levels/main2_heallthbartest_level.tscn` |
 | Phase 1 animation test | `scenes/test/animation_test.tscn` |
 | Static layout reference | `scenes/test/phase2a_layout_verification.tscn` |
@@ -34,6 +36,19 @@ The movement test **instances** the baked level. Save edits in `main2_heallthbar
 - Manual Godot editor changes **override** old manifest-generated geometry.
 - **Do not rebake** casually — `tools/bake_main2_level.gd` overwrites the `.tscn` and destroys manual edits.
 - Rebaking requires **explicit approval**.
+
+## Phase 2B1 features
+
+- Falling letters (A–Z) from GDevelop group #13 spawn rules
+- Player collection → spelling HUD
+- Dictionary validation (`EnglishWords4.txt`)
+- Score on valid word: `(len/2) + 2×len`
+- Submit: **Enter** or **C** (source key) | Delete: **Backspace**
+
+```powershell
+& "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
+  --headless --path . --script res://tools/validate_phase2b1.gd
+```
 
 ## Phase 2A features
 
@@ -73,7 +88,8 @@ python tools/phase2a_collision_manifest.py
 - `reports/PHASE2A_VALIDATION.md` — Phase 2A sign-off
 - `reports/PHASE2A_LEVEL_EDITING.md` — how to edit the level in Godot
 - `reports/PHASE2A_SOURCE_MAP.md`
-- `reports/PHASE2A_COLLISION_MAP.md`
+- `reports/PHASE2B1_SOURCE_MAP.md`
+- `reports/PHASE2B1_VALIDATION.md`
 
 ## Repository layout
 

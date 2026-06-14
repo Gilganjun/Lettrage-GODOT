@@ -1,0 +1,4647 @@
+{
+  "group_index": 13,
+  "group_name": "Letter Drop",
+  "group_disabled": null,
+  "event_record_count": 64,
+  "records": [
+    {
+      "path": "/0",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "",
+            "\"LetterTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "Letters",
+            "RandomInRange(0,2000)",
+            "TopBoundary.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextToSpeech::Speak"
+          },
+          "params": [
+            "",
+            "\"Lettrage\"",
+            "\"Mark\"",
+            "100",
+            "60",
+            "0\n",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "\"\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "no"
+          ]
+        },
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Player",
+            "\"Glow\"",
+            "no"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeWidth"
+          },
+          "params": [
+            "Player",
+            "=",
+            "0.58"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeScale"
+          },
+          "params": [
+            "Player",
+            "=",
+            ".65"
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "",
+            "\"DeleteLetterTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "609250__aemyn__journey-to-the-interweb.mp3",
+            "",
+            "20",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "HideLayer"
+          },
+          "params": [
+            "",
+            "\"Variables\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/4",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "FileSystem::LoadStringFromFileSync"
+          },
+          "params": [
+            "Dictionary",
+            "FileSystem::UserHomePath() + FileSystem::PathDelimiter() + \"OneDrive\" + FileSystem::PathDelimiter() + \"Documents\" + FileSystem::PathDelimiter() + \"Lettrage\" + FileSystem::PathDelimiter() + \"SnatchWord1\" + FileSystem::PathDelimiter() + \"Dictionary\" + FileSystem::PathDelimiter() + \"EnglishWords4.txt\"",
+            "Variabletest",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/5",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "FileSystem::LoadStringFromFileSync"
+          },
+          "params": [
+            "EnemyDictionary",
+            "FileSystem::UserHomePath()\n+ FileSystem::PathDelimiter() + \"OneDrive\"\n+ FileSystem::PathDelimiter() + \"Documents\"\n+ FileSystem::PathDelimiter() + \"Lettrage\"\n+ FileSystem::PathDelimiter() + \"SnatchWord1\"\n+ FileSystem::PathDelimiter() + \"Dictionary\"\n+ FileSystem::PathDelimiter() + \"EnemyDictionary.txt\"\n",
+            "Variabletest",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/6",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "t"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "DictionaryTEST",
+            "=",
+            "VariableString(EnemyDictionary)"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "VariableTest",
+            "=",
+            "VariableString(Variabletest)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/7",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "u"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "DictionaryTEST2",
+            "=",
+            "VariableString(Dictionary2)"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "VariableTest2",
+            "=",
+            "VariableString(Variabletest2)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/8",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "y"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "DictionaryTEST",
+            "=",
+            "VariableString(test)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/18",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Cache"
+          },
+          "params": [
+            "SpellingPosition"
+          ]
+        },
+        {
+          "type": {
+            "value": "Cache"
+          },
+          "params": [
+            "CentreScreen"
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\""
+          ]
+        },
+        {
+          "type": {
+            "value": "PauseObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/20",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "c"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::CompareNumbers"
+          },
+          "params": [
+            "StrFind(NewLine()+VariableString(Dictionary)+NewLine(),NewLine()+VariableString(SpellWord)+NewLine())\n\n",
+            "!=",
+            "-1"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "!=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "PlayerLetterIndex",
+            "=",
+            "StrLength(VariableString(SpellWord)) "
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "PlayerScore",
+            "=",
+            "Variable(PlayerScore) + (StrLength(VariableString(SpellWord)) / 2) + (StrLength(VariableString(SpellWord)) + StrLength(VariableString(SpellWord)))"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "PlayerScore",
+            "=",
+            "VariableString(PlayerScore)"
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "assets\\487436__elijahdanie__game-win.mp3",
+            "",
+            "RandomInRange(50,100)\n",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "Tween::AddObjectScaleTween"
+          },
+          "params": [
+            "Spelling",
+            "Tween",
+            "\"spelling1\"",
+            "3",
+            "3",
+            "\"easeOutQuad\"",
+            "500",
+            "",
+            "yes"
+          ]
+        },
+        {
+          "type": {
+            "value": "Tween::AddObjectPositionTween"
+          },
+          "params": [
+            "Spelling",
+            "Tween",
+            "\"SpellPosition1\"",
+            "Spelling.X()",
+            "Spelling.Y()+40",
+            "\"bounce\"",
+            "500",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "UnPauseObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "yes"
+          ]
+        },
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Player",
+            "\"Glow\"",
+            "yes"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/21",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\"",
+            ">",
+            "0.3"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Tween::AddObjectScaleTween"
+          },
+          "params": [
+            "Spelling",
+            "Tween",
+            "\"spelling2\"",
+            "1.0",
+            "1.0",
+            "\"easeOutCirc\"",
+            "500",
+            "",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Tween::AddObjectPositionTween"
+          },
+          "params": [
+            "Spelling",
+            "Tween",
+            "\"SpellPositionB\"",
+            "Enemy.X()",
+            "Enemy.Y()",
+            "\"bounce\"",
+            "500",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/22",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\"",
+            ">",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "PauseObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"SpellingTweenTimer\""
+          ]
+        },
+        {
+          "type": {
+            "value": "MettreXY"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "SpellingPosition.X()",
+            "=",
+            "SpellingPosition.Y()"
+          ]
+        },
+        {
+          "type": {
+            "value": "MettreXY"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "SpellingPosition.X()-6",
+            "=",
+            "SpellingPosition.Y()+8"
+          ]
+        },
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "no"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/24",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "c"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::CompareNumbers"
+          },
+          "params": [
+            "StrFind(NewLine()+VariableString(Dictionary)+NewLine(),NewLine()+VariableString(SpellWord)+NewLine())\n\n",
+            "=",
+            "-1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "UnPauseObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\""
+          ]
+        },
+        {
+          "type": {
+            "value": "ShakeObject::ShakeObject_PositionAngle::ShakeObject_PositionAngle"
+          },
+          "params": [
+            "Spelling",
+            "ShakeObject_PositionAngle",
+            "1",
+            "5",
+            "5",
+            "5",
+            "0.08",
+            "",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "369520__kinoton__bass-power-down.wav",
+            "",
+            "65",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/25",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\"",
+            ">=",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ShakeObject::ShakeObject_PositionAngle::StopShaking"
+          },
+          "params": [
+            "Spelling",
+            "ShakeObject_PositionAngle",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\""
+          ]
+        },
+        {
+          "type": {
+            "value": "PauseObjectTimer"
+          },
+          "params": [
+            "Spelling",
+            "\"WrongWord\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/27",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "x"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::CompareNumbers"
+          },
+          "params": [
+            "StrFind(NewLine()+VariableString(Dictionary),NewLine()+VariableString(SpellWord))\n\n",
+            "=",
+            "-1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "game-fx-hypnoshroom_G_major.wav",
+            "",
+            "RandomInRange(30,60)\n",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "=",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/28",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "DebuggerTools::ConsoleLog"
+          },
+          "params": [
+            "\"dictionaryArray.length\"",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/31",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpellingTweenTimer",
+            "=",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/32",
+      "conditions": [],
+      "actions": [
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "spellingtweentimer",
+            "=",
+            "VariableString(SpellingTweenTimer)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/33",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "g"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "yes"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/34",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "h"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "no"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/36",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "",
+            "\"GlowTimer\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/37",
+      "conditions": [
+        {
+          "type": {
+            "value": "VarSceneTxt"
+          },
+          "params": [
+            "DictionaryResourceSaver",
+            "!=",
+            "VariableString(Spellword)"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::CompareNumbers"
+          },
+          "params": [
+            "StrFind(NewLine()+VariableString(Dictionary)+NewLine(),NewLine()+VariableString(SpellWord)+NewLine())\n\n",
+            "!=",
+            "-1"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "LLimit",
+            ">=",
+            "1\n"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "yes"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "DictionaryResourceSaver",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/42",
+      "conditions": [
+        {
+          "type": {
+            "value": "VarSceneTxt"
+          },
+          "params": [
+            "DictionaryResourceSaver",
+            "!=",
+            "VariableString(Spellword)"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "LLimit",
+            ">=",
+            "1\n"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::CompareNumbers"
+          },
+          "params": [
+            "StrFind(NewLine()+VariableString(Dictionary)+NewLine(),NewLine()+VariableString(SpellWord)+NewLine())\n\n",
+            "=",
+            "-1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "EnableEffect"
+          },
+          "params": [
+            "Spelling",
+            "\"GlowWord\"",
+            "no"
+          ]
+        },
+        {
+          "type": {
+            "value": "DebuggerTools::ConsoleLog"
+          },
+          "params": [
+            "\"(LLimit =\" + VariableString(LetterLimit.oldvalue)",
+            "\"info\"",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "DebuggerTools::ConsoleLog"
+          },
+          "params": [
+            "\"(LLimit =\" + VariableString(LetterLimit)",
+            "\"info\"",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "DictionaryResourceSaver",
+            "=",
+            "Variable(SpellWord)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/44",
+      "conditions": [
+        {
+          "type": {
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "Delete"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "\"\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "\"\""
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySoundCanal"
+          },
+          "params": [
+            "",
+            "assets\\distant-explosion.wav",
+            "3",
+            "",
+            "40",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/46",
+      "conditions": [
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "LLimit",
+            ">=",
+            "20"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "\"\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "=",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/56",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareTimer"
+          },
+          "params": [
+            "",
+            "\"LetterTimer\"",
+            "<=",
+            "0.1"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentLetter",
+            ">=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentLetter",
+            "<=",
+            "27"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "CreateByName"
+          },
+          "params": [
+            "",
+            "Alphabet2",
+            "\"L\" + ToString(Variable(CurrentLetter))",
+            "RandomInRange(100,2000)",
+            "TopBoundary.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "SetSize"
+          },
+          "params": [
+            "Alphabet2",
+            "RandomInRange(25,50)",
+            "RandomInRange(25,50)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "CurrentLetter",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeColor"
+          },
+          "params": [
+            "Alphabet2",
+            "ToString(RandomInRange(128,255))+\";\"+ToString(RandomInRange(128,255))+\";\"+ToString(RandomInRange(128,255))"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeColor"
+          },
+          "params": [
+            "Alphabet2",
+            "ToString(RandomInRange(100,255))+\";\"+ToString(RandomInRange(100,255))+\";\"+ToString(RandomInRange(100,255))"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeBlendMode"
+          },
+          "params": [
+            "Alphabet2",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/57",
+      "conditions": [
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentLetter",
+            "=",
+            "27"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "CurrentLetter",
+            "=",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/59",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareTimer"
+          },
+          "params": [
+            "",
+            "\"LetterTimer\"",
+            "<=",
+            "0.2"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentVowel",
+            ">=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentVowel",
+            "<=",
+            "5"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "CreateByName"
+          },
+          "params": [
+            "",
+            "Alphabet3vowels",
+            "\"LV\" + ToString(RandomInRange(0,5))",
+            "RandomInRange(100,2000)",
+            "TopBoundary.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "SetSize"
+          },
+          "params": [
+            "Alphabet3vowels",
+            "RandomInRange(25,50)",
+            "RandomInRange(25,50)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "CurrentVowel",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeColor"
+          },
+          "params": [
+            "Alphabet3vowels",
+            "\"255;181;60\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/61",
+      "conditions": [
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "CurrentVowel",
+            "=",
+            "5"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "CurrentVowel",
+            "=",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/62",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareTimer"
+          },
+          "params": [
+            "",
+            "\"LetterTimer\"",
+            ">=",
+            "0.30"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "",
+            "\"LetterTimer\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/64",
+      "conditions": [],
+      "actions": [
+        {
+          "type": {
+            "value": "MettreY"
+          },
+          "params": [
+            "Alphabet2",
+            "+",
+            "RandomInRange(1,3.5)"
+          ]
+        },
+        {
+          "type": {
+            "value": "MettreY"
+          },
+          "params": [
+            "Alphabet3vowels",
+            "+",
+            "RandomInRange(1.5,4)"
+          ]
+        },
+        {
+          "type": {
+            "value": "MettreY"
+          },
+          "params": [
+            "DeleteArrow",
+            "+",
+            "RandomInRange(1,3.5)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/74",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareTimer"
+          },
+          "params": [
+            "",
+            "\"DeleteLetterTimer\"",
+            ">=",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "DeleteArrow",
+            "RandomInRange(100,1500)",
+            "TopBoundary.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangeScale"
+          },
+          "params": [
+            "DeleteArrow",
+            "=",
+            "0.25"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/75",
+      "conditions": [
+        {
+          "type": {
+            "value": "CompareTimer"
+          },
+          "params": [
+            "",
+            "\"DeleteLetterTimer\"",
+            ">=",
+            "5"
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "De",
+            "\"DeleteLetterTimer\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/79/2",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "1"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "PopLetterRing",
+            "Alphabet2.CenterX()",
+            "Alphabet2.CenterY()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "PopLetterRing",
+            "Alphabet3vowels.CenterX()",
+            "Alphabet3vowels.CenterY()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "PopPoopFx",
+            "Alphabet2.PointX(\"Pop\")",
+            "Alphabet2.PointY(\"Pop\")",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "PopPoopFx",
+            "Alphabet3vowels.PointX(\"Pop\")",
+            "Alphabet3vowels.PointY(\"Pop\")",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ParticleSystem::EmitterAngle"
+          },
+          "params": [
+            "PopPoopFx",
+            "=",
+            "RandomInRange(0,360)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Alphabet2",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Alphabet3vowels",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterPopSound",
+            "=",
+            "RandomInRange(1,2)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangePlan"
+          },
+          "params": [
+            "PopLetterRing",
+            "=",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/79/4",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "PlayerScore",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "PlayerLetterIndex",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "PlayerCollectedLetters",
+            "=",
+            "\"\""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/81",
+      "conditions": [
+        {
+          "type": {
+            "value": "DepartScene"
+          },
+          "params": [
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarGlobal"
+          },
+          "params": [
+            "SpeakLetterVolume",
+            "=",
+            "30"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/82",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "inverted": true,
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "RControl"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LLimit",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Letters",
+            "=",
+            "VariableString(Dic)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterCollectSFX",
+            "=",
+            "RandomInRange(1,4)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "LetterFlash",
+            "Alphabet2.X()",
+            "Alphabet2.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Create"
+          },
+          "params": [
+            "",
+            "LetterFlash",
+            "Alphabet3vowels.X()",
+            "Alphabet3vowels.Y()",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ChangePlan"
+          },
+          "params": [
+            "LetterFlash",
+            "=",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ParticleSystem::EmitterAngle"
+          },
+          "params": [
+            "LetterFlash",
+            "=",
+            "RandomInRange(20,200)"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/84",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L1",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "LV1",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"A\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakA",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/85",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L2",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"B\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "3"
+          ]
+        },
+        {
+          "type": {
+            "value": "ResetTimer"
+          },
+          "params": [
+            "",
+            "\"LetterBoom\""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakB",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/86",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L3",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"C\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "3"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakC",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/87",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L4",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"D\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "2"
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "coin.mp3",
+            "",
+            "30",
+            "RandomInRange(-1,1)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakD",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/88",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L5",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "LV2",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"E\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakE",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/89",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L6",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"F\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "4"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakF",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/90",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L7",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"G\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "2"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakG",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/91",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L8",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"H\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "4"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakH",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/92",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L9",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "LV3",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"I\" "
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakI",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/93",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L10",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"J\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "6"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakJ",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/94",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L11",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"K\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "5\n"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakK",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/95",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L12",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"L\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakL",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/96",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L13",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"M\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "3"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakM",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/97",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L14",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"N\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakN",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/98",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L15",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "LV4",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"O\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakO",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/99",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L16",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"P\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "3"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakP",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/100",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L17",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"Q\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "7"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakQ",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/101",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "inverted": true,
+            "value": "KeyPressed"
+          },
+          "params": [
+            "",
+            "RControl"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L18",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"R\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakR",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/102",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L19",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"S\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakS",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/103",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L20",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"T\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakT",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/104",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L21",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "LV5",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"U\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "1"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakU",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/105",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L22",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"V\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "4"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakV",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/106",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L23",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"W\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "4"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakW",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/107",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L24",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"X\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "6"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakX",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/108",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L25",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"Y\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "4"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakY",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/109",
+      "conditions": [
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Or"
+          },
+          "params": []
+        },
+        {
+          "type": {
+            "value": "VarScene"
+          },
+          "params": [
+            "ShieldToggle",
+            "=",
+            "0"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "L26",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "+",
+            "\"Z\""
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "LetterScr",
+            "+",
+            "7"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "SpeakZ",
+            "=",
+            "RandomInRange(1,3)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Bullet",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/111",
+      "conditions": [
+        {
+          "type": {
+            "value": "CollisionNP"
+          },
+          "params": [
+            "Player",
+            "DeleteArrow",
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "BuiltinCommonInstructions::Once"
+          },
+          "params": []
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "ModVarScene"
+          },
+          "params": [
+            "WordLength",
+            "=",
+            "StrLength(VariableString(SpellWord))"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "WordLengthVariableTest",
+            "=",
+            "VariableString(WordLength)"
+          ]
+        },
+        {
+          "type": {
+            "value": "ModVarSceneTxt"
+          },
+          "params": [
+            "SpellWord",
+            "=",
+            "SubStr(VariableString(SpellWord), 0, (Variable(WordLength)) -1)"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "Spelling",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "TextObject::String"
+          },
+          "params": [
+            "SpellingShadow",
+            "=",
+            "VariableString(SpellWord)"
+          ]
+        },
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "DeleteArrow",
+            ""
+          ]
+        },
+        {
+          "type": {
+            "value": "PlaySound"
+          },
+          "params": [
+            "",
+            "176238__melissapons__sci-fi-short-error.wav",
+            "",
+            "50",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/115",
+      "conditions": [
+        {
+          "type": {
+            "value": "CollisionNP"
+          },
+          "params": [
+            "Alphabet2",
+            "LetterDelBoundary",
+            "LetterDelBoundary",
+            "",
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Alphabet2",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/116",
+      "conditions": [
+        {
+          "type": {
+            "value": "CollisionNP"
+          },
+          "params": [
+            "Alphabet3vowels",
+            "LetterDelBoundary",
+            "LetterDelBoundary",
+            "",
+            ""
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": {
+            "value": "Delete"
+          },
+          "params": [
+            "Alphabet3vowels",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "scene_variables": [
+    {
+      "name": "Score",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "SpellWord",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "Checkword",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "Dictionary",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "Dictionary2",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "LetterScr",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "SpellingTweenTimer",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "LetterPopSound",
+      "type": "string",
+      "value": "0"
+    },
+    {
+      "folded": true,
+      "name": "LetterArray",
+      "type": "array",
+      "children": [
+        {
+          "folded": true,
+          "type": "number",
+          "value": 1
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 2
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 3
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 4
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 5
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 6
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 7
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 8
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 9
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 10
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 11
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 12
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 13
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 14
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 15
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 16
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 17
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 18
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 19
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 20
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 21
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 22
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 23
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 24
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 25
+        },
+        {
+          "folded": true,
+          "type": "number",
+          "value": 26
+        }
+      ]
+    },
+    {
+      "folded": true,
+      "name": "CurrentLetter",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "CurrentVowel",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "DictionaryResourceSaver",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "WordLength",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "LetterCollectSFX",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "EnemyDictionary",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "EnemyCurrentLetter",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "EnemyLetterIndex",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "EnemyCollectedLetters",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "EnemyScore",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "PlayerCollectedLetters",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "PlayerLetterIndex",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "PlayerScore",
+      "type": "string",
+      "value": ""
+    },
+    {
+      "folded": true,
+      "name": "newLetterColor",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "folded": true,
+      "name": "SpellingWidth",
+      "type": "number",
+      "value": 0
+    }
+  ],
+  "letter1_object": null
+}

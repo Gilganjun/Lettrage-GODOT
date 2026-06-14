@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="AlphabetCatalog" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/alphabet_catalog.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+texture_dir = "res://images/Alphabet/"
+vowel_modulate = Color(1, 0.709804, 0.235294, 1)
