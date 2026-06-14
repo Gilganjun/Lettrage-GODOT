@@ -1,6 +1,6 @@
 extends Node2D
 
-## Phase 2B2A — enemy movement foundation + Phase 2B1 word gameplay.
+## Phase 2B2B — shields, enemy letter collection and word building.
 
 const LEVEL_SCENE := preload("res://scenes/levels/main2_heallthbartest_level.tscn")
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
@@ -33,6 +33,7 @@ var _word_debug := true
 var _player_row: Dictionary = {}
 var _enemy_row: Dictionary = {}
 var _enemy: Enemy
+var _player_shield: PlayerShield
 
 
 func _ready() -> void:
@@ -54,6 +55,8 @@ func _ready() -> void:
 		hud.setup(word_controller, letter_spawner)
 	if hud.has_method("set_enemy"):
 		hud.set_enemy(_enemy)
+	if hud.has_method("set_player_shield"):
+		hud.set_player_shield(_player_shield)
 	if hud.has_method("set_debug_visible"):
 		hud.set_debug_visible(_word_debug)
 	call_deferred("_activate_player_camera")
@@ -73,7 +76,8 @@ func _spawn_player() -> void:
 	if player.has_method("configure_from_gdevelop"):
 		player.configure_from_gdevelop(spawn_row)
 	player.z_index = 100
-	PlayerAttach.attach(player, word_controller)
+	var attached := PlayerAttach.attach(player, word_controller)
+	_player_shield = attached.get("shield")
 	if level_root.has_method("collect_ladder_areas"):
 		for ladder in level_root.collect_ladder_areas():
 			if player.has_method("register_ladder"):
@@ -139,6 +143,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			letter_spawner.debug_spawn_letter("Z")
 		elif event.keycode == KEY_F9:
 			word_controller.debug_clear_word()
+		elif event.keycode == KEY_F10:
+			if _enemy:
+				_enemy.debug_force_shield(true)
+		elif event.keycode == KEY_F11:
+			if _enemy:
+				_enemy.debug_force_validation()
+		elif event.keycode == KEY_F12:
+			if _enemy:
+				_enemy.debug_clear_word()
 
 
 func _process(_delta: float) -> void:
@@ -153,3 +166,5 @@ func _process(_delta: float) -> void:
 		collision_debug.queue_redraw()
 	if _word_debug and hud.has_method("refresh_enemy_debug"):
 		hud.refresh_enemy_debug()
+	if hud.has_method("refresh_combat_hud"):
+		hud.refresh_combat_hud()

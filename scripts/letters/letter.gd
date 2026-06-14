@@ -1,9 +1,18 @@
 class_name Letter
 extends Area2D
 
-## Single falling collectible letter (A–Z).
+## Single falling collectible letter (A–Z) with authoritative resolution.
 
-signal collected(letter_node: Letter, character: String)
+enum Resolution {
+	NONE,
+	PLAYER_COLLECT,
+	ENEMY_COLLECT,
+	PLAYER_SHIELD,
+	ENEMY_SHIELD,
+	BOUNDARY,
+}
+
+signal resolved(letter_node: Letter, outcome: Resolution, character: String)
 
 @export var catalog: AlphabetCatalog
 
@@ -11,15 +20,15 @@ var character: String = "A"
 var spawn_id: int = -1
 var is_vowel: bool = false
 var fall_speed: float = 180.0
-var _collected := false
+var resolution: Resolution = Resolution.NONE
+var resolution_source: String = ""
 
 
 func _ready() -> void:
 	collision_layer = 8
-	collision_mask = 4
-	monitoring = true
-	body_entered.connect(_on_body_entered)
-	area_entered.connect(_on_area_entered)
+	collision_mask = 0
+	monitoring = false
+	add_to_group("letters")
 
 
 func configure(
@@ -46,34 +55,25 @@ func configure(
 
 
 func _physics_process(delta: float) -> void:
-	if _collected:
+	if is_resolved():
 		return
 	position.y += fall_speed * delta
 
 
-func try_collect_by_player(body: Node) -> bool:
-	if _collected:
+func is_resolved() -> bool:
+	return resolution != Resolution.NONE
+
+
+func try_resolve(outcome: Resolution, source: String = "") -> bool:
+	if is_resolved():
 		return false
-	if body == null or not body.is_in_group("player"):
-		return false
-	_collect()
+	resolution = outcome
+	resolution_source = source
+	set_deferred("monitoring", false)
+	resolved.emit(self, outcome, character)
+	queue_free()
 	return true
 
 
-func _on_body_entered(body: Node2D) -> void:
-	try_collect_by_player(body)
-
-
-func _on_area_entered(area: Area2D) -> void:
-	if area.is_in_group("player_collector"):
-		var player := area.get_parent()
-		try_collect_by_player(player)
-
-
-func _collect() -> void:
-	if _collected:
-		return
-	_collected = true
-	set_deferred("monitoring", false)
-	collected.emit(self, character)
-	queue_free()
+func get_center_global() -> Vector2:
+	return global_position

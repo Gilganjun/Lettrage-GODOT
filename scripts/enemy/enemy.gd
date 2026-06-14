@@ -1,7 +1,7 @@
 class_name Enemy
 extends CharacterBody2D
 
-## Phase 2B2A enemy foundation — patrol, obstacle escape, animation.
+## Phase 2B2A movement + Phase 2B2B word collection and shield.
 
 signal movement_state_changed(state: EnemyAnimation.MovementState)
 
@@ -13,8 +13,12 @@ signal movement_state_changed(state: EnemyAnimation.MovementState)
 @onready var animation_controller: EnemyAnimation = $AnimationController
 @onready var movement_controller: EnemyMovementController = $EnemyMovementController
 @onready var obstacle_sensor: Node = $ObstacleSensor
-@onready var obstacle_response: Node = $ObstacleResponse
-@onready var shield: Node = $Shield
+@onready var obstacle_response: EnemyObstacleResponse = $ObstacleResponse
+@onready var word_controller: Node = $EnemyWordController
+@onready var letter_targeting: Node = $EnemyLetterTargeting
+@onready var letter_collector: Node = $EnemyLetterCollector
+@onready var shield_controller: Node = $EnemyShieldController
+@onready var shield_component: Node2D = $ShieldComponent
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var floor_ray_left: RayCast2D = $FloorRayLeft
 @onready var floor_ray_right: RayCast2D = $FloorRayRight
@@ -36,8 +40,14 @@ var _jump_time: float = 0.0
 var _jump_held: bool = false
 var _floor_distance: float = INF
 var _last_sensor: Dictionary = {}
+var _spawn_position := Vector2(740.0, 406.0)
+var _chase_hop_impulse := 0.0
 
 const FLOOR_SNAP := 4.0
+const RECOVER_MIN_Y := -80.0
+const RECOVER_MAX_Y := 620.0
+const RECOVER_MIN_X := 40.0
+const RECOVER_MAX_X := 2400.0
 
 
 func _ready() -> void:
@@ -45,8 +55,9 @@ func _ready() -> void:
 	_apply_visual_profile()
 	animation_controller.sprite = sprite
 	_setup_rays()
+	_setup_word_and_shield()
 	obstacle_sensor.call("setup", self, _foot_y, _half_w)
-	obstacle_response.call("setup", movement_controller)
+	obstacle_response.setup(movement_controller, _cfg())
 	if obstacle_rng_seed >= 0:
 		obstacle_response.call("set_rng_seed", obstacle_rng_seed)
 	ladder_detector.area_entered.connect(_on_ladder_area_entered)
@@ -55,8 +66,37 @@ func _ready() -> void:
 		movement_controller.direction_changed.connect(func(_d): direction_changes += 1)
 
 
+func _setup_word_and_shield() -> void:
+	if shield_component:
+		shield_component.set("owner_group", "enemy")
+		shield_component.set("impact_source", "enemy_shield")
+		shield_component.set("shield_impact_sounds", [
+			load("res://assets/444136__lurpsis__glass-shatter-3.wav"),
+		])
+		shield_component.set("impact_volume", 0.35)
+		shield_component.position = Vector2(_half_w, _display_size.y * 0.45)
+	if shield_controller:
+		shield_controller.setup(self, shield_component, letter_targeting)
+	if letter_collector:
+		letter_collector.word_controller = word_controller
+		letter_collector.shield_component = shield_component
+		letter_collector.position = Vector2(_half_w, _display_size.y * 0.45)
+		var shape := letter_collector.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if shape == null:
+			shape = CollisionShape2D.new()
+			var rect := RectangleShape2D.new()
+			rect.size = Vector2(36, 48)
+			shape.shape = rect
+			letter_collector.add_child(shape)
+		letter_collector.letter_collected.connect(_on_enemy_letter_collected)
+	if word_controller:
+		word_controller.collect_sound = load("res://assets/361334__spoonsandlessspoons__charge-up-shot.wav")
+		word_controller.word_state.word_completed.connect(_on_enemy_word_completed)
+
+
 func configure_from_gdevelop(row: Dictionary) -> void:
 	global_position = Vector2(float(row.get("source_x", 740)), float(row.get("source_y", 406)))
+	_spawn_position = global_position
 	_display_size = Vector2(float(row.get("display_width", 93)), float(row.get("display_height", 116)))
 	if visual_profile == null:
 		visual_profile = load("res://resources/characters/enemy_visual.tres")
@@ -79,6 +119,7 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 		float(row.get("source_angle", 0)),
 	)
 	_align_collision_to_visual()
+	_setup_word_and_shield()
 	obstacle_sensor.call("setup", self, _foot_y, _half_w)
 	if movement_controller:
 		movement_controller.configure_patrol(300.0, 2000.0, global_position.x)
@@ -93,6 +134,10 @@ func set_obstacle_rng_seed(seed_value: int) -> void:
 func register_ladder(area: Area2D) -> void:
 	if area not in _ladder_areas:
 		_ladder_areas.append(area)
+
+
+func get_word_controller() -> Node:
+	return word_controller
 
 
 func get_debug_info() -> Dictionary:
@@ -110,29 +155,77 @@ func get_debug_info() -> Dictionary:
 		"patrol_max_x": movement_controller.patrol_max_x if movement_controller else 0.0,
 		"direction_changes": direction_changes,
 		"floor_distance": _floor_distance,
-		"shield_active": shield.get("is_active") if shield else false,
 	}
+	if word_controller:
+		info["enemy_word"] = word_controller.word_state.collected_letters
+		info["enemy_target_word"] = word_controller.word_state.target_word
+		info["enemy_score"] = word_controller.word_state.score
+		info["enemy_needed_letter"] = word_controller.word_state.current_needed_letter()
+		info["enemy_validation"] = word_controller.word_state.last_validation
+	if shield_controller:
+		info.merge(shield_controller.get_debug_info())
+	if letter_targeting:
+		info.merge(letter_targeting.get_debug_info(global_position))
 	info.merge(obstacle_response.call("get_debug_info", _last_sensor) if obstacle_response else {})
 	return info
+
+
+func debug_force_shield(active: bool) -> void:
+	if shield_controller:
+		shield_controller.debug_force_shield(active)
+
+
+func debug_clear_word() -> void:
+	if word_controller:
+		word_controller.debug_clear_word()
+		letter_targeting.drop_target("debug_clear")
+
+
+func debug_force_validation() -> void:
+	if word_controller:
+		word_controller.debug_force_validation()
 
 
 func _physics_process(delta: float) -> void:
 	if movement_controller:
 		movement_controller.tick(delta)
 	_update_floor_probe()
+	_tick_word_systems(delta)
 	if is_on_ladder:
 		_process_ladder(delta)
 	else:
 		_process_platformer(delta)
 	move_and_slide()
 	floor_snap_length = FLOOR_SNAP
+	_recover_if_out_of_bounds()
 	_update_movement_state()
+
+
+func _tick_word_systems(delta: float) -> void:
+	if shield_controller:
+		shield_controller.tick(delta, global_position)
+	if word_controller and letter_targeting:
+		var needed: String = word_controller.word_state.current_needed_letter()
+		var shield_blocks: bool = shield_component != null and shield_component.blocks_letter_collection()
+		letter_targeting.tick(delta, global_position, needed, shield_blocks)
 
 
 func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
-	var desired := movement_controller.get_desired_direction(global_position.x) if movement_controller else 1
-	if movement_controller and movement_controller.direction != 0:
+	var patrol_dir := movement_controller.get_desired_direction(global_position.x) if movement_controller else 1
+	var chase_dir: int = letter_targeting.get_chase_direction(global_position) if letter_targeting else 0
+	var desired := patrol_dir
+	var obstacle_busy := (
+		obstacle_response.encounter_active
+		or obstacle_response.is_paused()
+		or obstacle_response.is_jump_in_progress()
+	)
+	if chase_dir != 0 and not obstacle_busy:
+		movement_controller.set_letter_chase_direction(chase_dir)
+		desired = chase_dir
+	elif not obstacle_busy:
+		movement_controller.clear_letter_chase()
+	if movement_controller and movement_controller.direction != 0 and chase_dir == 0:
 		desired = movement_controller.direction
 	_last_sensor = obstacle_sensor.call("scan", desired)
 	obstacle_response.call(
@@ -145,6 +238,14 @@ func _process_platformer(delta: float) -> void:
 		absf(velocity.x),
 		desired,
 	)
+	if (
+		not obstacle_busy
+		and chase_dir != 0
+		and letter_targeting
+		and letter_targeting.should_request_chase_jump(global_position, is_on_floor())
+		and movement_controller.request_jump()
+	):
+		_chase_hop_impulse = 380.0
 	if obstacle_response.call("is_paused"):
 		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
 		if not is_on_floor():
@@ -161,9 +262,13 @@ func _process_platformer(delta: float) -> void:
 		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
 		_jump_time = 0.0
-		if obstacle_response.call("consume_jump_request"):
-			velocity.y = -cfg.jump_speed
-			_jump_held = true
+		var hop_impulse: float = obstacle_response.consume_jump_request()
+		if hop_impulse <= 0.0 and _chase_hop_impulse > 0.0:
+			hop_impulse = _chase_hop_impulse
+			_chase_hop_impulse = 0.0
+		if hop_impulse > 0.0:
+			velocity.y = -hop_impulse
+			_jump_held = false
 			_jump_time = 0.0
 	if _jump_held and _jump_time <= cfg.jump_sustain_time and velocity.y < 0.0:
 		_jump_time += delta
@@ -171,6 +276,18 @@ func _process_platformer(delta: float) -> void:
 	else:
 		_jump_held = false
 	_try_mount_ladder()
+
+
+func _on_enemy_letter_collected(_letter: Letter, _character: String) -> void:
+	if shield_controller:
+		shield_controller.notify_letter_collected()
+	if letter_targeting:
+		letter_targeting.drop_target("collected")
+
+
+func _on_enemy_word_completed(_word: String) -> void:
+	if letter_targeting:
+		letter_targeting.drop_target("word_complete")
 
 
 func _process_ladder(delta: float) -> void:
@@ -236,11 +353,18 @@ func _setup_rays() -> void:
 		floor_probe,
 		get_node_or_null("FloorBeyondRay"),
 		get_node_or_null("HeadClearanceRay"),
+		get_node_or_null("LookAheadWallRay"),
+		get_node_or_null("LookAheadFloorRay"),
+		get_node_or_null("StepLandingRay"),
 	]:
 		if ray:
 			ray.enabled = true
 			ray.collision_mask = 1
-			if ray is RayCast2D and ray.name.begins_with("Wall") or ray.name == "FloorBeyondRay" or ray.name == "HeadClearanceRay":
+			if ray is RayCast2D and (
+				ray.name.begins_with("Wall")
+				or ray.name.begins_with("LookAhead")
+				or ray.name in ["FloorBeyondRay", "HeadClearanceRay", "StepLandingRay"]
+			):
 				ray.hit_from_inside = true
 
 
@@ -292,6 +416,29 @@ func _on_ladder_area_entered(_area: Area2D) -> void:
 
 func _on_ladder_area_exited(_area: Area2D) -> void:
 	pass
+
+
+func _recover_if_out_of_bounds() -> void:
+	var out_of_bounds := (
+		global_position.y < RECOVER_MIN_Y
+		or global_position.y > RECOVER_MAX_Y
+		or global_position.x < RECOVER_MIN_X
+		or global_position.x > RECOVER_MAX_X
+	)
+	if not out_of_bounds:
+		return
+	global_position = _spawn_position
+	velocity = Vector2.ZERO
+	_jump_held = false
+	is_on_ladder = false
+	if movement_controller:
+		movement_controller.configure_patrol(
+			movement_controller.patrol_min_x,
+			movement_controller.patrol_max_x,
+			global_position.x,
+		)
+	if obstacle_response:
+		obstacle_response.reset_after_recovery()
 
 
 func _cfg() -> EnemyMovementConfig:

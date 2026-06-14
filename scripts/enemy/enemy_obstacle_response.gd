@@ -11,6 +11,7 @@ signal stuck_fallback_triggered
 
 @export var encounter_clear_distance := 64.0
 @export var decision_cooldown_duration := 0.55
+@export var post_jump_cooldown_duration := 0.85
 @export var reversal_cooldown_duration := 0.35
 @export var pause_min := 0.15
 @export var pause_max := 0.45
@@ -18,12 +19,18 @@ signal stuck_fallback_triggered
 @export var stuck_velocity_threshold := 6.0
 @export var failed_jump_block_radius := 28.0
 @export var local_reverse_radius := 80.0
+@export var jump_approach_min := 28.0
+@export var jump_approach_max := 115.0
+@export var hop_clearance := 14.0
+@export var min_obstacle_hop_speed := 280.0
+@export var max_obstacle_hop_speed := 520.0
 @export var weight_jump_clear := 70
 @export var weight_reverse_clear := 30
 @export var weight_jump_uncertain := 30
 @export var weight_reverse_uncertain := 70
 @export var weight_jump_after_fail := 10
 @export var weight_reverse_after_fail := 90
+@export var weight_jump_early_bonus := 30
 @export var weight_pause_vs_immediate := 25
 
 var encounter_active := false
@@ -45,7 +52,9 @@ var stuck_fallbacks := 0
 var max_stuck_duration := 0.0
 
 var _pushing_block_timer := 0.0
-var _pending_jump := false
+var _pending_jump_impulse := 0.0
+var _last_step_height := 40.0
+var _jump_in_progress := false
 var _jump_attempt_x := 0.0
 var _was_airborne := false
 var _executing := false
@@ -53,18 +62,36 @@ var _pause_then: EscapeAction = EscapeAction.NONE
 var _last_reverse_x := 0.0
 var _rng := RandomNumberGenerator.new()
 var _movement_controller: EnemyMovementController
+var _movement_config: EnemyMovementConfig
 
 
 func _ready() -> void:
 	_rng.randomize()
 
 
-func setup(movement_controller: EnemyMovementController) -> void:
+func setup(movement_controller: EnemyMovementController, config: EnemyMovementConfig = null) -> void:
 	_movement_controller = movement_controller
+	_movement_config = config
 
 
 func set_rng_seed(seed_value: int) -> void:
 	_rng.seed = seed_value
+
+
+func reset_after_recovery() -> void:
+	encounter_active = false
+	selected_action = EscapeAction.NONE
+	_executing = false
+	_pause_then = EscapeAction.NONE
+	_pending_jump_impulse = 0.0
+	_jump_in_progress = false
+	_was_airborne = false
+	pause_timer = 0.0
+	stuck_timer = 0.0
+	_pushing_block_timer = 0.0
+	jump_suppressed = false
+	failed_jump_count = 0
+	obstacle_decision_cooldown = 0.35
 
 
 func tick(
@@ -85,28 +112,53 @@ func tick(
 		if pause_timer <= 0.0 and _pause_then != EscapeAction.NONE:
 			_begin_execute(_pause_then)
 		return
-	if encounter_active and absf(body_pos.x - last_blocked_x) > encounter_clear_distance:
+	if encounter_active and on_floor and absf(body_pos.x - last_blocked_x) > encounter_clear_distance:
 		_clear_encounter("moved_away")
 	if in_air:
 		_was_airborne = true
 	elif _was_airborne and on_floor:
 		_on_landed(body_pos, sensor)
 		_was_airborne = false
+		_jump_in_progress = false
 	if _executing:
 		_tick_executing(delta, sensor, body_pos, on_floor, horizontal_speed, intended_direction)
 		return
-	var blocked := bool(sensor.get("blocked_wall", false)) or bool(sensor.get("ledge_ahead", false))
-	if not blocked and on_floor and intended_direction != 0 and horizontal_speed < stuck_velocity_threshold:
+	if _jump_in_progress and in_air:
+		return
+	var dist := float(sensor.get("distance_to_obstacle", INF))
+	var early_jump_zone := (
+		bool(sensor.get("early_approach", false))
+		and dist >= jump_approach_min
+		and dist <= jump_approach_max
+	)
+	var blocked := (
+		bool(sensor.get("blocked_wall", false))
+		or bool(sensor.get("ledge_ahead", false))
+		or early_jump_zone
+	)
+	if (
+		not blocked
+		and on_floor
+		and intended_direction != 0
+		and horizontal_speed < stuck_velocity_threshold
+		and not bool(sensor.get("ahead_obstacle", false))
+	):
 		_pushing_block_timer += delta
 	else:
 		_pushing_block_timer = 0.0
-	if not blocked and _pushing_block_timer >= 0.18:
+	if not blocked and _pushing_block_timer >= 0.22:
 		blocked = true
 		if last_obstacle_point == Vector2.ZERO:
 			last_obstacle_point = body_pos + Vector2(float(intended_direction) * 20.0, 0.0)
-	if blocked and not encounter_active and obstacle_decision_cooldown <= 0.0 and on_floor:
+	if blocked and not encounter_active and obstacle_decision_cooldown <= 0.0 and on_floor and not _jump_in_progress:
 		_start_encounter(sensor, body_pos)
-	elif blocked and on_floor and intended_direction != 0 and horizontal_speed < stuck_velocity_threshold:
+	elif (
+		blocked
+		and on_floor
+		and intended_direction != 0
+		and horizontal_speed < stuck_velocity_threshold
+		and bool(sensor.get("blocked_wall", false))
+	):
 		stuck_timer += delta
 		max_stuck_duration = maxf(max_stuck_duration, stuck_timer)
 		if stuck_timer >= stuck_time_limit:
@@ -115,27 +167,44 @@ func tick(
 		stuck_timer = 0.0
 
 
+func is_jump_in_progress() -> bool:
+	return _jump_in_progress
+
+
 func is_paused() -> bool:
 	return pause_timer > 0.0
 
 
-func consume_jump_request() -> bool:
-	if not _pending_jump:
-		return false
-	_pending_jump = false
-	return true
+func consume_jump_request() -> float:
+	if _pending_jump_impulse <= 0.0:
+		return 0.0
+	var impulse := _pending_jump_impulse
+	_pending_jump_impulse = 0.0
+	return impulse
 
 
 func get_debug_info(sensor: Dictionary) -> Dictionary:
+	var detected := (
+		bool(sensor.get("blocked_wall", false))
+		or bool(sensor.get("ledge_ahead", false))
+		or bool(sensor.get("ahead_obstacle", false))
+	)
 	return {
-		"obstacle_detected": bool(sensor.get("blocked_wall", false)) or bool(sensor.get("ledge_ahead", false)),
+		"obstacle_detected": detected,
+		"ahead_obstacle": bool(sensor.get("ahead_obstacle", false)),
+		"distance_to_obstacle": sensor.get("distance_to_obstacle", INF),
+		"early_approach": bool(sensor.get("early_approach", false)),
 		"obstacle_point": last_obstacle_point,
 		"selected_response": EscapeAction.keys()[selected_action],
 		"jumpable": bool(sensor.get("jumpable", false)),
 		"floor_beyond": bool(sensor.get("floor_beyond", false)),
+		"obstacle_height": sensor.get("obstacle_height", 0.0),
+		"pending_jump_impulse": _pending_jump_impulse,
+		"jump_in_progress": _jump_in_progress,
 		"encounter_active": encounter_active,
 		"decision_cooldown": obstacle_decision_cooldown,
 		"failed_jump_count": failed_jump_count,
+		"jump_suppressed": jump_suppressed,
 		"reverse_count": repeated_reverse_count,
 		"stuck_timer": stuck_timer,
 		"last_escape_outcome": last_escape_outcome,
@@ -151,6 +220,7 @@ func get_debug_info(sensor: Dictionary) -> Dictionary:
 func _start_encounter(sensor: Dictionary, body_pos: Vector2) -> void:
 	encounter_active = true
 	last_blocked_x = body_pos.x
+	_last_step_height = maxf(float(sensor.get("obstacle_height", 0.0)), 24.0)
 	if sensor.get("wall_point", Vector2.ZERO) != Vector2.ZERO:
 		last_obstacle_point = sensor.get("wall_point", Vector2.ZERO)
 	elif sensor.get("ledge_ahead", false):
@@ -171,8 +241,12 @@ func _start_encounter(sensor: Dictionary, body_pos: Vector2) -> void:
 
 func _pick_action(sensor: Dictionary) -> EscapeAction:
 	var jumpable: bool = sensor.get("jumpable", false)
+	var early: bool = bool(sensor.get("early_approach", false))
 	var jump_weight := weight_jump_clear if jumpable else weight_jump_uncertain
 	var reverse_weight := weight_reverse_clear if jumpable else weight_reverse_uncertain
+	if early and jumpable:
+		jump_weight += weight_jump_early_bonus
+		reverse_weight = maxi(10, reverse_weight - 15)
 	if failed_jump_count > 0 or jump_suppressed:
 		jump_weight = weight_jump_after_fail
 		reverse_weight = weight_reverse_after_fail
@@ -181,6 +255,10 @@ func _pick_action(sensor: Dictionary) -> EscapeAction:
 		reverse_weight = maxi(5, reverse_weight - 25)
 	var pick_jump := _rng.randi_range(0, jump_weight + reverse_weight - 1) < jump_weight
 	var base := EscapeAction.JUMP if pick_jump else EscapeAction.REVERSE
+	if early and jumpable and pick_jump:
+		return EscapeAction.JUMP
+	if early and jumpable and not pick_jump:
+		return EscapeAction.REVERSE
 	if _rng.randi_range(0, 99) < weight_pause_vs_immediate:
 		return EscapeAction.PAUSE_JUMP if base == EscapeAction.JUMP else EscapeAction.PAUSE_REVERSE
 	return base
@@ -194,17 +272,25 @@ func _begin_execute(action: EscapeAction) -> void:
 			if jump_suppressed or _movement_controller == null:
 				_execute_reverse()
 			elif _movement_controller.request_jump():
-				_pending_jump = true
+				_pending_jump_impulse = _compute_hop_speed(_last_step_height)
 				_jump_attempt_x = last_blocked_x
+				_jump_in_progress = true
 				jumps_chosen += 1
 				last_escape_outcome = "jump"
-				obstacle_decision_cooldown = decision_cooldown_duration
+				obstacle_decision_cooldown = post_jump_cooldown_duration
 			else:
 				_execute_reverse()
 		EscapeAction.REVERSE:
 			_execute_reverse()
 		_:
 			_executing = false
+
+
+func _compute_hop_speed(step_height: float) -> float:
+	var gravity := _movement_config.gravity if _movement_config else 1700.0
+	var target_height := maxf(step_height + hop_clearance, 20.0)
+	var speed := sqrt(2.0 * gravity * target_height)
+	return clampf(speed, min_obstacle_hop_speed, max_obstacle_hop_speed)
 
 
 func _execute_reverse() -> void:
@@ -229,7 +315,7 @@ func _tick_executing(
 	_horizontal_speed: float,
 	_intended_direction: int,
 ) -> void:
-	if selected_action == EscapeAction.JUMP and on_floor and not _pending_jump:
+	if selected_action == EscapeAction.JUMP and on_floor and _pending_jump_impulse <= 0.0:
 		if bool(sensor.get("blocked_wall", false)) and absf(body_pos.x - last_blocked_x) < failed_jump_block_radius:
 			_executing = false
 		else:
@@ -256,7 +342,6 @@ func _on_landed(body_pos: Vector2, sensor: Dictionary) -> void:
 func _stuck_fallback(body_pos: Vector2) -> void:
 	stuck_fallbacks += 1
 	stuck_fallback_triggered.emit()
-	jump_suppressed = true
 	last_escape_outcome = "stuck_fallback_reverse"
 	if _movement_controller:
 		_movement_controller.reverse_direction()
@@ -277,3 +362,8 @@ func _clear_encounter(reason: String) -> void:
 	selected_action = EscapeAction.NONE
 	_executing = false
 	_pause_then = EscapeAction.NONE
+	if reason in ["moved_away", "jump_passed", "reverse", "jump_complete"]:
+		jump_suppressed = false
+		if reason in ["moved_away", "jump_passed"]:
+			failed_jump_count = 0
+			repeated_reverse_count = 0

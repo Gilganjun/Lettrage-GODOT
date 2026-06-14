@@ -113,17 +113,17 @@ func _spawn_letter(ch: String, force_vowel_style: bool) -> void:
 	var fall := _rng.randf_range(fall_speed_min, fall_speed_max)
 	letter.catalog = catalog
 	letter.configure(ch, total_spawned, scale_factor, modulate, fall)
-	letter.collected.connect(_on_letter_collected)
+	letter.resolved.connect(_on_letter_resolved)
 	_active.append(letter)
 	total_spawned += 1
 	last_spawned_letter = ch
 	letter_spawned.emit(letter, ch)
 
 
-func _on_letter_collected(letter: Letter, character: String) -> void:
-	register_collected(letter)
-	if word_controller:
-		word_controller.on_letter_collected(character)
+func _on_letter_resolved(letter: Letter, outcome: Letter.Resolution, _character: String) -> void:
+	if outcome == Letter.Resolution.PLAYER_COLLECT or outcome == Letter.Resolution.ENEMY_COLLECT:
+		register_collected(letter)
+	_active.erase(letter)
 
 
 func _cleanup_boundary() -> void:
@@ -136,4 +136,4 @@ func _cleanup_boundary() -> void:
 			letter_deleted_boundary.emit(letter)
 			total_deleted_boundary += 1
 			_active.remove_at(i)
-			letter.queue_free()
+			letter.try_resolve(Letter.Resolution.BOUNDARY, "boundary")

@@ -4,6 +4,9 @@ extends Control
 
 @onready var word_label: Label = $Margin/VBox/WordLabel
 @onready var score_label: Label = $Margin/VBox/ScoreLabel
+@onready var enemy_word_label: Label = $Margin/VBox/EnemyWordLabel
+@onready var enemy_score_label: Label = $Margin/VBox/EnemyScoreLabel
+@onready var shield_label: Label = $Margin/VBox/ShieldLabel
 @onready var status_label: Label = $Margin/VBox/StatusLabel
 @onready var controls_label: Label = $Margin/VBox/ControlsLabel
 @onready var debug_label: Label = $Margin/VBox/DebugLabel
@@ -12,6 +15,7 @@ extends Control
 var _controller: WordGameController
 var _spawner: LetterSpawner
 var _enemy: Enemy
+var _player_shield: PlayerShield
 var _show_debug := false
 
 
@@ -25,12 +29,57 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
 	controls_label.text = (
-		"Enter/C submit | Backspace delete | A/D move Space jump | F3/V collision debug"
+		"Enter/C submit | Backspace delete | LCtrl shield | A/D move Space jump | F3/V collision debug"
 	)
+	refresh_combat_hud()
+
+
+func refresh_combat_hud() -> void:
+	if _controller:
+		var ws := _controller.word_state
+		word_label.text = "Player word: %s" % (ws.current_word if not ws.current_word.is_empty() else "—")
+		score_label.text = "Player score: %d" % ws.score
+	var player_shield_on := _player_shield != null and _player_shield.is_active
+	var enemy_shield_on := false
+	var enemy_word := "—"
+	var enemy_target := ""
+	var enemy_score := 0
+	var enemy_needed := ""
+	var enemy_validation := ""
+	if _enemy:
+		var info := _enemy.get_debug_info()
+		enemy_shield_on = bool(info.get("active", false))
+		enemy_word = str(info.get("enemy_word", ""))
+		enemy_target = str(info.get("enemy_target_word", ""))
+		enemy_score = int(info.get("enemy_score", 0))
+		enemy_needed = str(info.get("enemy_needed_letter", ""))
+		enemy_validation = str(info.get("enemy_validation", ""))
+	enemy_word_label.text = (
+		"Enemy word: %s / %s (need %s)"
+		% [enemy_word if not enemy_word.is_empty() else "—", enemy_target, enemy_needed]
+	)
+	enemy_score_label.text = "Enemy score: %d | %s" % [enemy_score, enemy_validation]
+	shield_label.text = "Player shield: %s | Enemy shield: %s" % [
+		"ON" if player_shield_on else "OFF",
+		"ON" if enemy_shield_on else "OFF",
+	]
 
 
 func set_enemy(enemy: Enemy) -> void:
 	_enemy = enemy
+	if _enemy and _enemy.has_method("get_word_controller"):
+		var wc: Node = _enemy.get_word_controller()
+		wc.word_state.word_changed.connect(func(_a, _b): refresh_combat_hud())
+		wc.word_state.score_changed.connect(func(_s): refresh_combat_hud())
+		wc.word_state.validation_changed.connect(func(_a, _b): refresh_combat_hud())
+	refresh_combat_hud()
+
+
+func set_player_shield(shield: PlayerShield) -> void:
+	_player_shield = shield
+	if _player_shield:
+		_player_shield.shield_toggled.connect(func(_a): refresh_combat_hud())
+	refresh_combat_hud()
 
 
 func set_debug_visible(enabled: bool) -> void:
@@ -44,10 +93,9 @@ func set_debug_visible(enabled: bool) -> void:
 func _refresh(_arg = null) -> void:
 	if _controller == null:
 		return
-	var ws := _controller.word_state
-	word_label.text = "Word: %s" % (ws.current_word if not ws.current_word.is_empty() else "—")
-	score_label.text = "Score: %d" % ws.score
+	refresh_combat_hud()
 	if _show_debug and _spawner:
+		var ws := _controller.word_state
 		debug_label.text = (
 			"Dict: %s (%d words, %.1fms) | Active: %d | Spawn in: %.2fs | Last: %s\n"
 			+ "Spawned %d | Collected %d | Boundary del %d | Last val: %s"
@@ -93,6 +141,14 @@ func refresh_enemy_debug() -> void:
 			str(info.get("jumpable", false)),
 			str(info.get("floor_beyond", false)),
 		]
+		+ "Look-ahead: %s dist: %.0f early: %s height: %.0f hop: %.0f\n"
+		% [
+			str(info.get("ahead_obstacle", false)),
+			float(info.get("distance_to_obstacle", INF)),
+			str(info.get("early_approach", false)),
+			float(info.get("obstacle_height", 0.0)),
+			float(info.get("pending_jump_impulse", 0.0)),
+		]
 		+ "encounter: %s cd: %.2f fail_jumps: %d rev_count: %d stuck: %.2f outcome: %s\n"
 		% [
 			str(info.get("encounter_active", false)),
@@ -102,13 +158,12 @@ func refresh_enemy_debug() -> void:
 			float(info.get("stuck_timer", 0.0)),
 			str(info.get("last_escape_outcome", "none")),
 		]
-		+ "decisions: %d jumps: %d reverses: %d fallbacks: %d max_stuck: %.2f"
+		+ "Shield reason: %s | target: %s dist: %.0f age: %.1f\n"
 		% [
-			int(info.get("total_decisions", 0)),
-			int(info.get("jumps_chosen", 0)),
-			int(info.get("reverses_chosen", 0)),
-			int(info.get("stuck_fallbacks", 0)),
-			float(info.get("max_stuck_duration", 0.0)),
+			str(info.get("last_activation_reason", "")),
+			str(info.get("target_letter", "")),
+			float(info.get("target_distance", INF)),
+			float(info.get("target_age", 0.0)),
 		]
 	)
 

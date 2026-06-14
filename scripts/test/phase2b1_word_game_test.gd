@@ -8,6 +8,7 @@ const HUD_SCENE := preload("res://scenes/ui/word_game_hud.tscn")
 const CATALOG := preload("res://resources/letters/alphabet_catalog.tres")
 const LETTER_SCENE := preload("res://scenes/letters/letter.tscn")
 const LayoutBuilder := preload("res://scripts/level/gdevelop_layout_builder.gd")
+const PlayerAttach := preload("res://scripts/test/player_gameplay_attach.gd")
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 
 const POP_SOUNDS := [
@@ -64,6 +65,7 @@ func _spawn_player() -> void:
 	if player.has_method("configure_from_gdevelop"):
 		player.configure_from_gdevelop(spawn_row)
 	player.z_index = 100
+	PlayerAttach.attach(player, word_controller)
 	if level_root.has_method("collect_ladder_areas"):
 		for ladder in level_root.collect_ladder_areas():
 			if player.has_method("register_ladder"):

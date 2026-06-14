@@ -19,7 +19,10 @@ var direction := 1
 var jump_cooldown := 0.0
 var stuck_timer := 0.0
 
+var letter_chase_active := false
+
 var _rng := RandomNumberGenerator.new()
+var _chase_direction := 0
 
 
 func _ready() -> void:
@@ -42,7 +45,21 @@ func update_target(current_x: float) -> void:
 		_pick_new_target(current_x)
 
 
+func set_letter_chase_direction(direction: int) -> void:
+	letter_chase_active = direction != 0
+	_chase_direction = direction
+	if direction != 0:
+		set_direction(direction)
+
+
+func clear_letter_chase() -> void:
+	letter_chase_active = false
+	_chase_direction = 0
+
+
 func get_desired_direction(current_x: float) -> int:
+	if letter_chase_active:
+		return _chase_direction
 	update_target(current_x)
 	if current_x < target_x - target_deadband:
 		return 1
