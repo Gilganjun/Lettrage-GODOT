@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://phase2a_layout_verify"]
+
+[ext_resource type="Script" path="res://scripts/test/phase2a_layout_verification.gd" id="1_root"]
+[ext_resource type="Script" path="res://scripts/test/phase2a_layout_debug_draw.gd" id="2_debug"]
+
+[node name="Phase2ALayoutVerification" type="Node2D"]
+script = ExtResource("1_root")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="FixedCamera" type="Camera2D" parent="World"]
+position = Vector2(480, 270)
+
+[node name="DebugDraw" type="Node2D" parent="World"]
+z_index = 4096
+script = ExtResource("2_debug")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Help" type="Label" parent="UI"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 700.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_font_sizes/font_size = 12
+text = "Phase 2A STATIC layout verification — no physics/collision. F3=debug wireframes | Esc=quit | Camera fixed at (480,270)"
+
+[node name="Status" type="Label" parent="UI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -24.0
+offset_right = 400.0
+offset_bottom = -4.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.8, 1, 0.8, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Manual visual validation REQUIRED before collision/movement restore"
+horizontal_alignment = 1

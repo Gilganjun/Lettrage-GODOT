@@ -1,0 +1,59 @@
+[gd_scene load_steps=4 format=3 uid="uid://phase2a_movement_test"]
+
+[ext_resource type="Script" path="res://scripts/level/phase2a_level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/test/movement_debug_overlay.gd" id="2_debug"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0, 0, 0, 0.65)
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+
+[node name="Phase2AMovementTest" type="Node2D"]
+
+[node name="Level" type="Node2D" parent="."]
+script = ExtResource("1_level")
+
+[node name="Environment" type="Node2D" parent="Level"]
+
+[node name="Collision" type="Node2D" parent="Level"]
+
+[node name="Ladders" type="Node2D" parent="Level"]
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("2_debug")
+level_path = NodePath("../Level")
+
+[node name="Panel" type="PanelContainer" parent="DebugOverlay"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 320.0
+offset_bottom = 180.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Label" type="Label" parent="DebugOverlay/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Debug overlay"
+
+[node name="Help" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="HelpLabel" type="Label" parent="Help"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -28.0
+offset_right = 420.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+theme_override_font_sizes/font_size = 12
+text = "A/← D/→ move | Space jump | W/↑ S/↓ climb | F3 debug | Esc quit"
+horizontal_alignment = 1

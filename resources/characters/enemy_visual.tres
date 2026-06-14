@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CharacterVisualProfile" load_steps=3 format=3 uid="uid://cvp_enemy_phase1"]
+
+[ext_resource type="Script" path="res://scripts/resources/character_visual_profile.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://resources/sprite_frames/enemy_frames.tres" id="2_frames"]
+
+[resource]
+script = ExtResource("1_script")
+character_id = "enemy_placeholder_baseline"
+role_label = "ENEMY — CURRENT PLACEHOLDER ART"
+sprite_frames = ExtResource("2_frames")
+animation_order = Array[String](["Idle", "Run", "Climb", "Jump", "Fall", "Death"])
+modulate = Color(0.75, 0.75, 0.75, 1)
+display_scale = 0.45
+glow_enabled = true
+glow_color = Color(1, 0.164706, 0.066667, 1)
+glow_distance = 15.0
+glow_inner_strength = 1.0
+glow_outer_strength = 2.0
+night_effect_enabled = true
+night_intensity = 0.5
+night_opacity = 0.5
+source_effect_notes = "Main2_heallthbartest Enemy object: DarkNight (Night) intensity=0.5 opacity=0.5; Glow color=255;42;17 distance=15 inner=1 outer=2. modulate 0.75 derived from DarkNight darkening (intensity*opacity) — placeholder visual only, not final enemy art."

@@ -1,0 +1,426 @@
+{
+  "layout": "Main2_heallthbartest",
+  "viewport": {
+    "width": 960,
+    "height": 540
+  },
+  "player_movement": {
+    "gravity": 900.0,
+    "jump_speed": 500.0,
+    "max_speed": 200.0,
+    "max_falling_speed": 400.0,
+    "acceleration": 1125.0,
+    "deceleration": 1125.0,
+    "ladder_climbing_speed": 300.0,
+    "jump_sustain_time": 0.3,
+    "can_go_down_from_jumpthru": true,
+    "slope_max_angle": 60.0,
+    "x_grab_tolerance": 10.0,
+    "y_grab_offset": 0.0,
+    "can_grab_platforms": false
+  },
+  "camera": {
+    "follow_x": true,
+    "follow_y": true,
+    "leftward_speed": 0.9,
+    "rightward_speed": 0.9,
+    "upward_speed": 0.7,
+    "downward_speed": 0.7,
+    "offset_x": 0.0,
+    "offset_y": 0.0
+  },
+  "checkpoint_spawn": {
+    "x": 224.0,
+    "y": 192.0
+  },
+  "instances": [
+    {
+      "name": "Player",
+      "x": 279.0,
+      "y": 231.0,
+      "width": 64.0,
+      "height": 97.0,
+      "angle": 0.0,
+      "z_order": 6,
+      "layer": "",
+      "image": "Character_Idle.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Character_Idle.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Ladder",
+      "x": 1281.0,
+      "y": 99.0,
+      "width": 64.0,
+      "height": 427.0,
+      "angle": 0.0,
+      "z_order": 2,
+      "layer": "",
+      "image": "Ladder1 (7).png",
+      "platform": {
+        "platform_type": "Ladder",
+        "can_be_grabbed": true
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Ladder1_7.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "LeftBoundary",
+      "x": 0.0,
+      "y": -256.0,
+      "width": 135.0,
+      "height": 928.0,
+      "angle": 0.0,
+      "z_order": 38,
+      "layer": "",
+      "image": "assets/boundary.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/boundary.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform1",
+      "x": 920.0,
+      "y": 469.0,
+      "width": 261.0,
+      "height": 95.92308044433594,
+      "angle": 0.0,
+      "z_order": 3,
+      "layer": "",
+      "image": "Ground2(Comp).png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Ground2_Comp.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "RightBoundary",
+      "x": 2112.0,
+      "y": -256.0,
+      "width": 160.0,
+      "height": 928.0,
+      "angle": 0.0,
+      "z_order": 90,
+      "layer": "",
+      "image": "assets/boundary.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/boundary.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "TopBoundary",
+      "x": 0.0,
+      "y": -256.0,
+      "width": 2272.0,
+      "height": 128.0,
+      "angle": 0.0,
+      "z_order": 59,
+      "layer": "",
+      "image": "assets/boundary.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/boundary.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "BottomBoundary",
+      "x": 51.0,
+      "y": 638.0,
+      "width": 2272.0,
+      "height": 128.0,
+      "angle": 0.0,
+      "z_order": 60,
+      "layer": "",
+      "image": "assets/boundary.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/boundary.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "BG1",
+      "x": -136.0,
+      "y": -214.0,
+      "width": 2664.0,
+      "height": 1024.0,
+      "angle": 0.0,
+      "z_order": -2,
+      "layer": "",
+      "image": "out (18).jpg",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/out_18.jpg",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform1",
+      "x": 120.0,
+      "y": 469.0,
+      "width": 814.0,
+      "height": 221.0,
+      "angle": 0.0,
+      "z_order": 67,
+      "layer": "",
+      "image": "Ground2(Comp).png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Ground2_Comp.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform2",
+      "x": 1464.0,
+      "y": -47.0,
+      "width": 382.0098876953125,
+      "height": 297.0,
+      "angle": 0.0,
+      "z_order": 0,
+      "layer": "",
+      "image": "platform1Compr.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/platform1Compr.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform1",
+      "x": 1710.0,
+      "y": 469.0,
+      "width": 261.0,
+      "height": 95.92308044433594,
+      "angle": 0.0,
+      "z_order": 3,
+      "layer": "",
+      "image": "Ground2(Comp).png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Ground2_Comp.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform3",
+      "x": 1702.0,
+      "y": 279.0,
+      "width": 544.0,
+      "height": 364.0,
+      "angle": 0.0,
+      "z_order": 502,
+      "layer": "",
+      "image": "platform2Compr.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/platform2Compr.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Platform3",
+      "x": 937.0,
+      "y": 71.0,
+      "width": 381.155059814453,
+      "height": 140.0,
+      "angle": 0.0,
+      "z_order": 1002,
+      "layer": "",
+      "image": "platform2Compr.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/platform2Compr.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "Tower1",
+      "x": -17.0,
+      "y": -266.0,
+      "width": 314.0,
+      "height": 761.0,
+      "angle": 0.0,
+      "z_order": 2,
+      "layer": "",
+      "image": "Tower1.png",
+      "platform": {
+        "platform_type": "NormalPlatform",
+        "can_be_grabbed": false
+      },
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/Tower1.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "PlatformCollision",
+      "x": -99.0,
+      "y": 574.0,
+      "width": 2412.0,
+      "height": 371.0,
+      "angle": 0.0,
+      "z_order": 2020,
+      "layer": "",
+      "image": "NewSprite4-1-8.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/NewSprite4-1-8.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "LeftCollision",
+      "x": -132.0,
+      "y": -269.0,
+      "width": 270.0,
+      "height": 864.0,
+      "angle": 0.0,
+      "z_order": 2021,
+      "layer": "",
+      "image": "NewSprite4-1-8.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/NewSprite4-1-8.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "RightCollision",
+      "x": 2142.0,
+      "y": -238.0,
+      "width": 353.0,
+      "height": 1178.0,
+      "angle": 0.0,
+      "z_order": 2022,
+      "layer": "",
+      "image": "NewSprite4-1-8.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/NewSprite4-1-8.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "TopCollision",
+      "x": -136.0,
+      "y": -596.0,
+      "width": 2633.0,
+      "height": 461.0,
+      "angle": 0.0,
+      "z_order": 2023,
+      "layer": "",
+      "image": "NewSprite4-1-8.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/NewSprite4-1-8.png",
+      "texture_status": "COPIED"
+    },
+    {
+      "name": "BG2",
+      "x": -136.0,
+      "y": -214.0,
+      "width": 2664.0,
+      "height": 1024.0,
+      "angle": 0.0,
+      "z_order": -1,
+      "layer": "",
+      "image": "out (18)_3.png",
+      "platform": {},
+      "object_type": "Sprite",
+      "texture": "res://assets/environment/out_18_3.png",
+      "texture_status": "COPIED"
+    }
+  ],
+  "assets": {
+    "out (18)_3.png": {
+      "godot_path": "res://assets/environment/out_18_3.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\out (18)_3.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "platform2Compr.png": {
+      "godot_path": "res://assets/environment/platform2Compr.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\platform2Compr.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "Ground2(Comp).png": {
+      "godot_path": "res://assets/environment/Ground2_Comp.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\Ground2(Comp).png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "Character_Idle.png": {
+      "godot_path": "res://assets/environment/Character_Idle.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\Character_Idle.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "Tower1.png": {
+      "godot_path": "res://assets/environment/Tower1.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\Tower1.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "out (18).jpg": {
+      "godot_path": "res://assets/environment/out_18.jpg",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\out (18).jpg",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "platform1Compr.png": {
+      "godot_path": "res://assets/environment/platform1Compr.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\platform1Compr.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "Ladder1 (7).png": {
+      "godot_path": "res://assets/environment/Ladder1_7.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\Ladder1 (7).png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "NewSprite4-1-8.png": {
+      "godot_path": "res://assets/environment/NewSprite4-1-8.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\NewSprite4-1-8.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    },
+    "assets/boundary.png": {
+      "godot_path": "res://assets/environment/boundary.png",
+      "source": "C:\\Users\\sbash\\OneDrive\\Documents\\Lettrage_GD_to_Godot_Cursor\\SnatchWord1\\assets\\boundary.png",
+      "status": "COPIED",
+      "width": null,
+      "height": null
+    }
+  },
+  "instance_count": 19
+}

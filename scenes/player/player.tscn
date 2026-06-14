@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://player_phase2a"]
+
+[ext_resource type="Script" path="res://scripts/player/player_movement.gd" id="1_move"]
+[ext_resource type="Script" path="res://scripts/player/player_animation.gd" id="2_anim"]
+[ext_resource type="Resource" path="res://resources/characters/player_visual.tres" id="3_visual"]
+[ext_resource type="Resource" path="res://resources/player/movement_config.tres" id="4_cfg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(38, 82)
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 3
+floor_snap_length = 4.0
+script = ExtResource("1_move")
+visual_profile = ExtResource("3_visual")
+movement_config = ExtResource("4_cfg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 8)
+
+[node name="AnimationController" type="Node" parent="."]
+script = ExtResource("2_anim")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true
+position_smoothing_enabled = true
+position_smoothing_speed = 9.5
+limit_left = 0
+limit_top = -256
+limit_right = 2272
+limit_bottom = 766

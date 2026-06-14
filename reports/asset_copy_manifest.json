@@ -1,0 +1,1381 @@
+{
+  "copy_log": [
+    {
+      "source": "Dictionary/EnglishWords4.txt",
+      "dest": "dictionary/EnglishWords4.txt",
+      "status": "COPIED"
+    },
+    {
+      "source": "Dictionary/EnglishWords.txt",
+      "dest": "dictionary/EnglishWords.txt",
+      "status": "COPIED"
+    },
+    {
+      "source": "Dictionary/EnemyDictionary.txt",
+      "dest": "dictionary/EnemyDictionary.txt",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/PTSans-Bold.ttf",
+      "dest": "assets/PTSans-Bold.ttf",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/Panton-BlackCaps.otf",
+      "dest": "assets/Panton-BlackCaps.otf",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/Monoton-Regular.ttf",
+      "dest": "assets/Monoton-Regular.ttf",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/Righteous-Regular.ttf",
+      "dest": "assets/Righteous-Regular.ttf",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Idle.png",
+      "dest": "characters/Character_Idle.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00002.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00002.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00012.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00012.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00022.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00022.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00032.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00032.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00042.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00042.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00052.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00052.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00082.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00082.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00092.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00092.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00102.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00102.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00112.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00112.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00122.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00122.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00142.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00142.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00152.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00152.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00162.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00162.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00172.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00172.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00182.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00182.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00192.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00192.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00202.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00202.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00212.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00212.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00222.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00222.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00232.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00232.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00242.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00242.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1.png",
+      "dest": "characters/Character_Climb1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1.png",
+      "dest": "characters/Character_Climb1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-1.png",
+      "dest": "characters/Character_Climb1-1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-3.png",
+      "dest": "characters/Character_Climb1-3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-4.png",
+      "dest": "characters/Character_Climb1-4.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-5.png",
+      "dest": "characters/Character_Climb1-5.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-6.png",
+      "dest": "characters/Character_Climb1-6.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-7.png",
+      "dest": "characters/Character_Climb1-7.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-8.png",
+      "dest": "characters/Character_Climb1-8.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_JUMP.png",
+      "dest": "characters/Synfig Character1_B_JUMP.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_FALL.png",
+      "dest": "characters/Synfig Character1_B_FALL.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death1.png",
+      "dest": "characters/Character_Death1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death2.png",
+      "dest": "characters/Character_Death2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death3.png",
+      "dest": "characters/Character_Death3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_RUN1.png",
+      "dest": "characters/Synfig Character1_B_RUN1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_RUN2.png",
+      "dest": "characters/Synfig Character1_B_RUN2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_RUN3.png",
+      "dest": "characters/Synfig Character1_B_RUN3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_A1.png",
+      "dest": "assets/Run__extra_A1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_A2.png",
+      "dest": "assets/Run__extra_A2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_A3.png",
+      "dest": "assets/Run__extra_A3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_A2.png",
+      "dest": "assets/Run__extra_A2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_A1.png",
+      "dest": "assets/Run__extra_A1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_RUN3.png",
+      "dest": "characters/Synfig Character1_B_RUN3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_RUN1.png",
+      "dest": "characters/Synfig Character1_B_RUN1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_B1.png",
+      "dest": "assets/Run__extra_B1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_B2.png",
+      "dest": "assets/Run__extra_B2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_B3.png",
+      "dest": "assets/Run__extra_B3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_B2.png",
+      "dest": "assets/Run__extra_B2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Run__extra_B1.png",
+      "dest": "assets/Run__extra_B1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_CROUCH.png",
+      "dest": "characters/Synfig Character1_B_CROUCH.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_1.png",
+      "dest": "assets/Roll_1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_2.png",
+      "dest": "assets/Roll_2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_3.png",
+      "dest": "assets/Roll_3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_4.png",
+      "dest": "assets/Roll_4.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_5.png",
+      "dest": "assets/Roll_5.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_6.png",
+      "dest": "assets/Roll_6.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Roll_Stationary.png",
+      "dest": "assets/Roll_Stationary.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick1.png",
+      "dest": "assets/Kick1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick2.png",
+      "dest": "assets/Kick2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick3.png",
+      "dest": "assets/Kick3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick4.png",
+      "dest": "assets/Kick4.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick5.png",
+      "dest": "assets/Kick5.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick6.png",
+      "dest": "assets/Kick6.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick7.png",
+      "dest": "assets/Kick7.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick6.png",
+      "dest": "assets/Kick6.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick5.png",
+      "dest": "assets/Kick5.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick4.png",
+      "dest": "assets/Kick4.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick3.png",
+      "dest": "assets/Kick3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick2.png",
+      "dest": "assets/Kick2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick22.png",
+      "dest": "assets/Kick22.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick42.png",
+      "dest": "assets/Kick42.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick72.png",
+      "dest": "assets/Kick72.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Kick22.png",
+      "dest": "assets/Kick22.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Idle.png",
+      "dest": "characters/Character_Idle.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00002.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00002.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00012.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00012.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00022.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00022.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00032.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00032.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00042.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00042.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00052.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00052.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00082.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00082.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00092.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00092.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00102.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00102.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00112.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00112.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00122.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00122.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00142.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00142.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00152.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00152.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00162.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00162.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00172.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00172.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00182.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00182.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00192.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00192.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00202.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00202.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00212.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00212.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00222.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00222.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00232.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00232.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B2_Walk.00242.png",
+      "dest": "characters/Synfig Character1_B2_Walk.00242.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1.png",
+      "dest": "characters/Character_Climb1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1.png",
+      "dest": "characters/Character_Climb1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-1.png",
+      "dest": "characters/Character_Climb1-1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-2.png",
+      "dest": "characters/Character_Climb1-2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-3.png",
+      "dest": "characters/Character_Climb1-3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-4.png",
+      "dest": "characters/Character_Climb1-4.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-5.png",
+      "dest": "characters/Character_Climb1-5.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-6.png",
+      "dest": "characters/Character_Climb1-6.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-7.png",
+      "dest": "characters/Character_Climb1-7.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Climb1-8.png",
+      "dest": "characters/Character_Climb1-8.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_JUMP.png",
+      "dest": "characters/Synfig Character1_B_JUMP.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Synfig Character1_B_FALL.png",
+      "dest": "characters/Synfig Character1_B_FALL.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death2.png",
+      "dest": "characters/Character_Death2.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death1.png",
+      "dest": "characters/Character_Death1.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Character_Death3.png",
+      "dest": "characters/Character_Death3.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "176238__melissapons__sci-fi-short-error.wav",
+      "dest": "assets/176238__melissapons__sci-fi-short-error.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "345426__artmasterrich__male-jump-03.wav",
+      "dest": "assets/345426__artmasterrich__male-jump-03.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "348429__insintesi__trilling.wav",
+      "dest": "assets/348429__insintesi__trilling.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "361334__spoonsandlessspoons__charge-up-shot.wav",
+      "dest": "assets/361334__spoonsandlessspoons__charge-up-shot.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "369520__kinoton__bass-power-down.wav",
+      "dest": "assets/369520__kinoton__bass-power-down.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "457070__humanoide9000__dramatic-evil-theme-orchestra-timestrech-2x.mp3",
+      "dest": "assets/457070__humanoide9000__dramatic-evil-theme-orchestra-timestrech-2x.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "530886__eflexmusic__incoming-artillery-strike-cinematic-explosion.wav",
+      "dest": "assets/530886__eflexmusic__incoming-artillery-strike-cinematic-explosion.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "60013__qubodup__whoosh (1).mp3",
+      "dest": "assets/60013__qubodup__whoosh (1).mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "609250__aemyn__journey-to-the-interweb.mp3",
+      "dest": "assets/609250__aemyn__journey-to-the-interweb.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "653227__zeraora__forcefield-hum-idle.wav",
+      "dest": "assets/653227__zeraora__forcefield-hum-idle.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/444136__lurpsis__glass-shatter-3.wav",
+      "dest": "assets/444136__lurpsis__glass-shatter-3.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/463388__vilkas-sound__vs-pop-4.mp3",
+      "dest": "assets/463388__vilkas-sound__vs-pop-4.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/463389__vilkas-sound__vs-pop-3.mp3",
+      "dest": "assets/463389__vilkas-sound__vs-pop-3.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/487436__elijahdanie__game-win.mp3",
+      "dest": "assets/487436__elijahdanie__game-win.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphaGrab_Designed2.mp3",
+      "dest": "assets/AlphaGrab_Designed2.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphaGrab_Designed3.mp3",
+      "dest": "assets/AlphaGrab_Designed3.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphaGrab_Designed4.mp3",
+      "dest": "assets/AlphaGrab_Designed4.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphaGrab_Designed5.mp3",
+      "dest": "assets/AlphaGrab_Designed5.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA000.wav",
+      "dest": "assets/AlphabetSpoken/AlpA000.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA001.wav",
+      "dest": "assets/AlphabetSpoken/AlpA001.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA002.wav",
+      "dest": "assets/AlphabetSpoken/AlpA002.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA003.wav",
+      "dest": "assets/AlphabetSpoken/AlpA003.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA004.wav",
+      "dest": "assets/AlphabetSpoken/AlpA004.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA005.wav",
+      "dest": "assets/AlphabetSpoken/AlpA005.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA006.wav",
+      "dest": "assets/AlphabetSpoken/AlpA006.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA007.wav",
+      "dest": "assets/AlphabetSpoken/AlpA007.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA008.wav",
+      "dest": "assets/AlphabetSpoken/AlpA008.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA009.wav",
+      "dest": "assets/AlphabetSpoken/AlpA009.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA010.wav",
+      "dest": "assets/AlphabetSpoken/AlpA010.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA011.wav",
+      "dest": "assets/AlphabetSpoken/AlpA011.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA012.wav",
+      "dest": "assets/AlphabetSpoken/AlpA012.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA013.wav",
+      "dest": "assets/AlphabetSpoken/AlpA013.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA014.wav",
+      "dest": "assets/AlphabetSpoken/AlpA014.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA015.wav",
+      "dest": "assets/AlphabetSpoken/AlpA015.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA016.wav",
+      "dest": "assets/AlphabetSpoken/AlpA016.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA017.wav",
+      "dest": "assets/AlphabetSpoken/AlpA017.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA018.wav",
+      "dest": "assets/AlphabetSpoken/AlpA018.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA019.wav",
+      "dest": "assets/AlphabetSpoken/AlpA019.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA020.wav",
+      "dest": "assets/AlphabetSpoken/AlpA020.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA021.wav",
+      "dest": "assets/AlphabetSpoken/AlpA021.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA022.wav",
+      "dest": "assets/AlphabetSpoken/AlpA022.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA023.wav",
+      "dest": "assets/AlphabetSpoken/AlpA023.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA024.wav",
+      "dest": "assets/AlphabetSpoken/AlpA024.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpA025.wav",
+      "dest": "assets/AlphabetSpoken/AlpA025.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB000.wav",
+      "dest": "assets/AlphabetSpoken/AlpB000.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB001.wav",
+      "dest": "assets/AlphabetSpoken/AlpB001.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB002.wav",
+      "dest": "assets/AlphabetSpoken/AlpB002.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB003.wav",
+      "dest": "assets/AlphabetSpoken/AlpB003.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB004.wav",
+      "dest": "assets/AlphabetSpoken/AlpB004.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB005.wav",
+      "dest": "assets/AlphabetSpoken/AlpB005.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB006.wav",
+      "dest": "assets/AlphabetSpoken/AlpB006.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB007.wav",
+      "dest": "assets/AlphabetSpoken/AlpB007.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB008.wav",
+      "dest": "assets/AlphabetSpoken/AlpB008.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB009.wav",
+      "dest": "assets/AlphabetSpoken/AlpB009.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB010.wav",
+      "dest": "assets/AlphabetSpoken/AlpB010.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB011.wav",
+      "dest": "assets/AlphabetSpoken/AlpB011.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB012.wav",
+      "dest": "assets/AlphabetSpoken/AlpB012.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB013.wav",
+      "dest": "assets/AlphabetSpoken/AlpB013.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB014.wav",
+      "dest": "assets/AlphabetSpoken/AlpB014.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB015.wav",
+      "dest": "assets/AlphabetSpoken/AlpB015.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB016.wav",
+      "dest": "assets/AlphabetSpoken/AlpB016.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB017.wav",
+      "dest": "assets/AlphabetSpoken/AlpB017.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB018.wav",
+      "dest": "assets/AlphabetSpoken/AlpB018.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB019.wav",
+      "dest": "assets/AlphabetSpoken/AlpB019.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB020.wav",
+      "dest": "assets/AlphabetSpoken/AlpB020.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB021.wav",
+      "dest": "assets/AlphabetSpoken/AlpB021.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB022.wav",
+      "dest": "assets/AlphabetSpoken/AlpB022.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB023.wav",
+      "dest": "assets/AlphabetSpoken/AlpB023.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB024.wav",
+      "dest": "assets/AlphabetSpoken/AlpB024.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpB025.wav",
+      "dest": "assets/AlphabetSpoken/AlpB025.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC000.wav",
+      "dest": "assets/AlphabetSpoken/AlpC000.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC001.wav",
+      "dest": "assets/AlphabetSpoken/AlpC001.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC002.wav",
+      "dest": "assets/AlphabetSpoken/AlpC002.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC003.wav",
+      "dest": "assets/AlphabetSpoken/AlpC003.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC004.wav",
+      "dest": "assets/AlphabetSpoken/AlpC004.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC005.wav",
+      "dest": "assets/AlphabetSpoken/AlpC005.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC006.wav",
+      "dest": "assets/AlphabetSpoken/AlpC006.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC007.wav",
+      "dest": "assets/AlphabetSpoken/AlpC007.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC008.wav",
+      "dest": "assets/AlphabetSpoken/AlpC008.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC009.wav",
+      "dest": "assets/AlphabetSpoken/AlpC009.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC010.wav",
+      "dest": "assets/AlphabetSpoken/AlpC010.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC011.wav",
+      "dest": "assets/AlphabetSpoken/AlpC011.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC012.wav",
+      "dest": "assets/AlphabetSpoken/AlpC012.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC013.wav",
+      "dest": "assets/AlphabetSpoken/AlpC013.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC014.wav",
+      "dest": "assets/AlphabetSpoken/AlpC014.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC015.wav",
+      "dest": "assets/AlphabetSpoken/AlpC015.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC016.wav",
+      "dest": "assets/AlphabetSpoken/AlpC016.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC017.wav",
+      "dest": "assets/AlphabetSpoken/AlpC017.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC018.wav",
+      "dest": "assets/AlphabetSpoken/AlpC018.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC019.wav",
+      "dest": "assets/AlphabetSpoken/AlpC019.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC020.wav",
+      "dest": "assets/AlphabetSpoken/AlpC020.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC021.wav",
+      "dest": "assets/AlphabetSpoken/AlpC021.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC022.wav",
+      "dest": "assets/AlphabetSpoken/AlpC022.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC023.wav",
+      "dest": "assets/AlphabetSpoken/AlpC023.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC024.wav",
+      "dest": "assets/AlphabetSpoken/AlpC024.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/AlphabetSpoken/AlpC025.wav",
+      "dest": "assets/AlphabetSpoken/AlpC025.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/Runsfx1.mp3",
+      "dest": "assets/Runsfx1.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/Runsfx1b.mp3",
+      "dest": "assets/Runsfx1b.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/ShieldDown1.mp3",
+      "dest": "assets/ShieldDown1.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/ShieldUp1.mp3",
+      "dest": "assets/ShieldUp1.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI1.mp3",
+      "dest": "assets/SoundFx/JumpAI1.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI2.mp3",
+      "dest": "assets/SoundFx/JumpAI2.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI3.mp3",
+      "dest": "assets/SoundFx/JumpAI3.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI4.mp3",
+      "dest": "assets/SoundFx/JumpAI4.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI5.mp3",
+      "dest": "assets/SoundFx/JumpAI5.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI6.mp3",
+      "dest": "assets/SoundFx/JumpAI6.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI7.mp3",
+      "dest": "assets/SoundFx/JumpAI7.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SoundFx/JumpAI8.mp3",
+      "dest": "assets/SoundFx/JumpAI8.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/SpeedUpFx3.mp3",
+      "dest": "assets/SpeedUpFx3.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/audio/grass.mp3",
+      "dest": "assets/audio/grass.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "assets/distant-explosion.wav",
+      "dest": "assets/distant-explosion.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "cartoon-approval-sound-fx_C_major.wav",
+      "dest": "assets/cartoon-approval-sound-fx_C_major.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "checkpoint.mp3",
+      "dest": "assets/checkpoint.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "coin.mp3",
+      "dest": "assets/coin.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "crickets.aac",
+      "dest": "assets/crickets.ogg",
+      "status": "AAC_CONVERTED"
+    },
+    {
+      "source": "death.mp3",
+      "dest": "assets/death.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "door.aac",
+      "dest": "assets/door.ogg",
+      "status": "AAC_CONVERTED"
+    },
+    {
+      "source": "explosions_rumbling_2022003806007062_12.wav",
+      "dest": "assets/explosions_rumbling_2022003806007062_12.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "game-fx-hypnoshroom_G_major.wav",
+      "dest": "assets/game-fx-hypnoshroom_G_major.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "jump.mp3",
+      "dest": "assets/jump.mp3",
+      "status": "COPIED"
+    },
+    {
+      "source": "magic_whoosh_large_burst_fantasy_2022003806006684_12.wav",
+      "dest": "assets/magic_whoosh_large_burst_fantasy_2022003806006684_12.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "misc._weapons_knife_swishes_military_battlefield_2022003807010269_12.wav",
+      "dest": "assets/misc._weapons_knife_swishes_military_battlefield_2022003807010269_12.wav",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/A.png",
+      "dest": "images/Alphabet/A.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/B.png",
+      "dest": "images/Alphabet/B.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/C.png",
+      "dest": "images/Alphabet/C.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/D.png",
+      "dest": "images/Alphabet/D.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/E.png",
+      "dest": "images/Alphabet/E.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/F.png",
+      "dest": "images/Alphabet/F.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/G.png",
+      "dest": "images/Alphabet/G.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/H.png",
+      "dest": "images/Alphabet/H.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/I.png",
+      "dest": "images/Alphabet/I.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/J.png",
+      "dest": "images/Alphabet/J.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/K.png",
+      "dest": "images/Alphabet/K.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/L.png",
+      "dest": "images/Alphabet/L.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/M.png",
+      "dest": "images/Alphabet/M.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/N.png",
+      "dest": "images/Alphabet/N.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/O.png",
+      "dest": "images/Alphabet/O.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/P.png",
+      "dest": "images/Alphabet/P.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/q.png",
+      "dest": "images/Alphabet/q.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/R.png",
+      "dest": "images/Alphabet/R.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/S.png",
+      "dest": "images/Alphabet/S.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/T.png",
+      "dest": "images/Alphabet/T.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/U.png",
+      "dest": "images/Alphabet/U.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/V.png",
+      "dest": "images/Alphabet/V.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/W.png",
+      "dest": "images/Alphabet/W.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/X.png",
+      "dest": "images/Alphabet/X.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/Y.png",
+      "dest": "images/Alphabet/Y.png",
+      "status": "COPIED"
+    },
+    {
+      "source": "Images/Alphabet/Z.png",
+      "dest": "images/Alphabet/Z.png",
+      "status": "COPIED"
+    }
+  ],
+  "summary": {
+    "total_copy_ops": 269,
+    "unique_images": 64,
+    "missing": [],
+    "aac": {
+      "ffmpeg_available": true,
+      "conversions": [
+        {
+          "file": "crickets.aac",
+          "output": "assets/crickets.ogg",
+          "status": "OK"
+        },
+        {
+          "file": "door.aac",
+          "output": "assets/door.ogg",
+          "status": "OK"
+        }
+      ]
+    },
+    "aac_log": [
+      {
+        "file": "crickets.aac",
+        "output": "assets/crickets.ogg",
+        "status": "OK"
+      },
+      {
+        "file": "door.aac",
+        "output": "assets/door.ogg",
+        "status": "OK"
+      }
+    ]
+  }
+}

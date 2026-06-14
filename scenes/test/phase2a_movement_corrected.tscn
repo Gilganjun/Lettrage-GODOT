@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3 uid="uid://phase2a_movement_corrected"]
+
+[ext_resource type="Script" path="res://scripts/test/phase2a_movement_corrected.gd" id="1_root"]
+[ext_resource type="Script" path="res://scripts/test/phase2a_collision_debug_draw.gd" id="2_coldebug"]
+[ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="3_level"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud"]
+bg_color = Color(0, 0, 0, 0.55)
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+
+[node name="Phase2AMovementCorrected" type="Node2D"]
+script = ExtResource("1_root")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Level" parent="World" instance=ExtResource("3_level")]
+
+[node name="FixedCamera" type="Camera2D" parent="World" groups=["fixed_camera"]]
+enabled = false
+position = Vector2(480, 270)
+
+[node name="PlayerRoot" type="Node2D" parent="World"]
+
+[node name="CollisionDebug" type="Node2D" parent="World"]
+z_index = 4096
+script = ExtResource("2_coldebug")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HudPanel" type="PanelContainer" parent="UI"]
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 920.0
+offset_bottom = 52.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud")
+
+[node name="HudLabel" type="Label" parent="UI/HudPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Phase 2A corrected movement"
+
+[node name="Help" type="Label" parent="UI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = -22.0
+offset_right = 460.0
+offset_bottom = -4.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+theme_override_font_sizes/font_size = 11
+text = "Baked level scene | Debug: OFF | F3/V collision debug | Edit level in main2_heallthbartest_level.tscn"
+horizontal_alignment = 1

@@ -1,0 +1,259 @@
+{
+  "layout": "Main2_heallthbartest",
+  "objects": {
+    "Player": [
+      {
+        "name": "Idle",
+        "loop": false,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Character_Idle.png"
+        ]
+      },
+      {
+        "name": "Run",
+        "loop": true,
+        "speed_fps": 40.0,
+        "time_between_frames": 0.02500000037252903,
+        "frames": [
+          "res://characters/Synfig Character1_B2_Walk.00002.png",
+          "res://characters/Synfig Character1_B2_Walk.00012.png",
+          "res://characters/Synfig Character1_B2_Walk.00022.png",
+          "res://characters/Synfig Character1_B2_Walk.00032.png",
+          "res://characters/Synfig Character1_B2_Walk.00042.png",
+          "res://characters/Synfig Character1_B2_Walk.00052.png",
+          "res://characters/Synfig Character1_B2_Walk.00082.png",
+          "res://characters/Synfig Character1_B2_Walk.00092.png",
+          "res://characters/Synfig Character1_B2_Walk.00102.png",
+          "res://characters/Synfig Character1_B2_Walk.00112.png",
+          "res://characters/Synfig Character1_B2_Walk.00122.png",
+          "res://characters/Synfig Character1_B2_Walk.00142.png",
+          "res://characters/Synfig Character1_B2_Walk.00152.png",
+          "res://characters/Synfig Character1_B2_Walk.00162.png",
+          "res://characters/Synfig Character1_B2_Walk.00172.png",
+          "res://characters/Synfig Character1_B2_Walk.00182.png",
+          "res://characters/Synfig Character1_B2_Walk.00192.png",
+          "res://characters/Synfig Character1_B2_Walk.00202.png",
+          "res://characters/Synfig Character1_B2_Walk.00212.png",
+          "res://characters/Synfig Character1_B2_Walk.00222.png",
+          "res://characters/Synfig Character1_B2_Walk.00232.png",
+          "res://characters/Synfig Character1_B2_Walk.00242.png"
+        ]
+      },
+      {
+        "name": "Climb",
+        "loop": true,
+        "speed_fps": 40.0,
+        "time_between_frames": 0.025,
+        "frames": [
+          "res://characters/Character_Climb1.png",
+          "res://characters/Character_Climb1.png",
+          "res://characters/Character_Climb1-1.png",
+          "res://characters/Character_Climb1-3.png",
+          "res://characters/Character_Climb1-4.png",
+          "res://characters/Character_Climb1-5.png",
+          "res://characters/Character_Climb1-6.png",
+          "res://characters/Character_Climb1-7.png",
+          "res://characters/Character_Climb1-8.png"
+        ]
+      },
+      {
+        "name": "Jump",
+        "loop": true,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Synfig Character1_B_JUMP.png"
+        ]
+      },
+      {
+        "name": "Fall",
+        "loop": true,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Synfig Character1_B_FALL.png"
+        ]
+      },
+      {
+        "name": "Death",
+        "loop": false,
+        "speed_fps": 5.5556,
+        "time_between_frames": 0.18,
+        "frames": [
+          "res://characters/Character_Death1.png",
+          "res://characters/Character_Death2.png",
+          "res://characters/Character_Death3.png"
+        ]
+      },
+      {
+        "name": "Sprint",
+        "loop": true,
+        "speed_fps": 25.0,
+        "time_between_frames": 0.04,
+        "frames": [
+          "res://characters/Synfig Character1_B_RUN1.png",
+          "res://characters/Synfig Character1_B_RUN2.png",
+          "res://characters/Synfig Character1_B_RUN3.png",
+          "res://assets/Run__extra_A1.png",
+          "res://assets/Run__extra_A2.png",
+          "res://assets/Run__extra_A3.png",
+          "res://assets/Run__extra_A2.png",
+          "res://assets/Run__extra_A1.png",
+          "res://characters/Synfig Character1_B_RUN3.png",
+          "res://characters/Synfig Character1_B_RUN1.png",
+          "res://assets/Run__extra_B1.png",
+          "res://assets/Run__extra_B2.png",
+          "res://assets/Run__extra_B3.png",
+          "res://assets/Run__extra_B2.png",
+          "res://assets/Run__extra_B1.png"
+        ]
+      },
+      {
+        "name": "Crouch",
+        "loop": false,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Synfig Character1_B_CROUCH.png"
+        ]
+      },
+      {
+        "name": "Roll",
+        "loop": true,
+        "speed_fps": 28.5714,
+        "time_between_frames": 0.035,
+        "frames": [
+          "res://assets/Roll_1.png",
+          "res://assets/Roll_2.png",
+          "res://assets/Roll_3.png",
+          "res://assets/Roll_4.png",
+          "res://assets/Roll_5.png",
+          "res://assets/Roll_6.png",
+          "res://assets/Roll_Stationary.png"
+        ]
+      },
+      {
+        "name": "Kick2",
+        "loop": false,
+        "speed_fps": 28.5714,
+        "time_between_frames": 0.035,
+        "frames": [
+          "res://assets/Kick1.png",
+          "res://assets/Kick2.png",
+          "res://assets/Kick3.png",
+          "res://assets/Kick4.png",
+          "res://assets/Kick5.png",
+          "res://assets/Kick6.png",
+          "res://assets/Kick7.png",
+          "res://assets/Kick6.png",
+          "res://assets/Kick5.png",
+          "res://assets/Kick4.png",
+          "res://assets/Kick3.png",
+          "res://assets/Kick2.png"
+        ]
+      },
+      {
+        "name": "Kick",
+        "loop": false,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://assets/Kick22.png",
+          "res://assets/Kick42.png",
+          "res://assets/Kick72.png",
+          "res://assets/Kick22.png"
+        ]
+      }
+    ],
+    "Enemy": [
+      {
+        "name": "Idle",
+        "loop": false,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Character_Idle.png"
+        ]
+      },
+      {
+        "name": "Run",
+        "loop": true,
+        "speed_fps": 40.0,
+        "time_between_frames": 0.02500000037252903,
+        "frames": [
+          "res://characters/Synfig Character1_B2_Walk.00002.png",
+          "res://characters/Synfig Character1_B2_Walk.00012.png",
+          "res://characters/Synfig Character1_B2_Walk.00022.png",
+          "res://characters/Synfig Character1_B2_Walk.00032.png",
+          "res://characters/Synfig Character1_B2_Walk.00042.png",
+          "res://characters/Synfig Character1_B2_Walk.00052.png",
+          "res://characters/Synfig Character1_B2_Walk.00082.png",
+          "res://characters/Synfig Character1_B2_Walk.00092.png",
+          "res://characters/Synfig Character1_B2_Walk.00102.png",
+          "res://characters/Synfig Character1_B2_Walk.00112.png",
+          "res://characters/Synfig Character1_B2_Walk.00122.png",
+          "res://characters/Synfig Character1_B2_Walk.00142.png",
+          "res://characters/Synfig Character1_B2_Walk.00152.png",
+          "res://characters/Synfig Character1_B2_Walk.00162.png",
+          "res://characters/Synfig Character1_B2_Walk.00172.png",
+          "res://characters/Synfig Character1_B2_Walk.00182.png",
+          "res://characters/Synfig Character1_B2_Walk.00192.png",
+          "res://characters/Synfig Character1_B2_Walk.00202.png",
+          "res://characters/Synfig Character1_B2_Walk.00212.png",
+          "res://characters/Synfig Character1_B2_Walk.00222.png",
+          "res://characters/Synfig Character1_B2_Walk.00232.png",
+          "res://characters/Synfig Character1_B2_Walk.00242.png"
+        ]
+      },
+      {
+        "name": "Climb",
+        "loop": true,
+        "speed_fps": 40.0,
+        "time_between_frames": 0.02500000037252903,
+        "frames": [
+          "res://characters/Character_Climb1.png",
+          "res://characters/Character_Climb1.png",
+          "res://characters/Character_Climb1-1.png",
+          "res://characters/Character_Climb1-2.png",
+          "res://characters/Character_Climb1-3.png",
+          "res://characters/Character_Climb1-4.png",
+          "res://characters/Character_Climb1-5.png",
+          "res://characters/Character_Climb1-6.png",
+          "res://characters/Character_Climb1-7.png",
+          "res://characters/Character_Climb1-8.png"
+        ]
+      },
+      {
+        "name": "Jump",
+        "loop": true,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Synfig Character1_B_JUMP.png"
+        ]
+      },
+      {
+        "name": "Fall",
+        "loop": true,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Synfig Character1_B_FALL.png"
+        ]
+      },
+      {
+        "name": "Death",
+        "loop": false,
+        "speed_fps": 12.5,
+        "time_between_frames": 0.08,
+        "frames": [
+          "res://characters/Character_Death2.png",
+          "res://characters/Character_Death1.png",
+          "res://characters/Character_Death3.png"
+        ]
+      }
+    ]
+  }
+}

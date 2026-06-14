@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CharacterVisualProfile" load_steps=3 format=3 uid="uid://cvp_player_phase1"]
+
+[ext_resource type="Script" path="res://scripts/resources/character_visual_profile.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://resources/sprite_frames/player_frames.tres" id="2_frames"]
+
+[resource]
+script = ExtResource("1_script")
+character_id = "player_baseline"
+role_label = "PLAYER"
+sprite_frames = ExtResource("2_frames")
+animation_order = Array[String](["Idle", "Run", "Climb", "Jump", "Fall", "Death", "Sprint", "Crouch", "Roll", "Kick2", "Kick"])
+modulate = Color(1, 1, 1, 1)
+display_scale = 0.45
+glow_enabled = true
+glow_color = Color(1, 0.109804, 0.266667, 1)
+glow_distance = 30.0
+glow_inner_strength = 2.0
+glow_outer_strength = 2.0
+night_effect_enabled = false
+night_intensity = 0.0
+night_opacity = 0.0
+source_effect_notes = "Main2_heallthbartest Player object: Glow effectType=Glow color=255;28;68 distance=30 inner=2 outer=2. Glow shader not replicated in Phase 1; values stored for future use. No modulate tint in source JSON."

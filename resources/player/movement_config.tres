@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="PlayerMovementConfig" format=3 uid="uid://c7j2o1uaxrc5y"]
+
+[ext_resource type="Script" uid="uid://f56a4dl2oy7d" path="res://scripts/resources/player_movement_config.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")

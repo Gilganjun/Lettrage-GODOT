@@ -1,0 +1,20 @@
+{
+  "ok": [
+    "project.godot",
+    "dual animation test scene",
+    "character preview slot scene",
+    "CharacterVisualProfile script",
+    "Player profile",
+    "Player explicit animation order",
+    "Enemy profile",
+    "Enemy explicit animation order",
+    "Player profile -> player_frames.tres",
+    "Enemy profile -> enemy_frames.tres",
+    "Profiles are separate files",
+    "AAC converted: assets/crickets.ogg",
+    "AAC converted: assets/door.ogg",
+    "player: textures on disk",
+    "enemy: textures on disk"
+  ],
+  "errors": []
+}

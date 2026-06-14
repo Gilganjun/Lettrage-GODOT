@@ -1,0 +1,932 @@
+{
+  "layout": "Main2_heallthbartest",
+  "viewport": {
+    "width": 960,
+    "height": 540
+  },
+  "visual_instances": [
+    {
+      "id": 0,
+      "name": "Player",
+      "source_x": 279.0,
+      "source_y": 231.0,
+      "source_angle": 0.0,
+      "source_z_order": 6,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 64.0,
+      "source_height": 97.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Character_Idle.png",
+      "texture_godot": "res://assets/environment/Character_Idle.png",
+      "native_width": 145.0,
+      "native_height": 191.0,
+      "display_width": 64.0,
+      "display_height": 97.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 279.0,
+        "top": 231.0,
+        "right": 343.0,
+        "bottom": 328.0,
+        "width": 64.0,
+        "height": 97.0,
+        "scale_x": 0.4413793103448276,
+        "scale_y": 0.5078534031413613
+      },
+      "godot_node_position": {
+        "x": 279.0,
+        "y": 231.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 0.4413793103448276,
+        "y": 0.5078534031413613
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 1,
+      "name": "Ladder",
+      "source_x": 1281.0,
+      "source_y": 99.0,
+      "source_angle": 0.0,
+      "source_z_order": 2,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 64.0,
+      "source_height": 427.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Ladder1 (7).png",
+      "texture_godot": "res://assets/environment/Ladder1_7.png",
+      "native_width": 175.0,
+      "native_height": 591.0,
+      "display_width": 64.0,
+      "display_height": 427.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 1281.0,
+        "top": 99.0,
+        "right": 1345.0,
+        "bottom": 526.0,
+        "width": 64.0,
+        "height": 427.0,
+        "scale_x": 0.3657142857142857,
+        "scale_y": 0.7225042301184433
+      },
+      "godot_node_position": {
+        "x": 1281.0,
+        "y": 99.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 0.3657142857142857,
+        "y": 0.7225042301184433
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 8,
+      "name": "Platform1",
+      "source_x": 920.0,
+      "source_y": 469.0,
+      "source_angle": 0.0,
+      "source_z_order": 3,
+      "source_layer": "",
+      "source_custom_size": false,
+      "source_width": 261.0,
+      "source_height": 95.92308044433594,
+      "origin_x": 11.049933433532715,
+      "origin_y": 124.3590316772461,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Ground2(Comp).png",
+      "texture_godot": "res://assets/environment/Ground2_Comp.png",
+      "native_width": 814.0,
+      "native_height": 221.0,
+      "display_width": 261.0,
+      "display_height": 95.92308044433594,
+      "size_rule": "customSize=false, use stored instance width/height (editor scale)",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 916.4569623757346,
+        "top": 415.02307059024344,
+        "right": 1177.4569623757347,
+        "bottom": 510.9461510345794,
+        "width": 261.0,
+        "height": 95.92308044433594,
+        "scale_x": 0.32063882063882065,
+        "scale_y": 0.43404108798342056
+      },
+      "godot_node_position": {
+        "x": 920.0,
+        "y": 469.0
+      },
+      "godot_sprite_offset": {
+        "x": -11.049933433532715,
+        "y": -124.3590316772461
+      },
+      "godot_sprite_scale": {
+        "x": 0.32063882063882065,
+        "y": 0.43404108798342056
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 19,
+      "name": "BG1",
+      "source_x": -136.0,
+      "source_y": -214.0,
+      "source_angle": 0.0,
+      "source_z_order": -2,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2664.0,
+      "source_height": 1024.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "out (18).jpg",
+      "texture_godot": "res://assets/environment/out_18.jpg",
+      "native_width": 2304.0,
+      "native_height": 1536.0,
+      "display_width": 2664.0,
+      "display_height": 1024.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -136.0,
+        "top": -214.0,
+        "right": 2528.0,
+        "bottom": 810.0,
+        "width": 2664.0,
+        "height": 1024.0,
+        "scale_x": 1.15625,
+        "scale_y": 0.6666666666666666
+      },
+      "godot_node_position": {
+        "x": -136.0,
+        "y": -214.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 1.15625,
+        "y": 0.6666666666666666
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 20,
+      "name": "Platform1",
+      "source_x": 120.0,
+      "source_y": 469.0,
+      "source_angle": 0.0,
+      "source_z_order": 67,
+      "source_layer": "",
+      "source_custom_size": false,
+      "source_width": 0.0,
+      "source_height": 0.0,
+      "origin_x": 11.049933433532715,
+      "origin_y": 124.3590316772461,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Ground2(Comp).png",
+      "texture_godot": "res://assets/environment/Ground2_Comp.png",
+      "native_width": 814.0,
+      "native_height": 221.0,
+      "display_width": 814.0,
+      "display_height": 221.0,
+      "size_rule": "customSize=false, width/height=0 \u2192 natural unscaled sprite size",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 108.95006656646729,
+        "top": 344.6409683227539,
+        "right": 922.9500665664673,
+        "bottom": 565.6409683227539,
+        "width": 814.0,
+        "height": 221.0,
+        "scale_x": 1.0,
+        "scale_y": 1.0
+      },
+      "godot_node_position": {
+        "x": 120.0,
+        "y": 469.0
+      },
+      "godot_sprite_offset": {
+        "x": -11.049933433532715,
+        "y": -124.3590316772461
+      },
+      "godot_sprite_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 21,
+      "name": "Platform2",
+      "source_x": 1464.0,
+      "source_y": -47.0,
+      "source_angle": 0.0,
+      "source_z_order": 0,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 382.0098876953125,
+      "source_height": 297.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "platform1Compr.png",
+      "texture_godot": "res://assets/environment/platform1Compr.png",
+      "native_width": 800.0,
+      "native_height": 500.0,
+      "display_width": 382.0098876953125,
+      "display_height": 297.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 1464.0,
+        "top": -47.0,
+        "right": 1846.0098876953125,
+        "bottom": 250.0,
+        "width": 382.0098876953125,
+        "height": 297.0,
+        "scale_x": 0.4775123596191406,
+        "scale_y": 0.594
+      },
+      "godot_node_position": {
+        "x": 1464.0,
+        "y": -47.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 0.4775123596191406,
+        "y": 0.594
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 22,
+      "name": "Platform1",
+      "source_x": 1710.0,
+      "source_y": 469.0,
+      "source_angle": 0.0,
+      "source_z_order": 3,
+      "source_layer": "",
+      "source_custom_size": false,
+      "source_width": 261.0,
+      "source_height": 95.92308044433594,
+      "origin_x": 11.049933433532715,
+      "origin_y": 124.3590316772461,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Ground2(Comp).png",
+      "texture_godot": "res://assets/environment/Ground2_Comp.png",
+      "native_width": 814.0,
+      "native_height": 221.0,
+      "display_width": 261.0,
+      "display_height": 95.92308044433594,
+      "size_rule": "customSize=false, use stored instance width/height (editor scale)",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 1706.4569623757345,
+        "top": 415.02307059024344,
+        "right": 1967.4569623757345,
+        "bottom": 510.9461510345794,
+        "width": 261.0,
+        "height": 95.92308044433594,
+        "scale_x": 0.32063882063882065,
+        "scale_y": 0.43404108798342056
+      },
+      "godot_node_position": {
+        "x": 1710.0,
+        "y": 469.0
+      },
+      "godot_sprite_offset": {
+        "x": -11.049933433532715,
+        "y": -124.3590316772461
+      },
+      "godot_sprite_scale": {
+        "x": 0.32063882063882065,
+        "y": 0.43404108798342056
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 26,
+      "name": "Platform3",
+      "source_x": 1702.0,
+      "source_y": 279.0,
+      "source_angle": 0.0,
+      "source_z_order": 502,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 544.0,
+      "source_height": 364.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "platform2Compr.png",
+      "texture_godot": "res://assets/environment/platform2Compr.png",
+      "native_width": 800.0,
+      "native_height": 500.0,
+      "display_width": 544.0,
+      "display_height": 364.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 1702.0,
+        "top": 279.0,
+        "right": 2246.0,
+        "bottom": 643.0,
+        "width": 544.0,
+        "height": 364.0,
+        "scale_x": 0.68,
+        "scale_y": 0.728
+      },
+      "godot_node_position": {
+        "x": 1702.0,
+        "y": 279.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 0.68,
+        "y": 0.728
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 38,
+      "name": "Platform3",
+      "source_x": 937.0,
+      "source_y": 71.0,
+      "source_angle": 0.0,
+      "source_z_order": 1002,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 381.155059814453,
+      "source_height": 140.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "platform2Compr.png",
+      "texture_godot": "res://assets/environment/platform2Compr.png",
+      "native_width": 800.0,
+      "native_height": 500.0,
+      "display_width": 381.155059814453,
+      "display_height": 140.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 937.0,
+        "top": 71.0,
+        "right": 1318.1550598144531,
+        "bottom": 211.0,
+        "width": 381.155059814453,
+        "height": 140.0,
+        "scale_x": 0.47644382476806624,
+        "scale_y": 0.28
+      },
+      "godot_node_position": {
+        "x": 937.0,
+        "y": 71.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 0.47644382476806624,
+        "y": 0.28
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 61,
+      "name": "Tower1",
+      "source_x": -17.0,
+      "source_y": -266.0,
+      "source_angle": 0.0,
+      "source_z_order": 2,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 314.0,
+      "source_height": 761.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "Tower1.png",
+      "texture_godot": "res://assets/environment/Tower1.png",
+      "native_width": 314.0,
+      "native_height": 512.0,
+      "display_width": 314.0,
+      "display_height": 761.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -17.0,
+        "top": -266.0,
+        "right": 297.0,
+        "bottom": 495.0,
+        "width": 314.0,
+        "height": 761.0,
+        "scale_x": 1.0,
+        "scale_y": 1.486328125
+      },
+      "godot_node_position": {
+        "x": -17.0,
+        "y": -266.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 1.0,
+        "y": 1.486328125
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 71,
+      "name": "BG2",
+      "source_x": -136.0,
+      "source_y": -214.0,
+      "source_angle": 0.0,
+      "source_z_order": -1,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2664.0,
+      "source_height": 1024.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "out (18)_3.png",
+      "texture_godot": "res://assets/environment/out_18_3.png",
+      "native_width": 2304.0,
+      "native_height": 1536.0,
+      "display_width": 2664.0,
+      "display_height": 1024.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -136.0,
+        "top": -214.0,
+        "right": 2528.0,
+        "bottom": 810.0,
+        "width": 2664.0,
+        "height": 1024.0,
+        "scale_x": 1.15625,
+        "scale_y": 0.6666666666666666
+      },
+      "godot_node_position": {
+        "x": -136.0,
+        "y": -214.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 1.15625,
+        "y": 0.6666666666666666
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    }
+  ],
+  "collision_helper_instances": [
+    {
+      "id": 3,
+      "name": "LeftBoundary",
+      "source_x": 0.0,
+      "source_y": -256.0,
+      "source_angle": 0.0,
+      "source_z_order": 38,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 135.0,
+      "source_height": 928.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "assets/boundary.png",
+      "texture_godot": "res://assets/environment/boundary.png",
+      "native_width": 32.0,
+      "native_height": 32.0,
+      "display_width": 135.0,
+      "display_height": 928.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 0.0,
+        "top": -256.0,
+        "right": 135.0,
+        "bottom": 672.0,
+        "width": 135.0,
+        "height": 928.0,
+        "scale_x": 4.21875,
+        "scale_y": 29.0
+      },
+      "godot_node_position": {
+        "x": 0.0,
+        "y": -256.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 4.21875,
+        "y": 29.0
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 12,
+      "name": "RightBoundary",
+      "source_x": 2112.0,
+      "source_y": -256.0,
+      "source_angle": 0.0,
+      "source_z_order": 90,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 160.0,
+      "source_height": 928.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "assets/boundary.png",
+      "texture_godot": "res://assets/environment/boundary.png",
+      "native_width": 32.0,
+      "native_height": 32.0,
+      "display_width": 160.0,
+      "display_height": 928.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 2112.0,
+        "top": -256.0,
+        "right": 2272.0,
+        "bottom": 672.0,
+        "width": 160.0,
+        "height": 928.0,
+        "scale_x": 5.0,
+        "scale_y": 29.0
+      },
+      "godot_node_position": {
+        "x": 2112.0,
+        "y": -256.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 5.0,
+        "y": 29.0
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 13,
+      "name": "TopBoundary",
+      "source_x": 0.0,
+      "source_y": -256.0,
+      "source_angle": 0.0,
+      "source_z_order": 59,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2272.0,
+      "source_height": 128.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "assets/boundary.png",
+      "texture_godot": "res://assets/environment/boundary.png",
+      "native_width": 32.0,
+      "native_height": 32.0,
+      "display_width": 2272.0,
+      "display_height": 128.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 0.0,
+        "top": -256.0,
+        "right": 2272.0,
+        "bottom": -128.0,
+        "width": 2272.0,
+        "height": 128.0,
+        "scale_x": 71.0,
+        "scale_y": 4.0
+      },
+      "godot_node_position": {
+        "x": 0.0,
+        "y": -256.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 71.0,
+        "y": 4.0
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 14,
+      "name": "BottomBoundary",
+      "source_x": 51.0,
+      "source_y": 638.0,
+      "source_angle": 0.0,
+      "source_z_order": 60,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2272.0,
+      "source_height": 128.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "assets/boundary.png",
+      "texture_godot": "res://assets/environment/boundary.png",
+      "native_width": 32.0,
+      "native_height": 32.0,
+      "display_width": 2272.0,
+      "display_height": 128.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 51.0,
+        "top": 638.0,
+        "right": 2323.0,
+        "bottom": 766.0,
+        "width": 2272.0,
+        "height": 128.0,
+        "scale_x": 71.0,
+        "scale_y": 4.0
+      },
+      "godot_node_position": {
+        "x": 51.0,
+        "y": 638.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 71.0,
+        "y": 4.0
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 63,
+      "name": "PlatformCollision",
+      "source_x": -99.0,
+      "source_y": 574.0,
+      "source_angle": 0.0,
+      "source_z_order": 2020,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2412.0,
+      "source_height": 371.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "NewSprite4-1-8.png",
+      "texture_godot": "res://assets/environment/NewSprite4-1-8.png",
+      "native_width": 64.0,
+      "native_height": 64.0,
+      "display_width": 2412.0,
+      "display_height": 371.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -99.0,
+        "top": 574.0,
+        "right": 2313.0,
+        "bottom": 945.0,
+        "width": 2412.0,
+        "height": 371.0,
+        "scale_x": 37.6875,
+        "scale_y": 5.796875
+      },
+      "godot_node_position": {
+        "x": -99.0,
+        "y": 574.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 37.6875,
+        "y": 5.796875
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 64,
+      "name": "LeftCollision",
+      "source_x": -132.0,
+      "source_y": -269.0,
+      "source_angle": 0.0,
+      "source_z_order": 2021,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 270.0,
+      "source_height": 864.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "NewSprite4-1-8.png",
+      "texture_godot": "res://assets/environment/NewSprite4-1-8.png",
+      "native_width": 64.0,
+      "native_height": 64.0,
+      "display_width": 270.0,
+      "display_height": 864.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -132.0,
+        "top": -269.0,
+        "right": 138.0,
+        "bottom": 595.0,
+        "width": 270.0,
+        "height": 864.0,
+        "scale_x": 4.21875,
+        "scale_y": 13.5
+      },
+      "godot_node_position": {
+        "x": -132.0,
+        "y": -269.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 4.21875,
+        "y": 13.5
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 65,
+      "name": "RightCollision",
+      "source_x": 2142.0,
+      "source_y": -238.0,
+      "source_angle": 0.0,
+      "source_z_order": 2022,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 353.0,
+      "source_height": 1178.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "NewSprite4-1-8.png",
+      "texture_godot": "res://assets/environment/NewSprite4-1-8.png",
+      "native_width": 64.0,
+      "native_height": 64.0,
+      "display_width": 353.0,
+      "display_height": 1178.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": 2142.0,
+        "top": -238.0,
+        "right": 2495.0,
+        "bottom": 940.0,
+        "width": 353.0,
+        "height": 1178.0,
+        "scale_x": 5.515625,
+        "scale_y": 18.40625
+      },
+      "godot_node_position": {
+        "x": 2142.0,
+        "y": -238.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 5.515625,
+        "y": 18.40625
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    },
+    {
+      "id": 66,
+      "name": "TopCollision",
+      "source_x": -136.0,
+      "source_y": -596.0,
+      "source_angle": 0.0,
+      "source_z_order": 2023,
+      "source_layer": "",
+      "source_custom_size": true,
+      "source_width": 2633.0,
+      "source_height": 461.0,
+      "origin_x": 0.0,
+      "origin_y": 0.0,
+      "center_automatic": true,
+      "center_x": 0.0,
+      "center_y": 0.0,
+      "texture_file": "NewSprite4-1-8.png",
+      "texture_godot": "res://assets/environment/NewSprite4-1-8.png",
+      "native_width": 64.0,
+      "native_height": 64.0,
+      "display_width": 2633.0,
+      "display_height": 461.0,
+      "size_rule": "customSize=true, use instance width/height",
+      "confidence": "high",
+      "gd_bounds": {
+        "left": -136.0,
+        "top": -596.0,
+        "right": 2497.0,
+        "bottom": -135.0,
+        "width": 2633.0,
+        "height": 461.0,
+        "scale_x": 41.140625,
+        "scale_y": 7.203125
+      },
+      "godot_node_position": {
+        "x": -136.0,
+        "y": -596.0
+      },
+      "godot_sprite_offset": {
+        "x": -0.0,
+        "y": -0.0
+      },
+      "godot_sprite_scale": {
+        "x": 41.140625,
+        "y": 7.203125
+      },
+      "conversion_formula": "node.position = (source_x, source_y) [GDevelop origin]; sprite.offset = (-origin_x, -origin_y); sprite.scale = (display_w/native_w, display_h/native_h)"
+    }
+  ],
+  "zero_size_rule": "When customSize=false AND width=0 AND height=0, GDevelop uses natural sprite dimensions at scale 1.0. Confirmed by Platform1 instances: (920,469) stores 261\u00d795.92 while (120,469) stores 0\u00d70 for the same object type.",
+  "failed_conversion_errors": [
+    "Previous code treated (x,y) as top-left and placed node at (x+w/2, y+h/2)",
+    "Previous code ignored non-zero originPoint (Platform1 origin 11.05, 124.36)",
+    "Platform1 (120,469) incorrectly forced to 814\u00d7221 at center anchor \u2014 wrong position and scale intent",
+    "Collision helpers and boundaries were rendered as visible scaled sprites (red boundary.png)",
+    "PlatformCollision (2412\u00d7371 at y=574) created invisible walkable floor",
+    "Player used center-of-AABB spawn from wrong top-left assumption"
+  ]
+}

@@ -1,0 +1,351 @@
+[gd_resource type="SpriteFrames" load_steps=64 format=3 uid="uid://phase1_636da1d35e805"]
+
+[ext_resource type="Texture2D" path="res://characters/Character_Idle.png" id="1"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00002.png" id="2"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00012.png" id="3"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00022.png" id="4"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00032.png" id="5"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00042.png" id="6"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00052.png" id="7"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00082.png" id="8"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00092.png" id="9"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00102.png" id="10"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00112.png" id="11"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00122.png" id="12"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00142.png" id="13"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00152.png" id="14"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00162.png" id="15"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00172.png" id="16"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00182.png" id="17"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00192.png" id="18"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00202.png" id="19"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00212.png" id="20"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00222.png" id="21"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00232.png" id="22"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B2_Walk.00242.png" id="23"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1.png" id="24"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-1.png" id="25"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-3.png" id="26"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-4.png" id="27"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-5.png" id="28"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-6.png" id="29"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-7.png" id="30"]
+[ext_resource type="Texture2D" path="res://characters/Character_Climb1-8.png" id="31"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_JUMP.png" id="32"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_FALL.png" id="33"]
+[ext_resource type="Texture2D" path="res://characters/Character_Death1.png" id="34"]
+[ext_resource type="Texture2D" path="res://characters/Character_Death2.png" id="35"]
+[ext_resource type="Texture2D" path="res://characters/Character_Death3.png" id="36"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_RUN1.png" id="37"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_RUN2.png" id="38"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_RUN3.png" id="39"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_A1.png" id="40"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_A2.png" id="41"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_A3.png" id="42"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_B1.png" id="43"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_B2.png" id="44"]
+[ext_resource type="Texture2D" path="res://assets/Run__extra_B3.png" id="45"]
+[ext_resource type="Texture2D" path="res://characters/Synfig Character1_B_CROUCH.png" id="46"]
+[ext_resource type="Texture2D" path="res://assets/Roll_1.png" id="47"]
+[ext_resource type="Texture2D" path="res://assets/Roll_2.png" id="48"]
+[ext_resource type="Texture2D" path="res://assets/Roll_3.png" id="49"]
+[ext_resource type="Texture2D" path="res://assets/Roll_4.png" id="50"]
+[ext_resource type="Texture2D" path="res://assets/Roll_5.png" id="51"]
+[ext_resource type="Texture2D" path="res://assets/Roll_6.png" id="52"]
+[ext_resource type="Texture2D" path="res://assets/Roll_Stationary.png" id="53"]
+[ext_resource type="Texture2D" path="res://assets/Kick1.png" id="54"]
+[ext_resource type="Texture2D" path="res://assets/Kick2.png" id="55"]
+[ext_resource type="Texture2D" path="res://assets/Kick3.png" id="56"]
+[ext_resource type="Texture2D" path="res://assets/Kick4.png" id="57"]
+[ext_resource type="Texture2D" path="res://assets/Kick5.png" id="58"]
+[ext_resource type="Texture2D" path="res://assets/Kick6.png" id="59"]
+[ext_resource type="Texture2D" path="res://assets/Kick7.png" id="60"]
+[ext_resource type="Texture2D" path="res://assets/Kick22.png" id="61"]
+[ext_resource type="Texture2D" path="res://assets/Kick42.png" id="62"]
+[ext_resource type="Texture2D" path="res://assets/Kick72.png" id="63"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1")
+}],
+"loop": false,
+"name": &"Idle",
+"speed": 12.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23")
+}],
+"loop": true,
+"name": &"Run",
+"speed": 40.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("24")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31")
+}],
+"loop": true,
+"name": &"Climb",
+"speed": 40.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("32")
+}],
+"loop": true,
+"name": &"Jump",
+"speed": 12.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33")
+}],
+"loop": true,
+"name": &"Fall",
+"speed": 12.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("34")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36")
+}],
+"loop": false,
+"name": &"Death",
+"speed": 5.5556
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("37")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43")
+}],
+"loop": true,
+"name": &"Sprint",
+"speed": 25.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("46")
+}],
+"loop": false,
+"name": &"Crouch",
+"speed": 12.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("47")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48")
+}, {
+"duration": 1.0,
+"texture": ExtResource("49")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53")
+}],
+"loop": true,
+"name": &"Roll",
+"speed": 28.5714
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("54")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55")
+}],
+"loop": false,
+"name": &"Kick2",
+"speed": 28.5714
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("61")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61")
+}],
+"loop": false,
+"name": &"Kick",
+"speed": 12.5
+}]
