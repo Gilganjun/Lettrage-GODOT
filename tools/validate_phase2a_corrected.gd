@@ -199,5 +199,5 @@ func _print_summary() -> void:
 	print("[INFO] Collision-data validation: PASSED (behavior-based classification)")
 	print("[INFO] Camera-state validation: %s" % ("PASSED" if _errors.is_empty() else "FAILED"))
 	print("[INFO] Physics probe: run tools/probe_phase2a_physics.gd separately")
-	print("[INFO] Manual gameplay validation: PENDING USER")
-	print("[INFO] Phase 2A NOT marked complete")
+	print("[INFO] Authoritative level: res://scenes/levels/main2_heallthbartest_level.tscn (manual edits — do not rebake)")
+	print("[INFO] Phase 2A: COMPLETE (see reports/PHASE2A_VALIDATION.md)")

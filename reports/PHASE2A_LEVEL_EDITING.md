@@ -1,107 +1,97 @@
 # Phase 2A — Manual Level Editing (Godot 2D Editor)
 
+**Phase 2A complete.** This scene is the **authoritative baseline** for level layout and collision.
+
 ## Which scene to open
 
-**Edit the level layout:**
-
-`res://scenes/levels/main2_heallthbartest_level.tscn`
-
-**Play movement test (F5 main scene):**
-
-`res://scenes/test/phase2a_movement_corrected.tscn`
+| Task | Scene |
+|------|-------|
+| **Edit platforms, ladders, collision** | `res://scenes/levels/main2_heallthbartest_level.tscn` |
+| **Play movement test (F5)** | `res://scenes/test/phase2a_movement_corrected.tscn` |
 
 The movement test **instances** the baked level. Changes saved in the level scene persist across F5 runs.
 
-## Regenerating from JSON (optional)
+## Authoritative baseline — do not rebake casually
 
-If you re-run the GDevelop importer and need to rebuild nodes from manifests:
+**`main2_heallthbartest_level.tscn` overrides manifest geometry.**
+
+The initial bake used `collision_manifest.json` and `instance_transforms.json`. Since Phase 2A close, the level has been **manually edited in Godot**, including:
+
+- **Bottom platform (`Platform1_003`)** — collision shape extended (~**2031×32**) so the player traverses without falling through gaps
+
+**Do not run the baker unless explicitly approved.** Regeneration overwrites manual work:
 
 ```powershell
+# DESTRUCTIVE — overwrites main2_heallthbartest_level.tscn
 python tools/phase2a_collision_manifest.py
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
   --headless --path Lettrage_Godot --script res://tools/bake_main2_level.gd
 ```
 
-After rebaking, re-check any manual editor tweaks you want to keep.
+Manifests and `gdevelop_level_baker.gd` remain reference tools only.
 
 ## Level structure
 
 ```text
 Main2_heallthbartestLevel
 ├── Backgrounds/          (BG1, BG2)
-├── Decorations/          (empty — future use)
-├── Platforms/            (Platform1, Platform2, Platform3, Tower1)
+├── Decorations/
+├── Platforms/            (Platform1_001, Platform1_002, Platform1_003, …)
 ├── Ladders/
-├── Boundaries/           (LeftBoundary, RightBoundary + wall collision)
-├── CollisionHelpers/     (visual helpers — no platformer physics)
+├── Boundaries/
+├── CollisionHelpers/     (visual only — no platformer physics)
 └── SpawnPoints/
     └── PlayerSpawn       (Marker2D at 279, 231)
 ```
 
-Each platform / ladder / boundary group:
+Each platform group:
 
 ```text
-Platform1_001 (Node2D)     ← drag this to move artwork + collision together
+Platform1_003 (Node2D)     ← drag to move sprite + collider together
 ├── Sprite2D
-└── StaticBody2D           ← local offset from parent
-    └── CollisionShape2D   ← resize handles in 2D editor
+└── StaticBody2D
+    └── CollisionShape2D   ← resize independently for walk surface
 ```
 
 ## How to move a platform
 
 1. Open `main2_heallthbartest_level.tscn`
-2. Click the **2D** tab at the top of the editor
-3. In the Scene tree, expand **Platforms**
-4. Select **Platform1_001** (or any platform group root)
-5. Drag in the viewport **or** set **Position** in the Inspector
-6. **Save the scene** (Ctrl+S)
-
-Moving the parent moves both the sprite and its `StaticBody2D` child.
+2. Click **2D**
+3. Expand **Platforms**, select the group root (e.g. `Platform1_003`)
+4. Drag or set **Position** in Inspector
+5. **Ctrl+S**
 
 ## How to resize platform collision
 
-1. Select the platform group (e.g. `Platform1_001`)
-2. Expand it and select **StaticBody2D → CollisionShape2D**
-3. In the 2D viewport, drag the orange collision handles
-4. Or set **RectangleShape2D → Size** in the Inspector
-5. Save the scene
+1. Select `StaticBody2D → CollisionShape2D` under the platform group
+2. Drag orange handles or edit **RectangleShape2D → Size**
+3. Save
 
-The `Sprite2D` stays put; only the collision slab moves/resizes relative to the group origin.
+**Tip:** Duplicating only `Sprite2D` copies artwork, not physics. Duplicate the **parent Node2D** or extend `CollisionShape2D` to match visuals.
 
 ## How to move a ladder
 
-1. Under **Ladders**, select **Ladder_001**
-2. Drag the parent node to move visual + `Area2D` together
-3. To adjust climb volume only: select **Area2D → CollisionShape2D** and resize
+Select `Ladders/Ladder_001` parent to move visual + `Area2D` together. Resize `Area2D/CollisionShape2D` for climb volume only.
 
-## How to change Z-order (draw order)
+## Z-order
 
-1. Select any group node (e.g. `Platform1_001`)
-2. In Inspector, change **CanvasItem → Z Index**
-3. Higher values draw in front (matches GDevelop z-order intent)
+Set **Z Index** on the platform group. Player spawns at z_index 100 — use higher values to draw platform in front of the player.
 
-## How to move player spawn
+## Player spawn
 
-1. Expand **SpawnPoints**
-2. Select **PlayerSpawn** (`Marker2D`)
-3. Drag or edit **Position** in the Inspector
-4. Save — F5 movement test uses this marker
+`SpawnPoints/PlayerSpawn` — F5 movement test reads this marker.
 
 ## Grid snapping
 
-- **View → Grids** — toggle grid visibility
-- **Snapping toolbar** (above 2D viewport) — enable **Use Grid Snap** / **Use Smart Snap**
-- **Project → Project Settings → Editor → 2D** — change **Grid Offset** and **Grid Step**
+**View → Grids** and the snapping toolbar above the 2D viewport.
 
 ## Diagnostic scenes (preserved)
-
-Runtime-built references kept for comparison:
 
 - `scenes/test/phase2a_layout_verification.tscn`
 - `scenes/test/phase2a_movement_test_failed.tscn`
 
-Do not delete these when editing the baked level.
+Do not delete when editing the baked level.
 
-## What was not changed
+## Phase 2B
 
-Baking copies current positions, collision-mask walk surfaces, layers/masks, and z-order from the approved Phase 2A manifests. Player movement, camera follow, and collision math are unchanged.
+Not started. Do not add enemy, letters, or gameplay systems to this level workflow until Phase 2B is approved.

@@ -51,15 +51,25 @@ Baseline layout: **Main2_heallthbartest** (GAME25.json)
 | TopCollision | (-136.0, -596.0) | 2633.0×461.0 | StaticBody2D collision only | z=2023 Collision helper — sprite hidden |
 | BG2 | (-136.0, -214.0) | 2664.0×1024.0 | StaticBody2D + Sprite2D | z=-1  |
 
-## Phase 2A runtime (movement test)
+## Phase 2A runtime (movement test) — COMPLETE
 
 | Item | Value |
 |------|-------|
 | F5 main scene | `phase2a_movement_corrected.tscn` |
-| Camera default | Always follows player (no toggle) |
+| **Authoritative level** | `scenes/levels/main2_heallthbartest_level.tscn` (manually edited — do not rebake) |
+| Edit level in Godot | Open `main2_heallthbartest_level.tscn` (not the movement test scene) |
+| Camera default | Always follows player at startup (no toggle) |
 | Debug default | OFF (F3 / V toggle) |
 | Player spawn | (279, 231) air spawn → fall to Platform1 |
 | Zoom | 1.0 fixed — GDevelop jump/death zoom deferred |
+
+### Manual level override (Phase 2A baseline)
+
+The baked level `.tscn` **overrides** manifest geometry. Notable editor change:
+
+- **`Platform1_003`** (bottom platform at 120, 469): collision shape extended to **~2031×32** with adjusted `CollisionShape2D` offset so the player traverses without gap fall-through.
+
+`collision_manifest.json` and `gdevelop_level_baker.gd` are reference/regeneration tools only. Rebaking requires explicit approval.
 
 
 ## Interpretations (not 1:1 from JSON)
@@ -74,7 +84,7 @@ Baseline layout: **Main2_heallthbartest** (GAME25.json)
 
 - **DictionaryTEST** — Dictionary logic excluded
 - **EndScreenBackground** — End screen excluded
-- **Enemy** — Phase 2A scope — no enemy
+- **Enemy** — Phase 2B — not started
 - **ForeBush1** — Decorative — not required for traversal validation
 - **Joystick** — Mobile controls excluded
 - **JoystickThumb** — Mobile controls excluded

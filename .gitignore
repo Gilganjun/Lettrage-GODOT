@@ -1,3 +1,22 @@
-# Godot 4+ cache
+# Godot 4+ generated / cache
 .godot/
 *.import
+
+# Godot-specific
+export_presets.cfg
+export/
+*.translation
+
+# Mono / C# (unused but standard)
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+*.log

@@ -3,40 +3,78 @@
 Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 
 **Baseline layout:** `Main2_heallthbartest`  
-**Sibling folder:** `SnatchWord1/` is read-only reference — do not modify.
+**Sibling folder:** `SnatchWord1/` is read-only local reference — **outside this git repository**, do not modify.
 
-## Phase 0/1 status
-- Project foundation and `project.godot` (960×540)
-- Reference copy: `reference/GAME25.json`
-- Active assets copied (characters, alphabet, dictionary, fonts, gameplay audio)
-- AAC converted: `assets/crickets.ogg`, `assets/door.ogg`
-- SpriteFrames: `resources/sprite_frames/player_frames.tres`, `enemy_frames.tres`
-- Phase 1 test: `scenes/test/animation_test.tscn`
+**GitHub:** https://github.com/Gilganjun/Lettrage-GODOT
 
-## Phase 2A status (movement test)
-- **F5 main scene:** `scenes/test/phase2a_movement_corrected.tscn` (platformer movement + collision)
-- Static layout reference: `scenes/test/phase2a_layout_verification.tscn`
-- Phase 1 animation test (not F5): `scenes/test/animation_test.tscn`
-- Failed movement test preserved: `phase2a_movement_test_failed.tscn`
-- Reports: `PHASE2A_ROOT_CAUSE.md`, `PHASE2A_INSTANCE_TRANSFORMS.md`
+## Phase status
+
+| Phase | Status |
+|-------|--------|
+| Phase 0 — Foundation | **Complete** |
+| Phase 1 — Assets, SpriteFrames, animation test | **Complete** |
+| Phase 2A — Movement, collision, editable baked level | **Complete** |
+| Phase 2B — Enemy, letters, scoring, health, gameplay | **Not started** |
+
+## Scenes
+
+| Purpose | Scene |
+|---------|-------|
+| **F5 — play movement test** | `scenes/test/phase2a_movement_corrected.tscn` |
+| **Edit level in Godot 2D** | `scenes/levels/main2_heallthbartest_level.tscn` |
+| Phase 1 animation test | `scenes/test/animation_test.tscn` |
+| Static layout reference | `scenes/test/phase2a_layout_verification.tscn` |
+
+The movement test **instances** the baked level. Save edits in `main2_heallthbartest_level.tscn` — they persist across F5 runs.
+
+### Authoritative level baseline
+
+**`main2_heallthbartest_level.tscn` is the source of truth** for platform positions, collision shapes, ladders, and spawn.
+
+- Manual Godot editor changes **override** old manifest-generated geometry.
+- **Do not rebake** casually — `tools/bake_main2_level.gd` overwrites the `.tscn` and destroys manual edits.
+- Rebaking requires **explicit approval**.
+
+## Phase 2A features
+
+- GDevelop-origin player movement (walk, jump, ladder, double-tap sprint)
+- Camera always follows player at startup (no toggle)
+- Baked editable level with grouped platform/ladder nodes
+- Collision debug: **F3** or **V**
+- Player spawn: **(279, 231)**
 
 ## Commands
+
 ```powershell
-# Re-run asset pipeline
+# Phase 1 asset pipeline
 python tools/phase1_pipeline.py
-
-# Phase 2A layout extract + source map
-python tools/phase2a_extract.py
-python tools/phase2a_source_map.py
-
-# Offline validation
 python tools/validate_phase1_python.py
 
-# Godot headless validation (Godot 4.6.3)
+# Phase 2A validation (Godot 4.6.3 headless)
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
-  --headless --path . --script res://tools/validate_phase1.gd
+  --headless --path . --script res://tools/validate_phase2a_corrected.gd
+
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
-  --headless --path . --script res://tools/validate_phase2a.gd
+  --headless --path . --script res://tools/probe_phase2a_physics.gd
 ```
 
-Reports: `reports/PHASE0_REPORT.md`, `reports/PHASE1_REPORT.md`, `reports/PHASE2A_SOURCE_MAP.md`, `reports/PHASE2A_VALIDATION.md`
+### Regenerate level from manifests (destructive — approval required)
+
+```powershell
+python tools/phase2a_collision_manifest.py
+& "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
+  --headless --path . --script res://tools/bake_main2_level.gd
+```
+
+## Reports
+
+- `reports/PHASE0_REPORT.md`
+- `reports/PHASE1_REPORT.md`
+- `reports/PHASE2A_VALIDATION.md` — Phase 2A sign-off
+- `reports/PHASE2A_LEVEL_EDITING.md` — how to edit the level in Godot
+- `reports/PHASE2A_SOURCE_MAP.md`
+- `reports/PHASE2A_COLLISION_MAP.md`
+
+## Repository layout
+
+Git root is **`Lettrage_Godot/`** only. Parent workspace may contain `SnatchWord1/` (untracked, not in repo).
