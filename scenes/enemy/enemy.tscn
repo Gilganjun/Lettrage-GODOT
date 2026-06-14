@@ -1,0 +1,62 @@
+[gd_scene load_steps=6 format=3 uid="uid://enemy_phase2b2a"]
+
+[ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_animation.gd" id="2_anim"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_movement_controller.gd" id="3_move"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_visual.tres" id="4_visual"]
+[ext_resource type="Resource" path="res://resources/enemy/enemy_movement_config.tres" id="5_cfg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(52, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ladder"]
+size = Vector2(42, 88)
+
+[node name="Enemy" type="CharacterBody2D"]
+collision_layer = 16
+collision_mask = 3
+floor_snap_length = 4.0
+script = ExtResource("1_enemy")
+visual_profile = ExtResource("4_visual")
+movement_config = ExtResource("5_cfg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(46, 50)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 8)
+
+[node name="AnimationController" type="Node" parent="."]
+script = ExtResource("2_anim")
+
+[node name="EnemyMovementController" type="Node" parent="."]
+script = ExtResource("3_move")
+
+[node name="FloorRayLeft" type="RayCast2D" parent="."]
+position = Vector2(32, 116)
+target_position = Vector2(0, 36)
+
+[node name="FloorRayRight" type="RayCast2D" parent="."]
+position = Vector2(60, 116)
+target_position = Vector2(0, 36)
+
+[node name="WallRayLeft" type="RayCast2D" parent="."]
+position = Vector2(36, 92)
+target_position = Vector2(-22, 0)
+
+[node name="WallRayRight" type="RayCast2D" parent="."]
+position = Vector2(56, 92)
+target_position = Vector2(22, 0)
+
+[node name="FloorProbe" type="RayCast2D" parent="."]
+position = Vector2(46, 116)
+target_position = Vector2(0, 64)
+
+[node name="LadderDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+position = Vector2(46, 58)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LadderDetector"]
+shape = SubResource("RectangleShape2D_ladder")

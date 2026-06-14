@@ -1,0 +1,18 @@
+{
+  "layout": "Main2_heallthbartest",
+  "name": "Enemy",
+  "source_x": 740.0,
+  "source_y": 406.0,
+  "source_angle": 0.0,
+  "source_z_order": 100,
+  "source_custom_size": true,
+  "source_width": 92.77617645263672,
+  "source_height": 115.86380004882812,
+  "origin_x": 0.0,
+  "origin_y": 0.0,
+  "center_automatic": true,
+  "native_width": 145.0,
+  "native_height": 191.0,
+  "display_width": 92.77617645263672,
+  "display_height": 115.86380004882812
+}

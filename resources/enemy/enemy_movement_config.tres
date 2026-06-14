@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyMovementConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_movement_config.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+gravity = 1700.0
+jump_speed = 900.0
+max_speed = 300.0
+max_falling_speed = 500.0
+acceleration = 1125.0
+deceleration = 1125.0
+ladder_climbing_speed = 300.0
+jump_sustain_time = 0.3
+can_go_down_from_jumpthru = false
+slope_max_angle = 60.0
+x_grab_tolerance = 10.0
+y_grab_offset = 0.0
+can_grab_platforms = false

@@ -5,6 +5,7 @@ extends SceneTree
 const AlphabetCatalogScript := preload("res://scripts/resources/alphabet_catalog.gd")
 const DictionaryServiceScript := preload("res://scripts/word_game/dictionary_service.gd")
 const PlayerWordStateScript := preload("res://scripts/word_game/player_word_state.gd")
+const SpokenAlphabetScript := preload("res://scripts/word_game/spoken_alphabet_service.gd")
 const LetterSpawnerScript := preload("res://scripts/letters/letter_spawner.gd")
 const LetterScript := preload("res://scripts/letters/letter.gd")
 
@@ -30,6 +31,7 @@ func _initialize() -> void:
 	print("=== Phase 2B1 Validation ===")
 	_check_files()
 	_check_alphabet()
+	_check_spoken_alphabet()
 	_check_dictionary()
 	_check_word_state_logic()
 	_check_spawner_limit()
@@ -78,6 +80,22 @@ func _check_alphabet() -> void:
 		_fail("Letter scene instantiate failed")
 		return
 	print("[OK] Letter scene instantiates")
+
+
+func _check_spoken_alphabet() -> void:
+	var spoken: RefCounted = SpokenAlphabetScript.new()
+	for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+		for voice in 3:
+			var path: String = spoken.path_for_letter(letter, voice)
+			if ResourceLoader.exists(path):
+				print("[OK] spoken %s voice %d -> %s" % [letter, voice + 1, path.get_file()])
+			else:
+				_fail("Missing spoken clip for %s voice %d: %s" % [letter, voice + 1, path])
+	var sample := spoken.get_spoken_path("M")
+	if sample.is_empty() or not ResourceLoader.exists(sample):
+		_fail("Random spoken path failed for M: %s" % sample)
+	else:
+		print("[OK] SpokenAlphabetService random path resolves")
 
 
 func _check_dictionary() -> void:

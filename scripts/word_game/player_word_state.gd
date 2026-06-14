@@ -45,7 +45,7 @@ func clear_word() -> void:
 
 func add_score_for_valid_word(word_len: int) -> int:
 	# GDevelop: len/2 + len + len (integer division on first term)
-	var delta := int(word_len / 2) + word_len + word_len
+	var delta := (word_len >> 1) + word_len + word_len
 	score += delta
 	score_changed.emit(score)
 	return delta

@@ -90,6 +90,7 @@ Letters **do not** collide with platforms — they pass over the playfield.
 | Append | `SpellWord += "A "` (letter + space in source) | Append single uppercase char (display trimmed) |
 | HUD | Set `Spelling` text | `WordGameHud` |
 | SFX | `LetterCollectSFX` random 1–4 | `463388` / `463389` pop MP3 |
+| Spoken letter | `SpeakA`–`SpeakZ` = `RandomInRange(1,3)` → `Alp{A\|B\|C}{index}.wav` vol **30** | `SpokenAlphabetService` — random voice pack A/B/C per letter index |
 | FX | Create `LetterFlash` | Audio only in v1 |
 | Remove letter | `Delete` L# / LV# | `Letter.queue_free()` once |
 
@@ -163,6 +164,8 @@ Clears word + `game-fx-hypnoshroom` — not wired in Phase 2B1 test.
 | `CurrentLetter` | 1–26 spawn sequence index |
 | `CurrentVowel` | 0–5 vowel stream index |
 | `LetterCollectSFX` | 1–4 pop variant |
+| `SpeakA`–`SpeakZ` | Random voice 1–3 → `Alp{A\|B\|C}{letterIndex}.wav` |
+| `SpeakLetterVolume` | Global **30** (0–100 scale) |
 | `ShieldToggle` | Shield mode — **excluded** from 2B1 |
 | `LetterTimer` / `DeleteLetterTimer` | Spawn / delete-arrow timers |
 
@@ -187,7 +190,6 @@ Letters: `collision_layer=8`, `collision_mask=4`. No world mask — no walkable 
 |------|--------|
 | DeleteArrow falling pickup vs key | **Backspace** used |
 | Key X invalid-word clear | Not implemented in 2B1 |
-| Spoken alphabet WAV on collect | Deferred (pop SFX only) |
 | LetterFlash / PopPoopFx particles | Deferred |
 | ShieldToggle collection branch | Excluded (Enemy/shield phase) |
 | Bullet-assisted collection | Excluded |

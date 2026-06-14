@@ -17,6 +17,7 @@ tools/validate_phase2b1.gd → 0 errors
 | Known valid words (A, CAT) | PASSED |
 | Invalid word rejected | PASSED |
 | Append / delete / score formula | PASSED (len 4 → +10) |
+| Spoken alphabet WAV A–Z (3 voices each) | PASSED |
 | Spawner active-letter cap | PASSED |
 | Authoritative level marker preserved | PASSED |
 | Player movement config unchanged | PASSED |
@@ -33,7 +34,7 @@ Phase 2A reference (unchanged): `phase2a_movement_corrected.tscn`
 
 - [ ] F5 — movement and camera unchanged
 - [ ] Letters fall and despawn below y≈648
-- [ ] Collect letters by touching them — word updates in order
+- [ ] Collect letters — pop SFX **and spoken letter name** (3 voice variants)
 - [ ] Backspace deletes last letter
 - [ ] Enter or C submits word
 - [ ] Valid word adds score and clears word

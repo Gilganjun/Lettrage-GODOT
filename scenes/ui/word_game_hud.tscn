@@ -66,3 +66,11 @@ theme_override_colors/font_color = Color(0.75, 0.82, 0.9, 1)
 theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 text = "Debug"
+
+[node name="EnemyDebugLabel" type="Label" parent="Margin/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.72, 1)
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 2
+text = "Enemy debug"

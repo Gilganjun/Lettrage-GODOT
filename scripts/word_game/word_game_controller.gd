@@ -9,12 +9,17 @@ signal debug_state_changed
 @export var valid_word_sound: AudioStream
 @export var invalid_word_sound: AudioStream
 @export var delete_letter_sound: AudioStream
+@export var speak_letter_enabled := true
+@export_range(0.0, 1.0, 0.01) var speak_letter_volume := SpokenAlphabetService.DEFAULT_VOLUME_LINEAR
+@export_range(0.0, 1.0, 0.01) var collect_sound_volume := 0.30
 
 var dictionary := DictionaryService.new()
 var word_state := PlayerWordState.new()
+var spoken_alphabet := SpokenAlphabetService.new()
 var debug_enabled := false
 
 var _audio: AudioStreamPlayer
+var _spoken_audio: AudioStreamPlayer
 var _last_collect_ms: int = 0
 const COLLECT_COOLDOWN_MS := 80
 
@@ -22,6 +27,8 @@ const COLLECT_COOLDOWN_MS := 80
 func _ready() -> void:
 	_audio = AudioStreamPlayer.new()
 	add_child(_audio)
+	_spoken_audio = AudioStreamPlayer.new()
+	add_child(_spoken_audio)
 	if not dictionary.load_dictionary():
 		push_error(dictionary.error_message)
 	word_state.word_changed.connect(func(_w): debug_state_changed.emit())
@@ -37,6 +44,7 @@ func on_letter_collected(character: String) -> void:
 	word_state.append_letter(character)
 	word_state.set_validation("collected", "Collected %s" % character)
 	_play_collect_sound()
+	_play_spoken_letter(character)
 
 
 func delete_last_letter() -> void:
@@ -72,11 +80,28 @@ func _play_collect_sound() -> void:
 	if collect_sounds.is_empty():
 		return
 	var stream := collect_sounds[randi() % collect_sounds.size()]
-	_play_one_shot(stream)
+	_play_one_shot(stream, collect_sound_volume)
 
 
-func _play_one_shot(stream: AudioStream) -> void:
+func _play_one_shot(stream: AudioStream, volume_linear: float = 1.0) -> void:
 	if stream == null:
 		return
+	_audio.volume_db = linear_to_db(volume_linear)
 	_audio.stream = stream
 	_audio.play()
+
+
+func _play_spoken_letter(character: String) -> void:
+	if not speak_letter_enabled:
+		return
+	var path := spoken_alphabet.get_spoken_path(character)
+	if path.is_empty() or not ResourceLoader.exists(path):
+		push_warning("Spoken letter missing: %s" % path)
+		return
+	var stream: AudioStream = load(path)
+	if stream == null:
+		push_warning("Spoken letter failed to load: %s" % path)
+		return
+	_spoken_audio.volume_db = linear_to_db(speak_letter_volume)
+	_spoken_audio.stream = stream
+	_spoken_audio.play()

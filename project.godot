@@ -12,8 +12,8 @@ config_version=5
 
 config/name="Lettrage"
 config/description="Snatch Word — GDevelop to Godot conversion"
-config/version="0.3.0-phase2b1"
-run/main_scene="res://scenes/test/phase2b1_word_game_test.tscn"
+config/version="0.4.0-phase2b2a"
+run/main_scene="res://scenes/test/phase2b2a_enemy_movement_test.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
 [display]
@@ -80,6 +80,7 @@ delete_letter={
 2d_physics/layer_2="ladder"
 2d_physics/layer_3="player"
 2d_physics/layer_4="letters"
+2d_physics/layer_5="enemy"
 
 [rendering]
 
