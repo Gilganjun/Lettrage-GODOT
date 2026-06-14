@@ -34,6 +34,15 @@ const EXPECTED_SPAWN := Vector2(740.0, 406.0)
 
 var _errors: Array[String] = []
 var _probe: Dictionary = {}
+var _probe_enemy: Enemy
+var _probe_frames := 0
+var _probe_positions: Array[Vector2] = []
+var _probe_on_floor := 0
+var _probe_dir_changes := 0
+var _probe_last_dir := 0
+var _probe_stuck := 0
+var _probe_max_y := 0.0
+var _probe_start := Vector2.ZERO
 
 
 func _initialize() -> void:
@@ -46,7 +55,104 @@ func _initialize() -> void:
 	_check_level_baseline()
 	_check_player_config_unchanged()
 	_load_scenes()
-	_run_physics_probe()
+	call_deferred("_setup_physics_probe")
+
+
+func _setup_physics_probe() -> void:
+	var level_packed: PackedScene = load(LEVEL_SCENE)
+	var enemy_packed: PackedScene = load(ENEMY_SCENE)
+	if level_packed == null or enemy_packed == null:
+		_fail("Physics probe setup failed — scene load")
+		_finish()
+		return
+	var probe := Node2D.new()
+	probe.name = "ProbeRoot"
+	root.add_child(probe)
+	var level: Node = level_packed.instantiate()
+	var enemy: Enemy = enemy_packed.instantiate()
+	probe.add_child(level)
+	probe.add_child(enemy)
+	var spawn_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ENEMY_SPAWN))
+	enemy.configure_from_gdevelop(spawn_data)
+	if level.has_method("collect_ladder_areas"):
+		for ladder in level.collect_ladder_areas():
+			enemy.register_ladder(ladder)
+	_probe_enemy = enemy
+	_probe_start = enemy.global_position
+	_probe_max_y = _probe_start.y
+	var timer := Timer.new()
+	timer.wait_time = 1.0 / 60.0
+	timer.timeout.connect(_probe_tick.bind(probe, timer))
+	root.add_child(timer)
+	timer.start()
+
+
+func _probe_tick(probe: Node2D, timer: Timer) -> void:
+	if _probe_enemy == null:
+		timer.stop()
+		probe.queue_free()
+		_finish()
+		return
+	_probe_frames += 1
+	_probe_positions.append(_probe_enemy.global_position)
+	if _probe_enemy.is_on_floor():
+		_probe_on_floor += 1
+	if _probe_enemy.global_position.y > _probe_max_y:
+		_probe_max_y = _probe_enemy.global_position.y
+	var dir := _probe_enemy.movement_controller.direction if _probe_enemy.movement_controller else 0
+	if dir != 0 and _probe_last_dir != 0 and dir != _probe_last_dir:
+		_probe_dir_changes += 1
+	if dir != 0:
+		_probe_last_dir = dir
+	if _probe_enemy.is_on_floor() and absf(_probe_enemy.velocity.x) < 2.0 and _probe_frames > 60:
+		_probe_stuck += 1
+	if _probe_frames >= 360:
+		timer.stop()
+		timer.queue_free()
+		_analyze_physics_probe()
+		probe.queue_free()
+		_finish()
+
+
+func _analyze_physics_probe() -> void:
+	var end_pos := _probe_enemy.global_position
+	var travelled := 0.0
+	for j in range(1, _probe_positions.size()):
+		travelled += _probe_positions[j - 1].distance_to(_probe_positions[j])
+	_probe = {
+		"frames": _probe_frames,
+		"start": _probe_start,
+		"end": end_pos,
+		"path_length": travelled,
+		"on_floor_frames": _probe_on_floor,
+		"direction_changes": _probe_dir_changes,
+		"stuck_frames": _probe_stuck,
+		"max_fall_y": _probe_max_y,
+		"signal_direction_changes": _probe_enemy.direction_changes,
+	}
+	if _probe_on_floor < 30:
+		_fail("Probe: enemy rarely on floor (%d/%d frames)" % [_probe_on_floor, _probe_frames])
+	else:
+		print("[OK] Probe: floor contact %d/%d frames" % [_probe_on_floor, _probe_frames])
+	if travelled < 40.0:
+		_fail("Probe: enemy travelled too little (%.1f px)" % travelled)
+	else:
+		print("[OK] Probe: travelled %.1f px" % travelled)
+	if _probe_dir_changes < 1 and _probe_enemy.direction_changes < 1:
+		_fail("Probe: no direction changes observed")
+	else:
+		print("[OK] Probe: direction changes %d (signal %d)" % [_probe_dir_changes, _probe_enemy.direction_changes])
+	if _probe_stuck > 90:
+		_fail("Probe: stuck-state detected (%d frames)" % _probe_stuck)
+	else:
+		print("[OK] Probe: stuck frames %d (threshold 90)" % _probe_stuck)
+	if _probe_max_y > _probe_start.y + 400.0:
+		_fail("Probe: unexpected fall depth (max y %.1f)" % _probe_max_y)
+	else:
+		print("[OK] Probe: fall depth within bounds")
+
+
+func _finish() -> void:
 	_print_probe()
 	_print_summary()
 	quit(0 if _errors.is_empty() else 1)
@@ -153,87 +259,6 @@ func _load_scenes() -> void:
 		else:
 			print("[OK] %s instantiates" % path)
 			inst.free()
-
-
-func _run_physics_probe() -> void:
-	var level_packed: PackedScene = load(LEVEL_SCENE)
-	var enemy_packed: PackedScene = load(ENEMY_SCENE)
-	if level_packed == null or enemy_packed == null:
-		_fail("Physics probe setup failed — scene load")
-		return
-	var root := Node2D.new()
-	root.name = "ProbeRoot"
-	var level: Node = level_packed.instantiate()
-	var enemy: Enemy = enemy_packed.instantiate()
-	root.add_child(level)
-	root.add_child(enemy)
-	var spawn_text := FileAccess.get_file_as_string(ENEMY_SPAWN)
-	var spawn_data: Dictionary = JSON.parse_string(spawn_text)
-	enemy.configure_from_gdevelop(spawn_data)
-	if level.has_method("collect_ladder_areas"):
-		for ladder in level.collect_ladder_areas():
-			enemy.register_ladder(ladder)
-	root.process_mode = Node.PROCESS_MODE_ALWAYS
-	current_scene = root
-	var start_pos := enemy.global_position
-	var positions: Array[Vector2] = []
-	var on_floor_frames := 0
-	var direction_changes := 0
-	var last_dir := 0
-	var stuck_frames := 0
-	var max_fall_y := start_pos.y
-	const FRAMES := 360
-	for i in FRAMES:
-		root.process_physics(get_physics_process_delta_time())
-		positions.append(enemy.global_position)
-		if enemy.is_on_floor():
-			on_floor_frames += 1
-		if enemy.global_position.y > max_fall_y:
-			max_fall_y = enemy.global_position.y
-		var dir := enemy.movement_controller.direction if enemy.movement_controller else 0
-		if dir != 0 and last_dir != 0 and dir != last_dir:
-			direction_changes += 1
-		if dir != 0:
-			last_dir = dir
-		if enemy.is_on_floor() and absf(enemy.velocity.x) < 2.0 and i > 60:
-			stuck_frames += 1
-	var end_pos := enemy.global_position
-	var distance := start_pos.distance_to(end_pos)
-	var travelled := 0.0
-	for j in range(1, positions.size()):
-		travelled += positions[j - 1].distance_to(positions[j])
-	_probe = {
-		"frames": FRAMES,
-		"start": start_pos,
-		"end": end_pos,
-		"distance": distance,
-		"path_length": travelled,
-		"on_floor_frames": on_floor_frames,
-		"direction_changes": direction_changes,
-		"stuck_frames": stuck_frames,
-		"max_fall_y": max_fall_y,
-	}
-	if on_floor_frames < 30:
-		_fail("Probe: enemy rarely on floor (%d/%d frames)" % [on_floor_frames, FRAMES])
-	else:
-		print("[OK] Probe: floor contact %d/%d frames" % [on_floor_frames, FRAMES])
-	if travelled < 40.0:
-		_fail("Probe: enemy travelled too little (%.1f px)" % travelled)
-	else:
-		print("[OK] Probe: travelled %.1f px" % travelled)
-	if direction_changes < 1 and enemy.direction_changes < 1:
-		_fail("Probe: no direction changes observed")
-	else:
-		print("[OK] Probe: direction changes %d (signal %d)" % [direction_changes, enemy.direction_changes])
-	if stuck_frames > 90:
-		_fail("Probe: stuck-state detected (%d frames nearly stationary on floor)" % stuck_frames)
-	else:
-		print("[OK] Probe: stuck frames %d (threshold 90)" % stuck_frames)
-	if max_fall_y > start_pos.y + 400.0:
-		_fail("Probe: unexpected fall depth (max y %.1f)" % max_fall_y)
-	else:
-		print("[OK] Probe: fall depth within bounds")
-	root.free()
 
 
 func _print_probe() -> void:
