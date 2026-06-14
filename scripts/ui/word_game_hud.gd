@@ -76,7 +76,7 @@ func refresh_enemy_debug() -> void:
 		"Enemy pos: (%.0f, %.0f) vel: (%.0f, %.0f) state: %s anim: %s\n"
 		% [info["position"].x, info["position"].y, info["velocity"].x, info["velocity"].y,
 			state_names[state], info.get("animation", "?")]
-		+ "dir: %s on_floor: %s ladder: %s target: %.0f patrol: %.0f-%.0f jump_cd: %.2f changes: %d"
+		+ "dir: %s on_floor: %s ladder: %s target: %.0f patrol: %.0f-%.0f\n"
 		% [
 			str(info.get("direction", 0)),
 			str(info.get("on_floor", false)),
@@ -84,8 +84,31 @@ func refresh_enemy_debug() -> void:
 			float(info.get("target_x", 0.0)),
 			float(info.get("patrol_min_x", 0.0)),
 			float(info.get("patrol_max_x", 0.0)),
-			float(info.get("jump_cooldown", 0.0)),
-			int(info.get("direction_changes", 0)),
+		]
+		+ "Obstacle: %s @ %s | response: %s | jumpable: %s floor_beyond: %s\n"
+		% [
+			str(info.get("obstacle_detected", false)),
+			str(info.get("obstacle_point", Vector2.ZERO)),
+			str(info.get("selected_response", "NONE")),
+			str(info.get("jumpable", false)),
+			str(info.get("floor_beyond", false)),
+		]
+		+ "encounter: %s cd: %.2f fail_jumps: %d rev_count: %d stuck: %.2f outcome: %s\n"
+		% [
+			str(info.get("encounter_active", false)),
+			float(info.get("decision_cooldown", 0.0)),
+			int(info.get("failed_jump_count", 0)),
+			int(info.get("reverse_count", 0)),
+			float(info.get("stuck_timer", 0.0)),
+			str(info.get("last_escape_outcome", "none")),
+		]
+		+ "decisions: %d jumps: %d reverses: %d fallbacks: %d max_stuck: %.2f"
+		% [
+			int(info.get("total_decisions", 0)),
+			int(info.get("jumps_chosen", 0)),
+			int(info.get("reverses_chosen", 0)),
+			int(info.get("stuck_fallbacks", 0)),
+			float(info.get("max_stuck_duration", 0.0)),
 		]
 	)
 

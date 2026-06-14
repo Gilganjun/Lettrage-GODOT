@@ -1,12 +1,9 @@
 extends SceneTree
 
-## Phase 2B2A automated validation — enemy foundation + regression guards.
+## Phase 2B2A automated validation — enemy foundation + obstacle escape probe.
 
 const EnemyScript := preload("res://scripts/enemy/enemy.gd")
-const EnemyMovementConfigScript := preload("res://scripts/resources/enemy_movement_config.gd")
-const EnemyAnimationScript := preload("res://scripts/enemy/enemy_animation.gd")
-const PlayerMovementConfigScript := preload("res://scripts/resources/player_movement_config.gd")
-const LetterScript := preload("res://scripts/letters/letter.gd")
+const EnemyObstacleResponseScript := preload("res://scripts/enemy/enemy_obstacle_response.gd")
 
 const PHASE2B2A_SCENE := "res://scenes/test/phase2b2a_enemy_movement_test.tscn"
 const PHASE2B1_SCENE := "res://scenes/test/phase2b1_word_game_test.tscn"
@@ -19,6 +16,9 @@ const PLAYER_VISUAL := "res://resources/characters/player_visual.tres"
 const ENEMY_SPAWN := "res://resources/enemy/enemy_spawn.json"
 const PLAYER_CFG := "res://resources/player/movement_config.tres"
 const LEVEL_BASELINE_MARKER := "2031.0498"
+const PROBE_SEED := 90210
+const PROBE_FRAMES := 540
+const OBSTACLE_ZONE_MIN_X := 820.0
 
 const EXPECTED_ENEMY_MOVEMENT := {
 	"gravity": 1700.0,
@@ -34,15 +34,19 @@ const EXPECTED_SPAWN := Vector2(740.0, 406.0)
 
 var _errors: Array[String] = []
 var _probe: Dictionary = {}
-var _probe_enemy: Enemy
+var _probe_enemy: Node
 var _probe_frames := 0
 var _probe_positions: Array[Vector2] = []
 var _probe_on_floor := 0
 var _probe_dir_changes := 0
 var _probe_last_dir := 0
-var _probe_stuck := 0
+var _probe_consecutive_stuck := 0
+var _probe_max_consecutive_stuck := 0
 var _probe_max_y := 0.0
 var _probe_start := Vector2.ZERO
+var _probe_max_x := 0.0
+var _probe_min_x := 0.0
+var _probe_direction_window: Array[int] = []
 
 
 func _initialize() -> void:
@@ -69,17 +73,20 @@ func _setup_physics_probe() -> void:
 	probe.name = "ProbeRoot"
 	root.add_child(probe)
 	var level: Node = level_packed.instantiate()
-	var enemy: Enemy = enemy_packed.instantiate()
+	var enemy: Node = enemy_packed.instantiate()
 	probe.add_child(level)
 	probe.add_child(enemy)
 	var spawn_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ENEMY_SPAWN))
-	enemy.configure_from_gdevelop(spawn_data)
+	enemy.call("configure_from_gdevelop", spawn_data)
+	enemy.call("set_obstacle_rng_seed", PROBE_SEED)
 	if level.has_method("collect_ladder_areas"):
 		for ladder in level.collect_ladder_areas():
-			enemy.register_ladder(ladder)
+			enemy.call("register_ladder", ladder)
 	_probe_enemy = enemy
 	_probe_start = enemy.global_position
 	_probe_max_y = _probe_start.y
+	_probe_max_x = _probe_start.x
+	_probe_min_x = _probe_start.x
 	var timer := Timer.new()
 	timer.wait_time = 1.0 / 60.0
 	timer.timeout.connect(_probe_tick.bind(probe, timer))
@@ -95,18 +102,27 @@ func _probe_tick(probe: Node2D, timer: Timer) -> void:
 		return
 	_probe_frames += 1
 	_probe_positions.append(_probe_enemy.global_position)
+	_probe_max_x = maxf(_probe_max_x, _probe_enemy.global_position.x)
+	_probe_min_x = minf(_probe_min_x, _probe_enemy.global_position.x)
 	if _probe_enemy.is_on_floor():
 		_probe_on_floor += 1
 	if _probe_enemy.global_position.y > _probe_max_y:
 		_probe_max_y = _probe_enemy.global_position.y
-	var dir := _probe_enemy.movement_controller.direction if _probe_enemy.movement_controller else 0
+	var mc: Node = _probe_enemy.get_node("EnemyMovementController")
+	var dir: int = mc.direction if mc else 0
 	if dir != 0 and _probe_last_dir != 0 and dir != _probe_last_dir:
 		_probe_dir_changes += 1
+		_probe_direction_window.append(_probe_frames)
 	if dir != 0:
 		_probe_last_dir = dir
-	if _probe_enemy.is_on_floor() and absf(_probe_enemy.velocity.x) < 2.0 and _probe_frames > 60:
-		_probe_stuck += 1
-	if _probe_frames >= 360:
+	var near_obstacle: bool = _probe_enemy.global_position.x >= OBSTACLE_ZONE_MIN_X
+	var low_speed: bool = absf(_probe_enemy.velocity.x) < 3.0 and _probe_enemy.is_on_floor()
+	if near_obstacle and low_speed:
+		_probe_consecutive_stuck += 1
+		_probe_max_consecutive_stuck = maxi(_probe_max_consecutive_stuck, _probe_consecutive_stuck)
+	else:
+		_probe_consecutive_stuck = 0
+	if _probe_frames >= PROBE_FRAMES:
 		timer.stop()
 		timer.queue_free()
 		_analyze_physics_probe()
@@ -115,37 +131,68 @@ func _probe_tick(probe: Node2D, timer: Timer) -> void:
 
 
 func _analyze_physics_probe() -> void:
-	var end_pos := _probe_enemy.global_position
+	var end_pos: Vector2 = _probe_enemy.global_position
 	var travelled := 0.0
 	for j in range(1, _probe_positions.size()):
 		travelled += _probe_positions[j - 1].distance_to(_probe_positions[j])
+	var response: Node = _probe_enemy.get_node("ObstacleResponse")
+	var escaped_forward: bool = _probe_max_x > OBSTACLE_ZONE_MIN_X + 40.0
+	var escaped_reverse: bool = _probe_min_x < OBSTACLE_ZONE_MIN_X - 60.0
+	var oscillations := 0
+	for frame_a in _probe_direction_window:
+		var count := 0
+		for frame_b in _probe_direction_window:
+			if absf(frame_a - frame_b) <= 30:
+				count += 1
+		if count >= 4:
+			oscillations += 1
 	_probe = {
+		"seed": PROBE_SEED,
 		"frames": _probe_frames,
 		"start": _probe_start,
 		"end": end_pos,
 		"path_length": travelled,
 		"on_floor_frames": _probe_on_floor,
 		"direction_changes": _probe_dir_changes,
-		"stuck_frames": _probe_stuck,
+		"max_consecutive_stuck": _probe_max_consecutive_stuck,
 		"max_fall_y": _probe_max_y,
-		"signal_direction_changes": _probe_enemy.direction_changes,
+		"obstacle_decisions": response.total_decisions if response else 0,
+		"jumps_chosen": response.jumps_chosen if response else 0,
+		"reverses_chosen": response.reverses_chosen if response else 0,
+		"stuck_fallbacks": response.stuck_fallbacks if response else 0,
+		"max_stuck_duration": response.max_stuck_duration if response else 0.0,
+		"last_escape_outcome": response.last_escape_outcome if response else "",
+		"min_x": _probe_min_x,
+		"max_x": _probe_max_x,
+		"oscillation_hits": oscillations,
+		"escaped_forward": escaped_forward,
+		"escaped_reverse": escaped_reverse,
 	}
 	if _probe_on_floor < 30:
 		_fail("Probe: enemy rarely on floor (%d/%d frames)" % [_probe_on_floor, _probe_frames])
 	else:
 		print("[OK] Probe: floor contact %d/%d frames" % [_probe_on_floor, _probe_frames])
-	if travelled < 40.0:
+	if travelled < 80.0:
 		_fail("Probe: enemy travelled too little (%.1f px)" % travelled)
 	else:
 		print("[OK] Probe: travelled %.1f px" % travelled)
-	if _probe_dir_changes < 1 and _probe_enemy.direction_changes < 1:
-		_fail("Probe: no direction changes observed")
+	if response == null or response.total_decisions < 1:
+		_fail("Probe: no obstacle decisions recorded")
 	else:
-		print("[OK] Probe: direction changes %d (signal %d)" % [_probe_dir_changes, _probe_enemy.direction_changes])
-	if _probe_stuck > 90:
-		_fail("Probe: stuck-state detected (%d frames)" % _probe_stuck)
+		print("[OK] Probe: obstacle decisions %d (jumps %d, reverses %d)" % [
+			response.total_decisions, response.jumps_chosen, response.reverses_chosen])
+	if not escaped_forward and not escaped_reverse:
+		_fail("Probe: enemy did not escape obstacle (end x %.1f)" % end_pos.x)
 	else:
-		print("[OK] Probe: stuck frames %d (threshold 90)" % _probe_stuck)
+		print("[OK] Probe: escaped via %s" % ("forward" if escaped_forward else "reverse"))
+	if _probe_max_consecutive_stuck > 120:
+		_fail("Probe: prolonged stuck near obstacle (%d frames)" % _probe_max_consecutive_stuck)
+	else:
+		print("[OK] Probe: max consecutive stuck %d frames" % _probe_max_consecutive_stuck)
+	if oscillations > 0:
+		_fail("Probe: rapid direction oscillation detected (%d windows)" % oscillations)
+	else:
+		print("[OK] Probe: no rapid oscillation")
 	if _probe_max_y > _probe_start.y + 400.0:
 		_fail("Probe: unexpected fall depth (max y %.1f)" % _probe_max_y)
 	else:
@@ -169,6 +216,8 @@ func _check_files() -> void:
 		ENEMY_VISUAL,
 		ENEMY_SPAWN,
 		"reports/PHASE2B2A_SOURCE_MAP.md",
+		"scripts/enemy/enemy_obstacle_sensor.gd",
+		"scripts/enemy/enemy_obstacle_response.gd",
 	]:
 		if ResourceLoader.exists(path) or FileAccess.file_exists(path):
 			print("[OK] %s" % path)

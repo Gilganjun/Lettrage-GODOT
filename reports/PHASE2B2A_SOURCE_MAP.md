@@ -195,6 +195,24 @@ Replacing enemy artwork: assign new `sprite_frames` on `enemy_visual.tres` only 
 
 ---
 
+## Obstacle escape (Phase 2B2A)
+
+**Root cause of original stuck behaviour:** immediate wall flip + jump-on-block every frame; wall rays missed when the CharacterBody2D was already pressed against colliders (`hit_from_inside` required).
+
+| Component | Role |
+|-----------|------|
+| `EnemyObstacleSensor` | Wall, ledge, floor-beyond, head-clearance rays |
+| `EnemyObstacleResponse` | One weighted decision per encounter |
+| `EnemyShield` | Placeholder — independent from patrol (Phase 2B+) |
+
+**Sensors:** `WallRay*`, `FloorRay*`, `FloorBeyondRay`, `HeadClearanceRay`, pushing-block timer (0.18 s low-speed while intent to move).
+
+**Weights:** jumpable 70/30, uncertain 30/70, after failed jump 10/90, optional pause 25%.
+
+**Cooldowns:** decision 0.55 s, reversal 0.35 s, stuck fallback 1.25 s.
+
+---
+
 ## Phase 2B2A test scene
 
 | Role | Path |

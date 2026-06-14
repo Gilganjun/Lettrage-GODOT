@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://enemy_phase2b2a"]
+[gd_scene load_steps=10 format=3 uid="uid://enemy_phase2b2a"]
 
 [ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://scripts/enemy/enemy_animation.gd" id="2_anim"]
 [ext_resource type="Script" path="res://scripts/enemy/enemy_movement_controller.gd" id="3_move"]
-[ext_resource type="Resource" path="res://resources/characters/enemy_visual.tres" id="4_visual"]
-[ext_resource type="Resource" path="res://resources/enemy/enemy_movement_config.tres" id="5_cfg"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_obstacle_sensor.gd" id="4_sensor"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_obstacle_response.gd" id="5_response"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_shield.gd" id="6_shield"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_visual.tres" id="7_visual"]
+[ext_resource type="Resource" path="res://resources/enemy/enemy_movement_config.tres" id="8_cfg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(52, 100)
@@ -17,8 +20,8 @@ collision_layer = 16
 collision_mask = 3
 floor_snap_length = 4.0
 script = ExtResource("1_enemy")
-visual_profile = ExtResource("4_visual")
-movement_config = ExtResource("5_cfg")
+visual_profile = ExtResource("7_visual")
+movement_config = ExtResource("8_cfg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(46, 50)
@@ -32,6 +35,15 @@ script = ExtResource("2_anim")
 
 [node name="EnemyMovementController" type="Node" parent="."]
 script = ExtResource("3_move")
+
+[node name="ObstacleSensor" type="Node" parent="."]
+script = ExtResource("4_sensor")
+
+[node name="ObstacleResponse" type="Node" parent="."]
+script = ExtResource("5_response")
+
+[node name="Shield" type="Node" parent="."]
+script = ExtResource("6_shield")
 
 [node name="FloorRayLeft" type="RayCast2D" parent="."]
 position = Vector2(32, 116)
@@ -52,6 +64,14 @@ target_position = Vector2(22, 0)
 [node name="FloorProbe" type="RayCast2D" parent="."]
 position = Vector2(46, 116)
 target_position = Vector2(0, 64)
+
+[node name="FloorBeyondRay" type="RayCast2D" parent="."]
+position = Vector2(46, 116)
+target_position = Vector2(0, 110)
+
+[node name="HeadClearanceRay" type="RayCast2D" parent="."]
+position = Vector2(46, -4)
+target_position = Vector2(42, 0)
 
 [node name="LadderDetector" type="Area2D" parent="."]
 collision_layer = 0

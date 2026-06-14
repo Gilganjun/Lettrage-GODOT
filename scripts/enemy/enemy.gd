@@ -1,16 +1,20 @@
 class_name Enemy
 extends CharacterBody2D
 
-## Phase 2B2A enemy foundation — movement, patrol, animation only.
+## Phase 2B2A enemy foundation — patrol, obstacle escape, animation.
 
 signal movement_state_changed(state: EnemyAnimation.MovementState)
 
 @export var visual_profile: CharacterVisualProfile
 @export var movement_config: EnemyMovementConfig
+@export var obstacle_rng_seed: int = -1
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var animation_controller: EnemyAnimation = $AnimationController
 @onready var movement_controller: EnemyMovementController = $EnemyMovementController
+@onready var obstacle_sensor: Node = $ObstacleSensor
+@onready var obstacle_response: Node = $ObstacleResponse
+@onready var shield: Node = $Shield
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var floor_ray_left: RayCast2D = $FloorRayLeft
 @onready var floor_ray_right: RayCast2D = $FloorRayRight
@@ -25,10 +29,13 @@ var is_on_ladder: bool = false
 var direction_changes: int = 0
 
 var _display_size := Vector2(93, 116)
+var _foot_y := 116.0
+var _half_w := 46.0
 var _ladder_areas: Array[Area2D] = []
 var _jump_time: float = 0.0
 var _jump_held: bool = false
 var _floor_distance: float = INF
+var _last_sensor: Dictionary = {}
 
 const FLOOR_SNAP := 4.0
 
@@ -38,6 +45,10 @@ func _ready() -> void:
 	_apply_visual_profile()
 	animation_controller.sprite = sprite
 	_setup_rays()
+	obstacle_sensor.call("setup", self, _foot_y, _half_w)
+	obstacle_response.call("setup", movement_controller)
+	if obstacle_rng_seed >= 0:
+		obstacle_response.call("set_rng_seed", obstacle_rng_seed)
 	ladder_detector.area_entered.connect(_on_ladder_area_entered)
 	ladder_detector.area_exited.connect(_on_ladder_area_exited)
 	if movement_controller:
@@ -68,8 +79,15 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 		float(row.get("source_angle", 0)),
 	)
 	_align_collision_to_visual()
+	obstacle_sensor.call("setup", self, _foot_y, _half_w)
 	if movement_controller:
 		movement_controller.configure_patrol(300.0, 2000.0, global_position.x)
+
+
+func set_obstacle_rng_seed(seed_value: int) -> void:
+	obstacle_rng_seed = seed_value
+	if obstacle_response:
+		obstacle_response.call("set_rng_seed", seed_value)
 
 
 func register_ladder(area: Area2D) -> void:
@@ -78,7 +96,7 @@ func register_ladder(area: Area2D) -> void:
 
 
 func get_debug_info() -> Dictionary:
-	return {
+	var info := {
 		"position": global_position,
 		"velocity": velocity,
 		"state": movement_state,
@@ -90,10 +108,12 @@ func get_debug_info() -> Dictionary:
 		"target_x": movement_controller.target_x if movement_controller else 0.0,
 		"patrol_min_x": movement_controller.patrol_min_x if movement_controller else 0.0,
 		"patrol_max_x": movement_controller.patrol_max_x if movement_controller else 0.0,
-		"jump_cooldown": movement_controller.jump_cooldown if movement_controller else 0.0,
 		"direction_changes": direction_changes,
 		"floor_distance": _floor_distance,
+		"shield_active": shield.get("is_active") if shield else false,
 	}
+	info.merge(obstacle_response.call("get_debug_info", _last_sensor) if obstacle_response else {})
+	return info
 
 
 func _physics_process(delta: float) -> void:
@@ -112,29 +132,36 @@ func _physics_process(delta: float) -> void:
 func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
 	var desired := movement_controller.get_desired_direction(global_position.x) if movement_controller else 1
-	var blocked := _is_blocked(desired)
-	if _should_reverse(desired, blocked):
-		desired = -desired
-		if movement_controller:
-			movement_controller.set_direction(desired)
-		blocked = _is_blocked(desired)
-	if movement_controller:
-		movement_controller.set_direction(desired)
-	facing = desired
-	var target_speed := float(desired) * cfg.max_speed
+	if movement_controller and movement_controller.direction != 0:
+		desired = movement_controller.direction
+	_last_sensor = obstacle_sensor.call("scan", desired)
+	obstacle_response.call(
+		"tick",
+		delta,
+		_last_sensor,
+		global_position,
+		is_on_floor(),
+		not is_on_floor(),
+		absf(velocity.x),
+		desired,
+	)
+	if obstacle_response.call("is_paused"):
+		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
+		if not is_on_floor():
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		return
+	var motion_dir := desired
+	if movement_controller and movement_controller.direction != 0:
+		motion_dir = movement_controller.direction
+	facing = motion_dir if motion_dir != 0 else facing
+	var target_speed := float(motion_dir) * cfg.max_speed
 	var rate := cfg.acceleration if absf(target_speed) > absf(velocity.x) else cfg.deceleration
 	velocity.x = move_toward(velocity.x, target_speed, rate * delta)
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
 		_jump_time = 0.0
-		if blocked and movement_controller and movement_controller.request_jump():
-			velocity.y = -cfg.jump_speed
-			_jump_held = true
-			_jump_time = 0.0
-		elif movement_controller and movement_controller.update_stuck_timer(
-			delta, true, absf(velocity.x), blocked
-		) and movement_controller.request_jump():
+		if obstacle_response.call("consume_jump_request"):
 			velocity.y = -cfg.jump_speed
 			_jump_held = true
 			_jump_time = 0.0
@@ -171,24 +198,6 @@ func _overlaps_any_ladder() -> bool:
 	return false
 
 
-func _should_reverse(desired: int, blocked: bool) -> bool:
-	if blocked:
-		return true
-	if desired > 0 and not floor_ray_right.is_colliding() and is_on_floor():
-		return true
-	if desired < 0 and not floor_ray_left.is_colliding() and is_on_floor():
-		return true
-	return false
-
-
-func _is_blocked(desired: int) -> bool:
-	if desired > 0:
-		return wall_ray_right.is_colliding()
-	if desired < 0:
-		return wall_ray_left.is_colliding()
-	return false
-
-
 func _update_movement_state() -> void:
 	var new_state: EnemyAnimation.MovementState
 	if is_on_ladder:
@@ -199,6 +208,8 @@ func _update_movement_state() -> void:
 			if velocity.y < 0.0
 			else EnemyAnimation.MovementState.FALL
 		)
+	elif obstacle_response.call("is_paused"):
+		new_state = EnemyAnimation.MovementState.IDLE
 	elif absf(velocity.x) > 8.0:
 		new_state = EnemyAnimation.MovementState.RUN
 	else:
@@ -217,10 +228,20 @@ func _update_floor_probe() -> void:
 
 
 func _setup_rays() -> void:
-	for ray in [floor_ray_left, floor_ray_right, wall_ray_left, wall_ray_right, floor_probe]:
+	for ray in [
+		floor_ray_left,
+		floor_ray_right,
+		wall_ray_left,
+		wall_ray_right,
+		floor_probe,
+		get_node_or_null("FloorBeyondRay"),
+		get_node_or_null("HeadClearanceRay"),
+	]:
 		if ray:
 			ray.enabled = true
 			ray.collision_mask = 1
+			if ray is RayCast2D and ray.name.begins_with("Wall") or ray.name == "FloorBeyondRay" or ray.name == "HeadClearanceRay":
+				ray.hit_from_inside = true
 
 
 func _apply_visual_profile() -> void:
@@ -238,24 +259,31 @@ func _align_collision_to_visual() -> void:
 	var rect := collision_shape.shape as RectangleShape2D
 	if rect == null:
 		return
+	_half_w = _display_size.x * 0.5
+	_foot_y = _display_size.y
 	rect.size = Vector2(_display_size.x * 0.56, _display_size.y * 0.86)
-	collision_shape.position = Vector2(_display_size.x * 0.5, _display_size.y - rect.size.y * 0.5)
-	var half_w := _display_size.x * 0.5
-	var foot_y := _display_size.y
-	floor_ray_left.position = Vector2(half_w - 14.0, foot_y)
-	floor_ray_right.position = Vector2(half_w + 14.0, foot_y)
+	collision_shape.position = Vector2(_half_w, _display_size.y - rect.size.y * 0.5)
+	floor_ray_left.position = Vector2(_half_w - 14.0, _foot_y)
+	floor_ray_right.position = Vector2(_half_w + 14.0, _foot_y)
 	floor_ray_left.target_position = Vector2(0, 36)
 	floor_ray_right.target_position = Vector2(0, 36)
-	wall_ray_left.position = Vector2(half_w - 10.0, foot_y - 24.0)
-	wall_ray_right.position = Vector2(half_w + 10.0, foot_y - 24.0)
+	wall_ray_left.position = Vector2(_half_w - 10.0, _foot_y - 24.0)
+	wall_ray_right.position = Vector2(_half_w + 10.0, _foot_y - 24.0)
 	wall_ray_left.target_position = Vector2(-22, 0)
 	wall_ray_right.target_position = Vector2(22, 0)
-	floor_probe.position = Vector2(half_w, foot_y)
+	floor_probe.position = Vector2(_half_w, _foot_y)
 	floor_probe.target_position = Vector2(0, 64)
-	ladder_detector.position = Vector2(half_w, _display_size.y * 0.5)
+	ladder_detector.position = Vector2(_half_w, _display_size.y * 0.5)
 	var ladder_shape := ladder_detector.get_node("CollisionShape2D").shape as RectangleShape2D
 	if ladder_shape:
 		ladder_shape.size = Vector2(_display_size.x * 0.45, _display_size.y * 0.75)
+	var beyond := get_node_or_null("FloorBeyondRay") as RayCast2D
+	if beyond:
+		beyond.target_position = Vector2(0, 110)
+	var head := get_node_or_null("HeadClearanceRay") as RayCast2D
+	if head:
+		head.position = Vector2(_half_w, _foot_y - 120.0)
+		head.target_position = Vector2(42, 0)
 
 
 func _on_ladder_area_entered(_area: Area2D) -> void:
