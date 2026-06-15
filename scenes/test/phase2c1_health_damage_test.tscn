@@ -42,6 +42,8 @@ script = ExtResource("3_coldebug")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
+[node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]
+
 [node name="CombatHud" parent="UI" instance=ExtResource("7_combat")]
 
 [node name="TopBar" type="PanelContainer" parent="UI"]
@@ -56,5 +58,3 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "Phase 2C1 | Health + word damage | Shift+F2 HUD | Alt+1-6 combat debug | Alt+0 reset HP"
-
-[node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]

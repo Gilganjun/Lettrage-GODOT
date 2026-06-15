@@ -5,11 +5,19 @@ extends RefCounted
 
 const SHADER := preload("res://shaders/letter_tint.gdshader")
 
+## Experiment toggle — set false to revert falling-letter outlines.
+const OUTLINE_ENABLED := true
+const OUTLINE_WIDTH := 2.0
+const OUTLINE_COLOR := Color(1.0, 1.0, 1.0, 1.0)
+
 
 static func create_material(color: Color) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = SHADER
 	mat.set_shader_parameter("letter_color", color)
+	mat.set_shader_parameter("outline_enabled", OUTLINE_ENABLED)
+	mat.set_shader_parameter("outline_width", OUTLINE_WIDTH)
+	mat.set_shader_parameter("outline_color", OUTLINE_COLOR)
 	return mat
 
 

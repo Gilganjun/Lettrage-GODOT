@@ -5,8 +5,6 @@ extends Node
 
 signal word_damage_applied(event: Dictionary)
 
-const WordDamageCalculator := preload("res://scripts/combat/word_damage_calculator.gd")
-
 @export var player_combat: Node
 @export var enemy_combat: Node
 

@@ -1,6 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://health_bar_phase2c1"]
+[gd_scene load_steps=3 format=3 uid="uid://health_bar_phase2c1"]
 
 [ext_resource type="Script" path="res://scripts/ui/health_bar.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_box"]
+bg_color = Color(0.05, 0.06, 0.08, 0.72)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.4, 0.48, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
 
 [node name="HealthBar" type="Control"]
 custom_minimum_size = Vector2(140, 36)
@@ -27,6 +43,7 @@ layout_mode = 0
 offset_top = 16.0
 offset_right = 134.0
 offset_bottom = 30.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_box")
 
 [node name="Fill" type="ColorRect" parent="Box"]
 layout_mode = 0

@@ -45,10 +45,10 @@ func tick(delta: float, enemy_pos: Vector2) -> void:
 				last_activation_reason = "post_collect_cooldown"
 				state_changed.emit()
 		return
-	if shield == null or _body == null:
+	if shield == null or _body == null or _targeting == null:
 		return
-	var target: Letter = _targeting.current_target if _targeting else null
-	var target_dist: float = _targeting.get_target_distance(enemy_pos) if _targeting else INF
+	var target: Letter = _targeting.get_valid_target() if _targeting.has_method("get_valid_target") else null
+	var target_dist: float = _targeting.get_target_distance(enemy_pos)
 	if target != null and is_instance_valid(target) and target_dist < collect_proximity:
 		if shield.is_active:
 			shield.deactivate("collect_proximity")

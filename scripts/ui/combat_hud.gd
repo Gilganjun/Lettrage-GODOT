@@ -1,14 +1,33 @@
 extends Control
 
-## Player + Enemy health bars and optional combat debug readout.
+## Player + Enemy health bars, spell text under each bar, optional combat debug.
 
-@onready var player_bar: Control = $Margin/Row/PlayerHealthBar
-@onready var enemy_bar: Control = $Margin/Row/EnemyHealthBar
-@onready var debug_label: Label = $Margin/CombatDebugLabel
+@onready var player_bar: Control = $TopRow/PlayerColumn/PlayerHealthBar
+@onready var enemy_bar: Control = $TopRow/EnemyColumn/EnemyHealthBar
+@onready var player_word_label: Label = $TopRow/PlayerColumn/PlayerWordLabel
+@onready var enemy_word_label: Label = $TopRow/EnemyColumn/EnemyWordLabel
+@onready var debug_label: Label = $CombatDebugLabel
+
+const WORD_OUTLINE_SIZE := 3
+const WORD_OUTLINE_COLOR := Color(1.0, 1.0, 1.0, 1.0)
 
 var _player_combat: Node
 var _enemy_combat: Node
 var _damage_bridge: Node
+var _word_controller: WordGameController
+var _enemy: Enemy
+
+
+func _ready() -> void:
+	_apply_word_label_outline(player_word_label)
+	_apply_word_label_outline(enemy_word_label)
+
+
+func _apply_word_label_outline(label: Label) -> void:
+	if label == null:
+		return
+	label.add_theme_constant_override("outline_size", WORD_OUTLINE_SIZE)
+	label.add_theme_color_override("font_outline_color", WORD_OUTLINE_COLOR)
 
 
 func setup(
@@ -20,9 +39,19 @@ func setup(
 	_enemy_combat = enemy_combat
 	_damage_bridge = damage_bridge
 	if player_bar.has_method("setup") and player_combat:
-		player_bar.setup("Player HP", player_combat.health, Color(0.35, 0.92, 0.55, 1.0))
+		player_bar.setup(
+			"Player HP",
+			player_combat.health,
+			Color(0.35, 0.92, 0.55, 1.0),
+			Color(0.12, 0.42, 0.22, 1.0),
+		)
 	if enemy_bar.has_method("setup") and enemy_combat:
-		enemy_bar.setup("Enemy HP", enemy_combat.health, Color(1.0, 0.55, 0.32, 1.0))
+		enemy_bar.setup(
+			"Enemy HP",
+			enemy_combat.health,
+			Color(1.0, 0.55, 0.32, 1.0),
+			Color(0.55, 0.18, 0.08, 1.0),
+		)
 	if player_combat:
 		player_combat.health.health_changed.connect(func(_a, _b): refresh_debug())
 		player_combat.health.damaged.connect(func(_a, _b): refresh_debug())
@@ -40,6 +69,31 @@ func setup(
 	if damage_bridge:
 		damage_bridge.word_damage_applied.connect(func(_e): refresh_debug())
 	refresh_debug()
+
+
+func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
+	_word_controller = word_controller
+	_enemy = enemy
+	if _word_controller:
+		_word_controller.word_state.word_changed.connect(func(_w): refresh_words())
+		_word_controller.word_state.score_changed.connect(func(_s): refresh_words())
+		_word_controller.word_state.validation_changed.connect(func(_a, _b): refresh_words())
+	if _enemy and _enemy.has_method("get_word_controller"):
+		var wc: Node = _enemy.get_word_controller()
+		wc.word_state.word_changed.connect(func(_a, _b): refresh_words())
+		wc.word_state.score_changed.connect(func(_s): refresh_words())
+		wc.word_state.validation_changed.connect(func(_a, _b): refresh_words())
+	refresh_words()
+
+
+func refresh_words() -> void:
+	if _word_controller:
+		player_word_label.text = _word_controller.word_state.current_word
+	if _enemy:
+		var info := _enemy.get_debug_info()
+		enemy_word_label.text = str(info.get("enemy_word", ""))
+	else:
+		enemy_word_label.text = ""
 
 
 func set_debug_visible(enabled: bool) -> void:

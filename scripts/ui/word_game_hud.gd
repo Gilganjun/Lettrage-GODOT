@@ -17,6 +17,7 @@ var _spawner: LetterSpawner
 var _enemy: Enemy
 var _player_shield: PlayerShield
 var _show_debug := false
+var _words_on_combat_hud := false
 
 
 func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
@@ -34,7 +35,15 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 	refresh_combat_hud()
 
 
+func set_word_display_on_combat_hud(enabled: bool) -> void:
+	_words_on_combat_hud = enabled
+	word_label.visible = not enabled
+	enemy_word_label.visible = not enabled
+
+
 func refresh_combat_hud() -> void:
+	if _words_on_combat_hud:
+		return
 	if _controller:
 		var ws := _controller.word_state
 		word_label.text = "Player word: %s" % (ws.current_word if not ws.current_word.is_empty() else "—")
@@ -84,9 +93,10 @@ func set_player_shield(shield: PlayerShield) -> void:
 
 func set_debug_visible(enabled: bool) -> void:
 	_show_debug = enabled
-	word_label.visible = true
+	if not _words_on_combat_hud:
+		word_label.visible = true
+		enemy_word_label.visible = true
 	score_label.visible = enabled
-	enemy_word_label.visible = enabled
 	enemy_score_label.visible = enabled
 	shield_label.visible = enabled
 	status_label.visible = enabled

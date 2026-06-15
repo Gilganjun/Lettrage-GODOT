@@ -16,7 +16,9 @@ var _spawn_position := Vector2.ZERO
 var _death_timer := 0.0
 var _pending_respawn := false
 var _saved_sprite_rotation := 0.0
+var _upright_rotation := 0.0
 var _initialized := false
+var _is_knocked := false
 
 
 func _health() -> Node:
@@ -49,6 +51,9 @@ func _ensure_initialized() -> void:
 	if _body:
 		_spawn_position = _body.global_position
 		_sprite = _body.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+		if _sprite:
+			_upright_rotation = _sprite.rotation_degrees
+			_saved_sprite_rotation = _upright_rotation
 	var impact := load(
 		"res://assets/530886__eflexmusic__incoming-artillery-strike-cinematic-explosion.wav"
 	) as AudioStream
@@ -124,7 +129,7 @@ func reset_combat() -> void:
 	_injury().end_injury()
 	_health().reset_health()
 	if _sprite:
-		_sprite.rotation_degrees = _saved_sprite_rotation
+		_restore_upright_pose()
 		_sprite.modulate = Color.WHITE
 	respawn_completed.emit()
 
@@ -170,16 +175,25 @@ func _disable_combat_actions() -> void:
 
 
 func _on_injury_started(_duration: float) -> void:
-	if _sprite:
-		_saved_sprite_rotation = _sprite.rotation_degrees
-		_sprite.rotation_degrees = injury_knock_rotation
+	if _sprite == null or _is_knocked:
+		return
+	_is_knocked = true
+	_sprite.rotation_degrees = injury_knock_rotation
 
 
 func _on_injury_ended() -> void:
 	if _health().is_dead:
 		return
+	_restore_upright_pose()
+
+
+func _restore_upright_pose() -> void:
+	_is_knocked = false
+	if _body:
+		_body.rotation = 0.0
 	if _sprite:
-		_sprite.rotation_degrees = _saved_sprite_rotation
+		_sprite.rotation = 0.0
+		_sprite.rotation_degrees = _upright_rotation
 
 
 func _play_death_animation() -> void:
@@ -200,8 +214,8 @@ func _finish_respawn() -> void:
 		if collector:
 			collector.set_deferred("monitoring", true)
 	if _sprite:
-		_sprite.rotation_degrees = 0.0
+		_restore_upright_pose()
 		_sprite.modulate = Color.WHITE
-	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
+		if _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
 			_sprite.play("Idle")
 	respawn_completed.emit()

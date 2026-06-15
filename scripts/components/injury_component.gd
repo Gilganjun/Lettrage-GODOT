@@ -20,6 +20,9 @@ func _process(delta: float) -> void:
 
 func start_injury(duration: float = -1.0) -> void:
 	var dur := default_duration if duration < 0.0 else duration
+	if is_injured:
+		time_remaining = maxf(time_remaining, dur)
+		return
 	is_injured = true
 	time_remaining = dur
 	injury_started.emit(dur)

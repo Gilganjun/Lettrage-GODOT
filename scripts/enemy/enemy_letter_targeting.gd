@@ -54,19 +54,30 @@ _shield_blocks_collection: bool,
 		_pick_target(enemy_pos)
 
 
+func get_valid_target() -> Letter:
+	if current_target == null:
+		return null
+	if not is_instance_valid(current_target):
+		current_target = null
+		return null
+	return current_target
+
+
 func get_chase_direction(enemy_pos: Vector2) -> int:
-	if current_target == null or not is_instance_valid(current_target):
+	var target := get_valid_target()
+	if target == null:
 		return 0
-	var dx := current_target.global_position.x - enemy_pos.x
+	var dx := target.global_position.x - enemy_pos.x
 	if absf(dx) < 8.0:
 		return 0
 	return 1 if dx > 0.0 else -1
 
 
 func get_target_distance(enemy_pos: Vector2) -> float:
-	if current_target == null or not is_instance_valid(current_target):
+	var target := get_valid_target()
+	if target == null:
 		return INF
-	return enemy_pos.distance_to(current_target.global_position)
+	return enemy_pos.distance_to(target.global_position)
 
 
 func is_within_collect_proximity(enemy_pos: Vector2) -> bool:
@@ -82,9 +93,10 @@ func should_request_chase_jump(enemy_pos: Vector2, on_floor: bool) -> bool:
 
 
 func get_debug_info(enemy_pos: Vector2) -> Dictionary:
+	var target := get_valid_target()
 	return {
-		"target_letter": current_target.character if current_target else "",
-		"target_position": current_target.global_position if current_target else Vector2.ZERO,
+		"target_letter": target.character if target else "",
+		"target_position": target.global_position if target else Vector2.ZERO,
 		"target_distance": get_target_distance(enemy_pos),
 		"target_age": target_age,
 		"selection_reason": selection_reason,

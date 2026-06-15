@@ -101,14 +101,16 @@ func _setup_word_and_shield() -> void:
 			rect.size = hit_size
 			shape.shape = rect
 			letter_collector.add_child(shape)
-		elif collision_shape and collision_shape.shape is RectangleShape2D:
+		elif shape.shape is RectangleShape2D:
 			var body_rect := collision_shape.shape as RectangleShape2D
 			if shape.shape is RectangleShape2D:
 				(shape.shape as RectangleShape2D).size = body_rect.size
-		letter_collector.letter_collected.connect(_on_enemy_letter_collected)
+		if not letter_collector.letter_collected.is_connected(_on_enemy_letter_collected):
+			letter_collector.letter_collected.connect(_on_enemy_letter_collected)
 	if word_controller:
 		word_controller.collect_sound = load("res://assets/361334__spoonsandlessspoons__charge-up-shot.wav")
-		word_controller.word_state.word_completed.connect(_on_enemy_word_completed)
+		if not word_controller.word_state.word_completed.is_connected(_on_enemy_word_completed):
+			word_controller.word_state.word_completed.connect(_on_enemy_word_completed)
 
 
 func configure_from_gdevelop(row: Dictionary) -> void:
@@ -234,12 +236,12 @@ func _tick_word_systems(delta: float) -> void:
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and (combat.is_dead() or combat.blocks_ai()):
 		return
-	if shield_controller:
-		shield_controller.tick(delta, global_position)
 	if word_controller and letter_targeting:
 		var needed: String = word_controller.word_state.current_needed_letter()
 		var shield_blocks: bool = shield_component != null and shield_component.blocks_letter_collection()
 		letter_targeting.tick(delta, global_position, needed, shield_blocks)
+	if shield_controller:
+		shield_controller.tick(delta, global_position)
 
 
 func _process_platformer(delta: float) -> void:

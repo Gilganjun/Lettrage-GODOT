@@ -14,8 +14,12 @@ extends Control
 var _health: Node
 
 
-func setup(label_text: String, health: Node, color: Color = bar_color) -> void:
+func setup(label_text: String, health: Node, color: Color = bar_color, title_color: Color = Color(0.15, 0.2, 0.28, 1.0)) -> void:
 	title_label.text = label_text
+	title_label.add_theme_color_override("font_color", title_color)
+	title_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.45))
+	title_label.add_theme_constant_override("shadow_offset_x", 1)
+	title_label.add_theme_constant_override("shadow_offset_y", 1)
 	bar_color = color
 	fill.color = color
 	_health = health

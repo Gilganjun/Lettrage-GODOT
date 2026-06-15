@@ -67,6 +67,10 @@ func _ready() -> void:
 		hud.set_debug_visible(_word_debug)
 	if combat_hud.has_method("setup"):
 		combat_hud.setup(_player_combat, _enemy_combat, damage_bridge)
+	if combat_hud.has_method("bind_words"):
+		combat_hud.bind_words(word_controller, _enemy)
+	if hud.has_method("set_word_display_on_combat_hud"):
+		hud.set_word_display_on_combat_hud(true)
 	combat_hud.set_debug_visible(_word_debug)
 	_apply_hud_chrome_visibility()
 	call_deferred("_activate_player_camera")
