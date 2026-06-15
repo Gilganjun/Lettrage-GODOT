@@ -91,7 +91,7 @@ func _check_spoken_alphabet() -> void:
 				print("[OK] spoken %s voice %d -> %s" % [letter, voice + 1, path.get_file()])
 			else:
 				_fail("Missing spoken clip for %s voice %d: %s" % [letter, voice + 1, path])
-	var sample := spoken.get_spoken_path("M")
+	var sample: String = spoken.get_spoken_path("M")
 	if sample.is_empty() or not ResourceLoader.exists(sample):
 		_fail("Random spoken path failed for M: %s" % sample)
 	else:

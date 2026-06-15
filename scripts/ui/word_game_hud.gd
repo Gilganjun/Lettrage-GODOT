@@ -29,7 +29,7 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
 	controls_label.text = (
-		"Enter/C submit | Backspace delete | LCtrl shield | A/D move Space jump | F3/V collision debug"
+		"Shift+F2 HUD | Enter/C submit | Backspace delete | LCtrl shield | A/D move Space jump | F3/V collision debug"
 	)
 	refresh_combat_hud()
 
@@ -84,10 +84,18 @@ func set_player_shield(shield: PlayerShield) -> void:
 
 func set_debug_visible(enabled: bool) -> void:
 	_show_debug = enabled
+	word_label.visible = true
+	score_label.visible = enabled
+	enemy_word_label.visible = enabled
+	enemy_score_label.visible = enabled
+	shield_label.visible = enabled
+	status_label.visible = enabled
+	controls_label.visible = enabled
 	debug_label.visible = enabled
 	enemy_debug_label.visible = enabled and _enemy != null
 	_refresh()
-	refresh_enemy_debug()
+	if enabled:
+		refresh_enemy_debug()
 
 
 func _refresh(_arg = null) -> void:

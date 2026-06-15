@@ -7,7 +7,8 @@
 | Task | Scene |
 |------|-------|
 | **Edit platforms, ladders, collision** | `res://scenes/levels/main2_heallthbartest_level.tscn` |
-| **Play movement test (F5)** | `res://scenes/test/phase2a_movement_corrected.tscn` |
+| **Play movement test** | `res://scenes/test/phase2a_movement_corrected.tscn` |
+| **Play full gameplay (F5 main)** | `res://scenes/test/phase2b2b_shield_word_test.tscn` |
 
 The movement test **instances** the baked level. Changes saved in the level scene persist across F5 runs.
 
@@ -19,14 +20,17 @@ The initial bake used `collision_manifest.json` and `instance_transforms.json`. 
 
 - **Bottom platform (`Platform1_003`)** — collision shape extended (~**2031×32**) so the player traverses without falling through gaps
 
-**Do not run the baker unless explicitly approved.** Regeneration overwrites manual work:
+**Do not run the baker unless explicitly approved.** Regeneration **destroys all manual edits** including platform collision extensions, nested sprites, and offset adjustments:
 
 ```powershell
 # DESTRUCTIVE — overwrites main2_heallthbartest_level.tscn
+# Do NOT run during normal development or stabilization.
 python tools/phase2a_collision_manifest.py
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
   --headless --path Lettrage_Godot --script res://tools/bake_main2_level.gd
 ```
+
+Also avoid headless `gdevelop_level_baker.gd` unless explicitly approved — same destructive effect.
 
 Manifests and `gdevelop_level_baker.gd` remain reference tools only.
 
@@ -92,6 +96,8 @@ Set **Z Index** on the platform group. Player spawns at z_index 100 — use high
 
 Do not delete when editing the baked level.
 
-## Phase 2B
+## Phase 2B (complete through 2B2B)
 
-Not started. Do not add enemy, letters, or gameplay systems to this level workflow until Phase 2B is approved.
+Phase 2B1–2B2B gameplay runs in test scenes that instance this level. Do not add health or damage systems to the level workflow until Phase 2C is approved.
+
+Current F5: `scenes/test/phase2b2b_shield_word_test.tscn`

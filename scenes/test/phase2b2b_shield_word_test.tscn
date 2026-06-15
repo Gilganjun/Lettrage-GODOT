@@ -48,6 +48,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_top")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "Phase 2B2B | LCtrl shield | Shift+F2 debug | F10 enemy shield | F11 force validate | F12 clear enemy word"
+text = "Phase 2B2B | LCtrl shield | Shift+F2 HUD | F10 enemy shield | F11 force validate | F12 clear enemy word"
 
 [node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]

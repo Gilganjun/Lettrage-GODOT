@@ -3,6 +3,9 @@ extends Area2D
 
 ## Single falling collectible letter (A–Z) with authoritative resolution.
 
+const LetterShatterEffectScript := preload("res://scripts/letters/letter_shatter_effect.gd")
+const LetterTint := preload("res://scripts/letters/letter_tint.gd")
+
 enum Resolution {
 	NONE,
 	PLAYER_COLLECT,
@@ -15,6 +18,7 @@ enum Resolution {
 signal resolved(letter_node: Letter, outcome: Resolution, character: String)
 
 @export var catalog: AlphabetCatalog
+@export var shatter_on_resolve := true
 
 var character: String = "A"
 var spawn_id: int = -1
@@ -22,6 +26,7 @@ var is_vowel: bool = false
 var fall_speed: float = 180.0
 var resolution: Resolution = Resolution.NONE
 var resolution_source: String = ""
+var tint_color: Color = Color.WHITE
 
 
 func _ready() -> void:
@@ -42,11 +47,12 @@ func configure(
 	spawn_id = p_spawn_id
 	is_vowel = catalog.is_vowel(character) if catalog else false
 	fall_speed = p_fall_speed
+	tint_color = p_modulate
 	var sprite := $Sprite2D as Sprite2D
 	var path := catalog.get_texture_path(character) if catalog else ""
 	if ResourceLoader.exists(path):
 		sprite.texture = load(path)
-	sprite.modulate = p_modulate
+	LetterTint.apply(sprite, tint_color)
 	sprite.scale = Vector2.ONE * p_scale_factor
 	var shape := $CollisionShape2D.shape as RectangleShape2D
 	if shape and sprite.texture:
@@ -70,9 +76,37 @@ func try_resolve(outcome: Resolution, source: String = "") -> bool:
 	resolution = outcome
 	resolution_source = source
 	set_deferred("monitoring", false)
+	if shatter_on_resolve and _should_shatter(outcome):
+		_play_shatter_vfx()
 	resolved.emit(self, outcome, character)
 	queue_free()
 	return true
+
+
+func _should_shatter(outcome: Resolution) -> bool:
+	return (
+		outcome == Resolution.PLAYER_COLLECT
+		or outcome == Resolution.ENEMY_COLLECT
+		or outcome == Resolution.PLAYER_SHIELD
+		or outcome == Resolution.ENEMY_SHIELD
+	)
+
+
+func _play_shatter_vfx() -> void:
+	var sprite := $Sprite2D as Sprite2D
+	if sprite == null or sprite.texture == null:
+		return
+	sprite.visible = false
+	var parent := get_parent()
+	if parent == null:
+		parent = get_tree().current_scene
+	LetterShatterEffectScript.spawn(
+		parent,
+		global_position,
+		sprite.texture,
+		tint_color,
+		sprite.scale,
+	)
 
 
 func get_center_global() -> Vector2:

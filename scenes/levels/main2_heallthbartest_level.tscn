@@ -24,7 +24,7 @@ size = Vector2(261, 32)
 size = Vector2(261, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_du2nt"]
-size = Vector2(814, 32)
+size = Vector2(2031.0498, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1oqdy"]
 size = Vector2(544, 32)
@@ -162,6 +162,15 @@ z_index = 67
 position = Vector2(120, 469)
 
 [node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1_003" unique_id=1338385870]
+position = Vector2(4.4803796, -1.5258789e-05)
+scale = Vector2(1.4054667, 1)
+texture = ExtResource("6_amae3")
+centered = false
+offset = Vector2(-11.049933, -124.35903)
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1_003/Sprite2D" unique_id=933483497]
+position = Vector2(636.45746, 4.9999847)
+scale = Vector2(1.4054667, 1)
 texture = ExtResource("6_amae3")
 centered = false
 offset = Vector2(-11.049933, -124.35903)
@@ -177,6 +186,7 @@ metadata/shape_note = "floor mask-top y=508.6 (image y=164.0)"
 metadata/walk_surface_y = 508.6409683227539
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform1_003/StaticBody2D" unique_id=1641390811]
+position = Vector2(608.525, 0)
 shape = SubResource("RectangleShape2D_du2nt")
 
 [node name="Platform3_001" type="Node2D" parent="Platforms" unique_id=1151276926]

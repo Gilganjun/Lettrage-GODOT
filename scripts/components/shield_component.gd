@@ -20,9 +20,11 @@ const ShieldVisualScript := preload("res://scripts/components/shield_visual.gd")
 @export_range(0.0, 1.0, 0.01) var shield_down_volume := 0.25
 @export_range(0.0, 1.0, 0.01) var impact_volume := 0.30
 
-## GDevelop reference: player shield pop vol 50/100; enemy glass shatter vol 5–10/100.
+## GDevelop reference: player shield pop vol 50/100.
 const PLAYER_BREAK_VOLUME := 0.30
-const ENEMY_BREAK_VOLUME := 0.08
+const ENEMY_POP_MIN_VOLUME := 0.06
+const ENEMY_POP_FULL_DISTANCE := 180.0
+const ENEMY_POP_MAX_DISTANCE := 1500.0
 
 var is_active := false
 var cooldown_remaining := 0.0
@@ -189,7 +191,26 @@ func _play_impact_sound() -> void:
 	if shield_impact_sounds.is_empty():
 		return
 	var stream := shield_impact_sounds[randi() % shield_impact_sounds.size()]
-	_play_one_shot(stream, impact_volume)
+	_play_one_shot(stream, _impact_volume_for_break())
+
+
+func _impact_volume_for_break() -> float:
+	if owner_group != "enemy":
+		return impact_volume
+	var player := _find_player_body()
+	if player == null:
+		return impact_volume
+	var dist := global_position.distance_to(player.global_position)
+	var t := inverse_lerp(ENEMY_POP_FULL_DISTANCE, ENEMY_POP_MAX_DISTANCE, dist)
+	t = clampf(t, 0.0, 1.0)
+	return lerpf(impact_volume, ENEMY_POP_MIN_VOLUME, t)
+
+
+func _find_player_body() -> Node2D:
+	for node in get_tree().get_nodes_in_group("player"):
+		if node is CharacterBody2D and is_instance_valid(node):
+			return node as Node2D
+	return null
 
 
 func _play_one_shot(stream: AudioStream, volume_linear: float) -> void:

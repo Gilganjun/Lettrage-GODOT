@@ -14,82 +14,68 @@ Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 | Phase 0 — Foundation | **Complete** |
 | Phase 1 — Assets, SpriteFrames, animation test | **Complete** |
 | Phase 2A — Movement, collision, editable baked level | **Complete** |
-| Phase 2B1 — Player letters, spelling, dictionary, score | **Implemented** — manual F5 pending |
-| Phase 2B2+ — Enemy AI, health, etc. | **Not started** |
+| Phase 2B1 — Player letters, spelling, dictionary, score | **Implemented** |
+| Phase 2B2A — Enemy movement, obstacle escape | **Implemented** |
+| Phase 2B2B — Shields, enemy word AI, HUD | **Implemented** — manual F5 sign-off pending |
+| Phase 2C+ — Health, damage, death, production scene | **Not started** |
 
 ## Scenes
 
 | Purpose | Scene |
 |---------|-------|
-| **F5 — play word game test** | `scenes/test/phase2b1_word_game_test.tscn` |
+| **F5 — current gameplay test** | `scenes/test/phase2b2b_shield_word_test.tscn` |
+| Phase 2B1 word game (player only) | `scenes/test/phase2b1_word_game_test.tscn` |
+| Phase 2B2A enemy movement | `scenes/test/phase2b2a_enemy_movement_test.tscn` |
 | Phase 2A movement reference | `scenes/test/phase2a_movement_corrected.tscn` |
+| Letter shatter VFX preview | `scenes/test/letter_shatter_vfx_test.tscn` |
 | **Edit level in Godot 2D** | `scenes/levels/main2_heallthbartest_level.tscn` |
 | Phase 1 animation test | `scenes/test/animation_test.tscn` |
-| Static layout reference | `scenes/test/phase2a_layout_verification.tscn` |
 
-The movement test **instances** the baked level. Save edits in `main2_heallthbartest_level.tscn` — they persist across F5 runs.
+Test scenes **instance** the baked level. Save edits in `main2_heallthbartest_level.tscn` — they persist across F5 runs.
 
 ### Authoritative level baseline
 
 **`main2_heallthbartest_level.tscn` is the source of truth** for platform positions, collision shapes, ladders, and spawn.
 
-- Manual Godot editor changes **override** old manifest-generated geometry.
-- **Do not rebake** casually — `tools/bake_main2_level.gd` overwrites the `.tscn` and destroys manual edits.
-- Rebaking requires **explicit approval**.
+- Manual Godot editor changes **override** manifest-generated geometry.
+- **Do not rebake** casually — `tools/bake_main2_level.gd` and `gdevelop_level_baker.gd` **overwrite** the `.tscn` and destroy manual edits (including `Platform1_003` extended collision).
+- Rebaking requires **explicit approval**. See `reports/PHASE2A_LEVEL_EDITING.md`.
 
-## Phase 2B1 features
+## Current gameplay (Phase 2B2B)
 
-- Falling letters (A–Z) from GDevelop group #13 spawn rules
-- Player collection → spelling HUD
-- Dictionary validation (`EnglishWords4.txt`)
-- Score on valid word: `(len/2) + 2×len`
-- Submit: **Enter** or **C** (source key) | Delete: **Backspace**
+- Falling letters A–Z with per-letter tint colours (`letter_tint.gdshader`)
+- Player collection → spoken letter WAVs + pop SFX → spell → dictionary validation → score
+- Player **LCtrl** toggle shield — breaks letters (pop SFX only, no spoken letter)
+- Enemy patrol, obstacle escape, letter chase, word building, auto-score
+- Enemy shield AI — collection gate + destroy non-target letters
+- Letter destroy shatter VFX on collect/shield break
+- HUD: **Shift+F2** toggles full HUD; **player word always visible**
 
-```powershell
-& "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
-  --headless --path . --script res://tools/validate_phase2b1.gd
-```
+**Not implemented:** health, damage, death, respawn, projectiles, menus, mobile controls, production main scene.
 
-## Phase 2A features
-
-- GDevelop-origin player movement (walk, jump, ladder, double-tap sprint)
-- Camera always follows player at startup (no toggle)
-- Baked editable level with grouped platform/ladder nodes
-- Collision debug: **F3** or **V**
-- Player spawn: **(279, 231)**
-
-## Commands
+## Validation
 
 ```powershell
-# Phase 1 asset pipeline
-python tools/phase1_pipeline.py
-python tools/validate_phase1_python.py
-
-# Phase 2A validation (Godot 4.6.3 headless)
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
   --headless --path . --script res://tools/validate_phase2a_corrected.gd
 
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
-  --headless --path . --script res://tools/probe_phase2a_physics.gd
-```
+  --headless --path . --script res://tools/validate_phase2b1.gd
 
-### Regenerate level from manifests (destructive — approval required)
-
-```powershell
-python tools/phase2a_collision_manifest.py
 & "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
-  --headless --path . --script res://tools/bake_main2_level.gd
+  --headless --path . --script res://tools/validate_phase2b2a.gd
+
+& "C:\Godot\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe" `
+  --headless --path . --script res://tools/validate_phase2b2b.gd
 ```
 
 ## Reports
 
-- `reports/PHASE0_REPORT.md`
-- `reports/PHASE1_REPORT.md`
-- `reports/PHASE2A_VALIDATION.md` — Phase 2A sign-off
-- `reports/PHASE2A_LEVEL_EDITING.md` — how to edit the level in Godot
-- `reports/PHASE2A_SOURCE_MAP.md`
-- `reports/PHASE2B1_SOURCE_MAP.md`
-- `reports/PHASE2B1_VALIDATION.md`
+- `reports/PHASE2B2B_VALIDATION.md` — current phase sign-off checklist
+- `reports/PHASE2B2B_SOURCE_MAP.md` — GDevelop → Godot mapping
+- `reports/PHASE2A_LEVEL_EDITING.md` — how to edit level (do not rebake)
+- `reports/BACKGROUND_COVERAGE_ANALYSIS.md` — camera vs BG edge gaps
+- Earlier phases: `PHASE0_REPORT.md` through `PHASE2B2A_VALIDATION.md`
 
 ## Repository layout
 

@@ -26,10 +26,11 @@ const POP_SOUNDS := [
 @onready var word_controller: WordGameController = $WordGameController
 @onready var collision_debug: Node2D = $World/CollisionDebug
 @onready var hud: Control = $UI/WordGameHud
+@onready var top_bar: Control = $UI/TopBar
 
 var _collider_nodes: Array[Node] = []
 var _debug_enabled := false
-var _word_debug := true
+var _word_debug := false
 var _player_row: Dictionary = {}
 var _enemy_row: Dictionary = {}
 var _enemy: Enemy
@@ -59,6 +60,7 @@ func _ready() -> void:
 		hud.set_player_shield(_player_shield)
 	if hud.has_method("set_debug_visible"):
 		hud.set_debug_visible(_word_debug)
+	_apply_hud_chrome_visibility()
 	call_deferred("_activate_player_camera")
 
 
@@ -139,6 +141,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_word_debug = not _word_debug
 			if hud.has_method("set_debug_visible"):
 				hud.set_debug_visible(_word_debug)
+			_apply_hud_chrome_visibility()
 		elif event.keycode == KEY_F8:
 			letter_spawner.debug_spawn_letter("Z")
 		elif event.keycode == KEY_F9:
@@ -168,3 +171,8 @@ func _process(_delta: float) -> void:
 		hud.refresh_enemy_debug()
 	if hud.has_method("refresh_combat_hud"):
 		hud.refresh_combat_hud()
+
+
+func _apply_hud_chrome_visibility() -> void:
+	if top_bar:
+		top_bar.visible = _word_debug

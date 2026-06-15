@@ -108,8 +108,7 @@ func _spawn_letter(ch: String, force_vowel_style: bool) -> void:
 	var ref_size := 100.0
 	var target := _rng.randf_range(size_min, size_max)
 	var scale_factor := target / ref_size
-	var is_vowel := force_vowel_style or catalog.is_vowel(ch)
-	var spawn_modulate := catalog.random_modulate(is_vowel, _rng)
+	var spawn_modulate := catalog.get_letter_modulate(ch, _rng)
 	var fall := _rng.randf_range(fall_speed_min, fall_speed_max)
 	letter.catalog = catalog
 	letter.configure(ch, total_spawned, scale_factor, spawn_modulate, fall)

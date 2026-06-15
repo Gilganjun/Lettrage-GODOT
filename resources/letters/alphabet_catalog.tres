@@ -5,4 +5,10 @@
 [resource]
 script = ExtResource("1")
 texture_dir = "res://images/Alphabet/"
+color_mode = 1
 vowel_modulate = Color(1, 0.709804, 0.235294, 1)
+letter_hue_offset = 0.11
+letter_saturation_min = 0.72
+letter_saturation_max = 0.98
+letter_value_min = 0.78
+letter_value_max = 1.0

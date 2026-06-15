@@ -74,11 +74,11 @@ func _setup_word_and_shield() -> void:
 		shield_component.owner_group = "enemy"
 		shield_component.impact_source = "enemy_shield"
 		var impact_sounds: Array[AudioStream] = [
-			load("res://assets/444136__lurpsis__glass-shatter-3.wav") as AudioStream,
+			load("res://assets/463388__vilkas-sound__vs-pop-4.mp3") as AudioStream,
+			load("res://assets/463389__vilkas-sound__vs-pop-3.mp3") as AudioStream,
 		]
 		shield_component.shield_impact_sounds = impact_sounds
-		# g/14 enemy shield delete — glass shatter (not player pop); source vol ~5–10/100.
-		shield_component.impact_volume = ShieldComponent.ENEMY_BREAK_VOLUME
+		shield_component.impact_volume = ShieldComponent.PLAYER_BREAK_VOLUME
 		if collision_shape:
 			shield_component.position = collision_shape.position
 		else:

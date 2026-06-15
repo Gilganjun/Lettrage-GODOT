@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3 uid="uid://letter_shatter_vfx_test"]
+
+[ext_resource type="Script" path="res://scripts/test/letter_shatter_vfx_test.gd" id="1_root"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.07, 0.1, 0.82)
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+
+[node name="LetterShatterVfxTest" type="Node2D"]
+script = ExtResource("1_root")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="PanelContainer" parent="CanvasLayer"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 520.0
+offset_bottom = 120.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer/Panel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Letter shatter VFX preview"
+
+[node name="StyleLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Active: Grid shatter"
+
+[node name="HintLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "1 Grid shatter | 2 Pixel burst | 3 Soft dissolve | Space demo | Esc quit"
