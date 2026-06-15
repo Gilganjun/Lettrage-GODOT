@@ -1,12 +1,14 @@
 class_name ShieldComponent
 extends Node2D
 
-## Reusable shield — impact area, visuals, audio. Used by Player and Enemy.
+## Reusable shield — body-hugging hitbox, particle aura, audio. Used by Player and Enemy.
 
 signal shield_activated
 signal shield_deactivated
 signal letter_broken(letter: Letter, character: String)
 signal shield_impact(letter: Letter, character: String)
+
+const ShieldVisualScript := preload("res://scripts/components/shield_visual.gd")
 
 @export var owner_group: String = "player"
 @export var impact_source: String = "player_shield"
@@ -16,7 +18,11 @@ signal shield_impact(letter: Letter, character: String)
 @export var shield_impact_sounds: Array[AudioStream] = []
 @export_range(0.0, 1.0, 0.01) var shield_up_volume := 0.25
 @export_range(0.0, 1.0, 0.01) var shield_down_volume := 0.25
-@export_range(0.0, 1.0, 0.01) var impact_volume := 0.50
+@export_range(0.0, 1.0, 0.01) var impact_volume := 0.30
+
+## GDevelop reference: player shield pop vol 50/100; enemy glass shatter vol 5–10/100.
+const PLAYER_BREAK_VOLUME := 0.30
+const ENEMY_BREAK_VOLUME := 0.08
 
 var is_active := false
 var cooldown_remaining := 0.0
@@ -24,8 +30,10 @@ var active_duration_remaining := -1.0
 var last_activation_reason := "none"
 
 var _area: Area2D
-var _visual: Node2D
+var _collision_shape: CollisionShape2D
+var _shield_visual: ShieldVisual
 var _audio: AudioStreamPlayer
+var _hit_size := Vector2(40, 80)
 var _processed_this_frame: Dictionary = {}
 
 
@@ -47,6 +55,14 @@ func _physics_process(delta: float) -> void:
 			deactivate("duration_expired")
 
 
+func configure_body_shape(size: Vector2) -> void:
+	_hit_size = size
+	if _collision_shape and _collision_shape.shape is RectangleShape2D:
+		(_collision_shape.shape as RectangleShape2D).size = size
+	if _shield_visual:
+		_shield_visual.configure(size, owner_group == "enemy")
+
+
 func activate(reason: String = "manual", duration: float = -1.0) -> bool:
 	if is_active:
 		last_activation_reason = reason
@@ -59,6 +75,7 @@ func activate(reason: String = "manual", duration: float = -1.0) -> bool:
 	_set_active_visual(true)
 	_play_one_shot(shield_up_sound, shield_up_volume)
 	shield_activated.emit()
+	call_deferred("_break_overlapping_letters")
 	return true
 
 
@@ -87,6 +104,7 @@ func get_debug_info() -> Dictionary:
 		"cooldown": cooldown_remaining,
 		"duration_remaining": active_duration_remaining,
 		"last_reason": last_activation_reason,
+		"hit_size": _hit_size,
 	}
 
 
@@ -95,24 +113,19 @@ func _build_nodes() -> void:
 	_area.name = "ShieldArea"
 	_area.collision_layer = 0
 	_area.collision_mask = 8
-	_area.monitoring = true
+	_area.monitoring = false
 	add_child(_area)
-	var shape := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
-	circle.radius = 42.0
-	shape.shape = circle
-	_area.add_child(shape)
+	_collision_shape = CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = _hit_size
+	_collision_shape.shape = rect
+	_area.add_child(_collision_shape)
 	_area.area_entered.connect(_on_area_entered)
-	_visual = Node2D.new()
-	_visual.name = "Visual"
-	add_child(_visual)
-	var ring := ColorRect.new()
-	ring.name = "Ring"
-	ring.size = Vector2(88, 88)
-	ring.position = Vector2(-44, -44)
-	ring.color = Color(0.35, 0.75, 1.0, 0.22)
-	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_visual.add_child(ring)
+	_shield_visual = ShieldVisualScript.new()
+	_shield_visual.name = "ShieldVisual"
+	_shield_visual.visible = false
+	add_child(_shield_visual)
+	_shield_visual.configure(_hit_size, owner_group == "enemy")
 	_audio = AudioStreamPlayer.new()
 	_audio.name = "ShieldAudio"
 	add_child(_audio)
@@ -125,8 +138,9 @@ func _build_nodes() -> void:
 
 
 func _set_active_visual(on: bool) -> void:
-	if _visual:
-		_visual.visible = on
+	if _shield_visual:
+		_shield_visual.visible = on
+		_shield_visual.set_active(on)
 	if _area:
 		_area.monitoring = on
 
@@ -134,9 +148,21 @@ func _set_active_visual(on: bool) -> void:
 func _on_area_entered(area: Area2D) -> void:
 	if not is_active or area == null:
 		return
-	if not area is Letter:
+	if area is Letter:
+		_try_break_letter(area as Letter)
+
+
+func _break_overlapping_letters() -> void:
+	if not is_active or _area == null:
 		return
-	var letter := area as Letter
+	for area in _area.get_overlapping_areas():
+		if area is Letter:
+			_try_break_letter(area as Letter)
+
+
+func _try_break_letter(letter: Letter) -> void:
+	if letter == null or letter.is_resolved():
+		return
 	var id := letter.get_instance_id()
 	if _processed_this_frame.has(id):
 		return
@@ -146,7 +172,14 @@ func _on_area_entered(area: Area2D) -> void:
 		if owner_group == "player"
 		else Letter.Resolution.ENEMY_SHIELD
 	)
+	var burst_pos := (
+		_shield_visual.to_local(letter.global_position)
+		if _shield_visual
+		else Vector2.ZERO
+	)
 	if letter.try_resolve(outcome, impact_source):
+		if _shield_visual:
+			_shield_visual.play_impact_burst(burst_pos)
 		letter_broken.emit(letter, letter.character)
 		shield_impact.emit(letter, letter.character)
 		_play_impact_sound()

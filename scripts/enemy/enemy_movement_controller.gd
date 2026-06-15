@@ -45,11 +45,11 @@ func update_target(current_x: float) -> void:
 		_pick_new_target(current_x)
 
 
-func set_letter_chase_direction(direction: int) -> void:
-	letter_chase_active = direction != 0
-	_chase_direction = direction
-	if direction != 0:
-		set_direction(direction)
+func set_letter_chase_direction(chase_direction: int) -> void:
+	letter_chase_active = chase_direction != 0
+	_chase_direction = chase_direction
+	if chase_direction != 0:
+		set_direction(chase_direction)
 
 
 func clear_letter_chase() -> void:

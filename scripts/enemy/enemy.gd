@@ -18,7 +18,7 @@ signal movement_state_changed(state: EnemyAnimation.MovementState)
 @onready var letter_targeting: Node = $EnemyLetterTargeting
 @onready var letter_collector: Node = $EnemyLetterCollector
 @onready var shield_controller: Node = $EnemyShieldController
-@onready var shield_component: Node2D = $ShieldComponent
+@onready var shield_component: ShieldComponent = $ShieldComponent
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var floor_ray_left: RayCast2D = $FloorRayLeft
 @onready var floor_ray_right: RayCast2D = $FloorRayRight
@@ -67,27 +67,44 @@ func _ready() -> void:
 
 
 func _setup_word_and_shield() -> void:
+	var hit_size := Vector2(36, 48)
+	if collision_shape and collision_shape.shape is RectangleShape2D:
+		hit_size = (collision_shape.shape as RectangleShape2D).size
 	if shield_component:
-		shield_component.set("owner_group", "enemy")
-		shield_component.set("impact_source", "enemy_shield")
-		shield_component.set("shield_impact_sounds", [
-			load("res://assets/444136__lurpsis__glass-shatter-3.wav"),
-		])
-		shield_component.set("impact_volume", 0.35)
-		shield_component.position = Vector2(_half_w, _display_size.y * 0.45)
+		shield_component.owner_group = "enemy"
+		shield_component.impact_source = "enemy_shield"
+		var impact_sounds: Array[AudioStream] = [
+			load("res://assets/444136__lurpsis__glass-shatter-3.wav") as AudioStream,
+		]
+		shield_component.shield_impact_sounds = impact_sounds
+		# g/14 enemy shield delete — glass shatter (not player pop); source vol ~5–10/100.
+		shield_component.impact_volume = ShieldComponent.ENEMY_BREAK_VOLUME
+		if collision_shape:
+			shield_component.position = collision_shape.position
+		else:
+			shield_component.position = Vector2(_half_w, _display_size.y * 0.45)
+		shield_component.configure_body_shape(hit_size)
+		shield_component.z_index = 20
 	if shield_controller:
 		shield_controller.setup(self, shield_component, letter_targeting)
 	if letter_collector:
 		letter_collector.word_controller = word_controller
 		letter_collector.shield_component = shield_component
-		letter_collector.position = Vector2(_half_w, _display_size.y * 0.45)
+		if collision_shape:
+			letter_collector.position = collision_shape.position
+		else:
+			letter_collector.position = Vector2(_half_w, _display_size.y * 0.45)
 		var shape := letter_collector.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if shape == null:
 			shape = CollisionShape2D.new()
 			var rect := RectangleShape2D.new()
-			rect.size = Vector2(36, 48)
+			rect.size = hit_size
 			shape.shape = rect
 			letter_collector.add_child(shape)
+		elif collision_shape and collision_shape.shape is RectangleShape2D:
+			var body_rect := collision_shape.shape as RectangleShape2D
+			if shape.shape is RectangleShape2D:
+				(shape.shape as RectangleShape2D).size = body_rect.size
 		letter_collector.letter_collected.connect(_on_enemy_letter_collected)
 	if word_controller:
 		word_controller.collect_sound = load("res://assets/361334__spoonsandlessspoons__charge-up-shot.wav")
@@ -290,7 +307,7 @@ func _on_enemy_word_completed(_word: String) -> void:
 		letter_targeting.drop_target("word_complete")
 
 
-func _process_ladder(delta: float) -> void:
+func _process_ladder(_delta: float) -> void:
 	var cfg := _cfg()
 	velocity = Vector2.ZERO
 	velocity.y = -cfg.ladder_climbing_speed

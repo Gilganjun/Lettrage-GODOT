@@ -14,7 +14,20 @@ func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 8
 	monitoring = true
+	monitorable = false
 	area_entered.connect(_on_area_entered)
+
+
+func sync_to_body_shape(center: Vector2 = Vector2.ZERO, size: Vector2 = Vector2(34, 52)) -> void:
+	position = center
+	for child in get_children():
+		if child is CollisionShape2D:
+			child.queue_free()
+	var shape_node := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape_node.shape = rect
+	add_child(shape_node)
 
 
 func _physics_process(_delta: float) -> void:

@@ -31,7 +31,7 @@ func tick(
 	delta: float,
 	enemy_pos: Vector2,
 	needed_letter: String,
-	shield_blocks_collection: bool,
+_shield_blocks_collection: bool,
 ) -> void:
 	_needed_letter = needed_letter
 	if needed_letter.is_empty():

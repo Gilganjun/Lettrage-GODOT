@@ -23,7 +23,7 @@ const COLLISION_HELPER_NAMES := [
 static func build() -> Node2D:
 	var transforms: Dictionary = GDevelopLayoutBuilder.load_json(TRANSFORMS_PATH)
 	var collision_data: Dictionary = GDevelopLayoutBuilder.load_json(COLLISION_PATH)
-	var collider_map: Dictionary = _build_collider_map(collision_data.get("colliders", []))
+	var collider_map: Dictionary = _build_collider_map(_array_value(collision_data, "colliders"))
 	var counters: Dictionary = {}
 
 	var root := Node2D.new()
@@ -58,13 +58,13 @@ static func build() -> Node2D:
 	spawn_points.name = "SpawnPoints"
 	root.add_child(spawn_points)
 
-	var spawn: Dictionary = collision_data.get("player_spawn", {})
+	var spawn: Dictionary = _dict_value(collision_data, "player_spawn")
 	var marker := Marker2D.new()
 	marker.name = "PlayerSpawn"
 	marker.position = Vector2(float(spawn.get("x", 279)), float(spawn.get("y", 231)))
 	spawn_points.add_child(marker)
 
-	var visuals: Array = transforms.get("visual_instances", [])
+	var visuals: Array = _array_value(transforms, "visual_instances")
 	visuals.sort_custom(func(a, b): return int(a.get("source_z_order", 0)) < int(b.get("source_z_order", 0)))
 	for row in visuals:
 		var name: String = str(row.get("name", ""))
@@ -77,7 +77,7 @@ static func build() -> Node2D:
 		elif name == "Ladder":
 			_add_ladder_group(ladders, row, collider_map, counters)
 
-	for row in transforms.get("collision_helper_instances", []):
+	for row in _array_value(transforms, "collision_helper_instances"):
 		var name: String = str(row.get("name", ""))
 		if name in BOUNDARY_NAMES:
 			_add_boundary_group(boundaries, row, collider_map, counters)
@@ -124,7 +124,7 @@ static func _add_platform_group(
 	parent.add_child(group)
 	_add_sprite(row, group)
 	var key := _instance_key(str(row.get("name", "")), row)
-	var entry: Dictionary = collider_map.get(key, {})
+	var entry: Dictionary = _dict_value(collider_map, key)
 	if not entry.is_empty():
 		_add_static_body(group, entry, group.position)
 	return group
@@ -140,7 +140,7 @@ static func _add_ladder_group(
 	parent.add_child(group)
 	_add_sprite(row, group)
 	var key := _instance_key(str(row.get("name", "")), row)
-	var entry: Dictionary = collider_map.get(key, {})
+	var entry: Dictionary = _dict_value(collider_map, key)
 	if not entry.is_empty():
 		_add_ladder_area(group, entry, group.position)
 	return group
@@ -156,7 +156,7 @@ static func _add_boundary_group(
 	parent.add_child(group)
 	_add_sprite(row, group)
 	var key := _instance_key(str(row.get("name", "")), row)
-	var entry: Dictionary = collider_map.get(key, {})
+	var entry: Dictionary = _dict_value(collider_map, key)
 	if not entry.is_empty():
 		_add_static_body(group, entry, group.position)
 	return group
@@ -171,7 +171,7 @@ static func _make_group_node(node_name: String, row: Dictionary) -> Node2D:
 
 
 static func _add_sprite(row: Dictionary, parent: Node2D) -> Sprite2D:
-	var tex_path: String = row.get("texture_godot", "")
+	var tex_path: String = str(row.get("texture_godot", ""))
 	if tex_path.is_empty() or not ResourceLoader.exists(tex_path):
 		return null
 	var sprite := Sprite2D.new()
@@ -230,3 +230,13 @@ static func _set_collider_meta(node: Node, entry: Dictionary, shape_info: Dictio
 	node.set_meta("visible_pair", entry.get("visible_pair", ""))
 	node.set_meta("shape_note", shape_info.get("shape_note", ""))
 	node.set_meta("walk_surface_y", entry.get("walk_surface_y", 0))
+
+
+static func _dict_value(source: Dictionary, key: String, default: Dictionary = {}) -> Dictionary:
+	var value: Variant = source.get(key, default)
+	return value if value is Dictionary else default
+
+
+static func _array_value(source: Dictionary, key: String, default: Array = []) -> Array:
+	var value: Variant = source.get(key, default)
+	return value if value is Array else default
