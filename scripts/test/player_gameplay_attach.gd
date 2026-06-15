@@ -26,3 +26,12 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 	player.add_child(collector)
 	collector.sync_to_body_shape(pickup_center, pickup_size)
 	return {"shield": shield, "collector": collector}
+
+
+static func attach_combat(body: CharacterBody2D, owner_kind: String, spawn_position: Vector2) -> Node:
+	var scene := load("res://scenes/components/character_combat.tscn") as PackedScene
+	var combat: Node = scene.instantiate()
+	combat.owner_kind = owner_kind
+	body.add_child(combat)
+	combat.configure_spawn(spawn_position)
+	return combat

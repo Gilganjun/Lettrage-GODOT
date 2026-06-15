@@ -4,6 +4,7 @@ extends Node
 ## Orchestrates collection, validation, scoring and audio for Phase 2B1.
 
 signal debug_state_changed
+signal valid_word_submitted(word: String, word_length: int, score_delta: int)
 
 @export var collect_sounds: Array[AudioStream] = []
 @export var valid_word_sound: AudioStream
@@ -65,6 +66,7 @@ func submit_word() -> void:
 		var delta := word_state.add_score_for_valid_word(word.length())
 		word_state.set_validation("valid", "+%d  VALID: %s" % [delta, word])
 		_play_one_shot(valid_word_sound)
+		valid_word_submitted.emit(word, word.length(), delta)
 		word_state.clear_word()
 	else:
 		word_state.set_validation("invalid", "INVALID: %s" % word)

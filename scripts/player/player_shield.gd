@@ -53,6 +53,13 @@ func attach_to_body(body: Node2D, local_position: Vector2 = Vector2.ZERO) -> voi
 func toggle() -> void:
 	if shield == null:
 		return
+	var body := get_parent() as Node
+	if body:
+		var combat := body.get_node_or_null("CharacterCombat")
+		if combat and combat.has_method("is_dead") and (
+			combat.is_dead() or combat.blocks_movement()
+		):
+			return
 	if shield.is_active:
 		shield.deactivate("player_toggle")
 	else:

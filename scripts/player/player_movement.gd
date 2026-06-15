@@ -62,6 +62,13 @@ func set_camera_follow_enabled(enabled: bool) -> void:
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel"):
 		get_tree().quit()
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.blocks_movement():
+		_process_combat_lock(delta, combat)
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return
 	_update_ladder_overlap()
 	if is_on_ladder:
 		_process_ladder(delta)
@@ -164,6 +171,15 @@ func _process_platformer(delta: float) -> void:
 			velocity.y = -cfg.jump_speed
 	else:
 		_jump_held = false
+
+
+func _process_combat_lock(delta: float, combat: Node) -> void:
+	var cfg := _cfg()
+	velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
+	if not is_on_floor():
+		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+	if combat.is_dead():
+		velocity = Vector2.ZERO
 
 
 func _process_ladder(_delta: float) -> void:

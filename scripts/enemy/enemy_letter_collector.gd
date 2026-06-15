@@ -26,6 +26,11 @@ func _physics_process(_delta: float) -> void:
 func try_collect_letter(letter: Letter) -> bool:
 	if letter == null or letter.is_resolved():
 		return false
+	var enemy := get_parent() as Enemy
+	if enemy:
+		var combat := enemy.get_node_or_null("CharacterCombat")
+		if combat and combat.blocks_collection():
+			return false
 	if shield_component and shield_component.blocks_letter_collection():
 		return false
 	if word_controller == null:

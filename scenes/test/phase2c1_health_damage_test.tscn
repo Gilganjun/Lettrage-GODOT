@@ -1,0 +1,60 @@
+[gd_scene load_steps=11 format=3 uid="uid://phase2c1_health_damage_test"]
+
+[ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
+[ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
+[ext_resource type="Script" path="res://scripts/test/phase2a_collision_debug_draw.gd" id="3_coldebug"]
+[ext_resource type="Script" path="res://scripts/letters/letter_spawner.gd" id="4_spawner"]
+[ext_resource type="Script" path="res://scripts/word_game/word_game_controller.gd" id="5_controller"]
+[ext_resource type="PackedScene" path="res://scenes/ui/word_game_hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="7_combat"]
+[ext_resource type="Script" path="res://scripts/combat/word_damage_bridge.gd" id="8_bridge"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
+bg_color = Color(0, 0, 0, 0.55)
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+
+[node name="Phase2C1HealthDamageTest" type="Node2D"]
+script = ExtResource("1_root")
+
+[node name="WordGameController" type="Node" parent="."]
+script = ExtResource("5_controller")
+
+[node name="WordDamageBridge" type="Node" parent="."]
+script = ExtResource("8_bridge")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Level" parent="World" instance=ExtResource("2_level")]
+
+[node name="LetterSpawner" type="Node2D" parent="World"]
+script = ExtResource("4_spawner")
+
+[node name="PlayerRoot" type="Node2D" parent="World"]
+
+[node name="EnemyRoot" type="Node2D" parent="World"]
+
+[node name="CollisionDebug" type="Node2D" parent="World"]
+z_index = 4096
+script = ExtResource("3_coldebug")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="CombatHud" parent="UI" instance=ExtResource("7_combat")]
+
+[node name="TopBar" type="PanelContainer" parent="UI"]
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 900.0
+offset_bottom = 44.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_top")
+
+[node name="Title" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Phase 2C1 | Health + word damage | Shift+F2 HUD | Alt+1-6 combat debug | Alt+0 reset HP"
+
+[node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]

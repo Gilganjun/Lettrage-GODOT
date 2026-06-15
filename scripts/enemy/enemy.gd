@@ -204,6 +204,18 @@ func debug_force_validation() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.is_dead():
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	if combat and combat.blocks_ai():
+		_process_combat_lock(delta)
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return
 	if movement_controller:
 		movement_controller.tick(delta)
 	_update_floor_probe()
@@ -219,6 +231,9 @@ func _physics_process(delta: float) -> void:
 
 
 func _tick_word_systems(delta: float) -> void:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and (combat.is_dead() or combat.blocks_ai()):
+		return
 	if shield_controller:
 		shield_controller.tick(delta, global_position)
 	if word_controller and letter_targeting:
@@ -313,6 +328,15 @@ func _process_ladder(_delta: float) -> void:
 	velocity.y = -cfg.ladder_climbing_speed
 	if not _overlaps_any_ladder():
 		is_on_ladder = false
+
+
+func _process_combat_lock(delta: float) -> void:
+	var cfg := _cfg()
+	if not is_on_floor():
+		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+	else:
+		velocity.y = 0.0
+	velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
 
 
 func _try_mount_ladder() -> void:

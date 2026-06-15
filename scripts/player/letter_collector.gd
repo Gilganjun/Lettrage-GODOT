@@ -37,6 +37,11 @@ func _physics_process(_delta: float) -> void:
 func try_collect_letter(letter: Letter) -> bool:
 	if letter == null or letter.is_resolved():
 		return false
+	var player := get_parent() as CharacterBody2D
+	if player:
+		var combat := player.get_node_or_null("CharacterCombat")
+		if combat and combat.blocks_collection():
+			return false
 	if player_shield and player_shield.blocks_letter_collection():
 		return false
 	if controller == null:
