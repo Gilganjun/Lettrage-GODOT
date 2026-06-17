@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://phase2c1_health_damage_test"]
+[gd_scene load_steps=16 format=3 uid="uid://phase2c1_health_damage_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="10_backdrop"]
 [ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
 [ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
+[ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
 bg_color = Color(0, 0, 0, 0.55)
@@ -42,6 +43,22 @@ script = ExtResource("8_bridge")
 
 [node name="LetterSpawner" type="Node2D" parent="World"]
 script = ExtResource("4_spawner")
+
+[node name="CannonLeft" type="Node2D" parent="World"]
+position = Vector2(80, 320)
+script = ExtResource("13_cannon")
+director_path = NodePath("../LetterSpawner")
+fire_direction = 0
+fire_interval = 3.0
+burst_count = 3
+
+[node name="CannonRight" type="Node2D" parent="World"]
+position = Vector2(2020, 280)
+script = ExtResource("13_cannon")
+director_path = NodePath("../LetterSpawner")
+fire_direction = 1
+fire_interval = 3.5
+burst_count = 4
 
 [node name="PlayerRoot" type="Node2D" parent="World"]
 

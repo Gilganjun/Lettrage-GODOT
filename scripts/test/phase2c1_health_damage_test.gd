@@ -13,6 +13,7 @@ const WordGameFeatures := preload("res://scripts/word_game/word_game_features.gd
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 
+const LANE_PROFILE := preload("res://resources/letters/lane_rain_spawn_profile.tres")
 const POP_SOUNDS := [
 	preload("res://assets/463388__vilkas-sound__vs-pop-4.mp3"),
 	preload("res://assets/463389__vilkas-sound__vs-pop-3.mp3"),
@@ -52,6 +53,7 @@ func _ready() -> void:
 	letter_spawner.catalog = CATALOG
 	letter_spawner.letter_scene = LETTER_SCENE
 	letter_spawner.word_controller = word_controller
+	letter_spawner.profile = LANE_PROFILE
 	_load_transform_rows()
 	_spawn_player()
 	_spawn_enemy()

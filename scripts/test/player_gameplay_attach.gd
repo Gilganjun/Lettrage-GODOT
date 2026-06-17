@@ -1,7 +1,7 @@
 class_name PlayerGameplayAttach
 extends RefCounted
 
-## Attaches letter collector + toggle shield to the player without modifying movement.
+## Attaches letter collector, shield, and letter shooter to the player.
 
 
 static func attach(player: CharacterBody2D, word_controller: WordGameController) -> Dictionary:
@@ -25,7 +25,14 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 	collector.player_shield = shield
 	player.add_child(collector)
 	collector.sync_to_body_shape(pickup_center, pickup_size)
-	return {"shield": shield, "collector": collector}
+
+	var shooter := LetterShooter.new()
+	shooter.word_controller = word_controller
+	shooter.player_shield = shield
+	player.add_child(shooter)
+	shooter.attach_to_body(player)
+
+	return {"shield": shield, "collector": collector, "shooter": shooter}
 
 
 static func attach_combat(body: CharacterBody2D, owner_kind: String, spawn_position: Vector2) -> Node:

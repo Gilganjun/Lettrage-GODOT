@@ -30,7 +30,7 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
 	controls_label.text = (
-		"Shift+F2 HUD | Enter/C submit | Backspace delete | LCtrl shield | A/D move Space jump | F3/V collision debug"
+		"Shift+F2 HUD | Enter/C submit | Backspace undo | Hold LCtrl shield | F hold/release fire | A/D move Space jump | F3/V collision debug"
 	)
 	refresh_combat_hud()
 
@@ -116,7 +116,7 @@ func _refresh(_arg = null) -> void:
 		var ws := _controller.word_state
 		debug_label.text = (
 			"Dict: %s (%d words, %.1fms) | Active: %d | Spawn in: %.2fs | Last: %s\n"
-			+ "Spawned %d | Collected %d | Boundary del %d | Last val: %s"
+			+ "Spawned %d | Collected %d | Boundary del %d | Expired %d | Last val: %s"
 			% [
 				str(_controller.dictionary.loaded),
 				_controller.dictionary.word_count,
@@ -127,6 +127,7 @@ func _refresh(_arg = null) -> void:
 				_spawner.total_spawned,
 				_spawner.total_collected,
 				_spawner.total_deleted_boundary,
+				_spawner.total_expired,
 				ws.last_validation,
 			]
 		)
@@ -192,7 +193,7 @@ func _on_validation(status: String, message: String) -> void:
 			status_label.modulate = Color(0.4, 1.0, 0.5)
 		"invalid":
 			status_label.modulate = Color(1.0, 0.45, 0.4)
-		"collected", "deleted":
+		"collected", "deleted", "undone":
 			status_label.modulate = Color(0.85, 0.9, 1.0)
 		_:
 			status_label.modulate = Color(1, 1, 1)

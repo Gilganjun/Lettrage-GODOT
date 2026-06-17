@@ -43,13 +43,19 @@ func on_letter_collected(character: String) -> void:
 		return
 	_last_collect_ms = now
 	word_state.append_letter(character)
-	word_state.set_validation("collected", "Collected %s" % character)
+	word_state.set_validation("collected", "Collected %s — Backspace to undo" % character)
 	_play_collect_sound()
 	_play_spoken_letter(character)
 
 
 func delete_last_letter() -> void:
-	if word_state.delete_last_letter():
+	if word_state.current_word.is_empty():
+		word_state.set_validation("empty", "Nothing to delete")
+		return
+	var used_free_undo := word_state.delete_last_letter()
+	if used_free_undo:
+		word_state.set_validation("undone", "Undone last letter")
+	else:
 		word_state.set_validation("deleted", "Deleted last letter")
 		_play_one_shot(delete_letter_sound)
 

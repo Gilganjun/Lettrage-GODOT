@@ -1,13 +1,19 @@
 class_name PlayerShield
 extends Node
 
-## Player shield input — LControl toggle wrapping ShieldComponent.
+## Player shield input — hold (default) or toggle wrapping ShieldComponent.
 
 signal shield_toggled(active: bool)
+
+enum InputMode {
+	TOGGLE,
+	HOLD,
+}
 
 const ShieldComponentScript := preload("res://scripts/components/shield_component.gd")
 
 @export var shield_scene: PackedScene
+@export var input_mode: InputMode = InputMode.HOLD
 
 var shield: ShieldComponent
 var is_active := false
@@ -27,16 +33,18 @@ func _ready() -> void:
 		load("res://assets/463388__vilkas-sound__vs-pop-4.mp3") as AudioStream,
 		load("res://assets/463389__vilkas-sound__vs-pop-3.mp3") as AudioStream,
 	]
-	# g/13/79 letter smash — pop MP3s (not ShieldUp/Down); target 30% linear.
 	shield.impact_volume = ShieldComponent.PLAYER_BREAK_VOLUME
 	shield.shield_activated.connect(func(): _sync_active(true))
 	shield.shield_deactivated.connect(func(): _sync_active(false))
-	# Do not add_child here — Node2D under plain Node breaks canvas drawing until reparented.
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("player_shield"):
-		toggle()
+	match input_mode:
+		InputMode.TOGGLE:
+			if Input.is_action_just_pressed("player_shield"):
+				toggle()
+		InputMode.HOLD:
+			_update_hold_shield()
 
 
 func attach_to_body(body: Node2D, local_position: Vector2 = Vector2.ZERO) -> void:
@@ -53,13 +61,8 @@ func attach_to_body(body: Node2D, local_position: Vector2 = Vector2.ZERO) -> voi
 func toggle() -> void:
 	if shield == null:
 		return
-	var body := get_parent() as Node
-	if body:
-		var combat := body.get_node_or_null("CharacterCombat")
-		if combat and combat.has_method("is_dead") and (
-			combat.is_dead() or combat.blocks_movement()
-		):
-			return
+	if _is_input_blocked():
+		return
 	if shield.is_active:
 		shield.deactivate("player_toggle")
 	else:
@@ -81,8 +84,33 @@ func blocks_letter_collection() -> bool:
 
 func get_debug_info() -> Dictionary:
 	if shield == null:
-		return {"active": false, "cooldown": 0.0}
-	return shield.get_debug_info()
+		return {"active": false, "cooldown": 0.0, "input_mode": input_mode}
+	var info := shield.get_debug_info()
+	info["input_mode"] = input_mode
+	return info
+
+
+func _update_hold_shield() -> void:
+	if shield == null:
+		return
+	var want_active := Input.is_action_pressed("player_shield")
+	if _is_input_blocked():
+		want_active = false
+	if want_active and not shield.is_active:
+		shield.activate("player_hold")
+	elif not want_active and shield.is_active:
+		shield.deactivate("player_hold")
+
+
+func _is_input_blocked() -> bool:
+	var body := get_parent() as Node
+	if body:
+		var combat := body.get_node_or_null("CharacterCombat")
+		if combat and combat.has_method("is_dead") and (
+			combat.is_dead() or combat.blocks_movement()
+		):
+			return true
+	return false
 
 
 func _sync_active(active: bool) -> void:

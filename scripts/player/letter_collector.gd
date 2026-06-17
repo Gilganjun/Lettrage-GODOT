@@ -46,10 +46,13 @@ func try_collect_letter(letter: Letter) -> bool:
 		return false
 	if controller == null:
 		return false
-	if letter.try_resolve(Letter.Resolution.PLAYER_COLLECT, "player_collector"):
-		controller.on_letter_collected(letter.character)
-		return true
-	return false
+	return LetterCollection.try_player_collect(
+		letter,
+		controller,
+		player_shield,
+		"player_collector",
+		Letter.Resolution.PLAYER_COLLECT,
+	)
 
 
 func _on_area_entered(area: Area2D) -> void:

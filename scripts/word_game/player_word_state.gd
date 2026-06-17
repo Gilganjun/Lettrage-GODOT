@@ -14,6 +14,7 @@ var current_word: String = ""
 var letter_limit: int = 0
 var last_validation: String = "idle"
 var last_collected_letter: String = ""
+var free_undo_available: bool = true
 
 
 func append_letter(ch: String) -> void:
@@ -32,14 +33,21 @@ func append_letter(ch: String) -> void:
 func delete_last_letter() -> bool:
 	if current_word.is_empty():
 		return false
+	var used_free_undo := free_undo_available
+	if free_undo_available:
+		free_undo_available = false
 	current_word = current_word.substr(0, current_word.length() - 1)
+	letter_limit = maxi(0, letter_limit - 1)
+	last_collected_letter = current_word[-1] if not current_word.is_empty() else ""
 	word_changed.emit(current_word)
-	return true
+	return used_free_undo
 
 
 func clear_word() -> void:
 	current_word = ""
 	letter_limit = 0
+	free_undo_available = true
+	last_collected_letter = ""
 	word_changed.emit(current_word)
 
 

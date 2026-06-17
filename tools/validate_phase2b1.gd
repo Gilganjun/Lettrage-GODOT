@@ -52,6 +52,9 @@ func _check_files() -> void:
 		"res://scripts/word_game/dictionary_service.gd",
 		"res://scripts/word_game/player_word_state.gd",
 		"res://scripts/letters/letter_spawner.gd",
+		"res://scripts/letters/letter_spawn_director.gd",
+		"res://scripts/letters/letter_spawn_profile.gd",
+		"res://resources/letters/rain_spawn_profile.tres",
 		"res://scenes/ui/word_game_hud.tscn",
 	]:
 		if ResourceLoader.exists(path):
@@ -80,6 +83,20 @@ func _check_alphabet() -> void:
 		_fail("Letter scene instantiate failed")
 		return
 	print("[OK] Letter scene instantiates")
+	_check_letter_velocity()
+
+
+func _check_letter_velocity() -> void:
+	var packed: PackedScene = load(LETTER_SCENE)
+	var letter: Letter = packed.instantiate()
+	letter.catalog = load(CATALOG)
+	letter.configure("A", 0, 0.4, Color.WHITE, 180.0)
+	if letter.velocity != Vector2(0.0, 180.0):
+		_fail("Letter rain velocity expected (0,180) got %s" % str(letter.velocity))
+	if int(Letter.Resolution.BULLET_COLLECT) < 0:
+		_fail("Letter.Resolution.BULLET_COLLECT invalid")
+	letter.queue_free()
+	print("[OK] Letter velocity + resolution enums")
 
 
 func _check_spoken_alphabet() -> void:
@@ -138,7 +155,9 @@ func _check_word_state_logic() -> void:
 
 func _check_spawner_limit() -> void:
 	var spawner: Node = LetterSpawnerScript.new()
-	spawner.max_active_letters = 3
+	var profile: Resource = load("res://resources/letters/rain_spawn_profile.tres")
+	spawner.profile = profile
+	spawner.profile.max_active_letters = 3
 	spawner.catalog = load(CATALOG)
 	spawner.letter_scene = load(LETTER_SCENE)
 	var root := Node2D.new()
