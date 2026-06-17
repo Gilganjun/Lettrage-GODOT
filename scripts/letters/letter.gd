@@ -32,7 +32,8 @@ var is_vowel: bool = false
 ## Legacy read-only mirror of downward speed when using rain-style drops.
 var fall_speed: float = 180.0
 var velocity: Vector2 = Vector2.ZERO
-var gravity: float = 0.0
+## Downward acceleration for arcing paths (not Area2D.gravity).
+var motion_gravity: float = 0.0
 var field_speed_multiplier: float = 1.0
 var lifetime_max: float = -1.0
 var lifetime_fade_start: float = 8.0
@@ -43,6 +44,7 @@ var tint_color: Color = Color.WHITE
 
 var _base_modulate: Color = Color.WHITE
 var _sprite: Sprite2D
+var _pending_resolve_finish := false
 
 
 func _ready() -> void:
@@ -63,13 +65,13 @@ func configure(
 	p_use_initial_velocity: bool = false,
 	p_lifetime_max: float = -1.0,
 	p_lifetime_fade_start: float = 8.0,
-	p_gravity: float = 0.0,
+	p_motion_gravity: float = 0.0,
 ) -> void:
 	character = p_character.to_upper()
 	spawn_id = p_spawn_id
 	is_vowel = catalog.is_vowel(character) if catalog else false
 	fall_speed = p_fall_speed
-	gravity = p_gravity
+	motion_gravity = p_motion_gravity
 	lifetime_max = p_lifetime_max
 	lifetime_fade_start = p_lifetime_fade_start
 	age = 0.0
@@ -99,8 +101,8 @@ func _physics_process(delta: float) -> void:
 		return
 	var scaled_delta := delta * field_speed_multiplier
 	age += delta
-	if gravity != 0.0:
-		velocity.y += gravity * scaled_delta
+	if motion_gravity != 0.0:
+		velocity.y += motion_gravity * scaled_delta
 	position += velocity * scaled_delta
 	_update_lifetime_fade()
 
@@ -128,6 +130,37 @@ func try_resolve(outcome: Resolution, source: String = "", knockback_from: Vecto
 	resolved.emit(self, outcome, character)
 	queue_free()
 	return true
+
+
+func begin_pending_resolve(outcome: Resolution, source: String = "") -> void:
+	if is_resolved():
+		return
+	resolution = outcome
+	resolution_source = source
+	set_deferred("monitoring", false)
+	freeze_motion()
+
+
+func finish_pending_resolve() -> void:
+	if not is_resolved() or _pending_resolve_finish:
+		return
+	_pending_resolve_finish = true
+	resolved.emit(self, resolution, character)
+	queue_free()
+
+
+func freeze_motion() -> void:
+	velocity = Vector2.ZERO
+	field_speed_multiplier = 0.0
+	set_physics_process(false)
+
+
+func get_sprite() -> Sprite2D:
+	return _sprite
+
+
+func get_display_scale() -> Vector2:
+	return _sprite.scale if _sprite else Vector2.ONE
 
 
 func _update_lifetime_fade() -> void:

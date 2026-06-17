@@ -5,7 +5,7 @@ extends Camera2D
 
 signal zoom_percent_changed(percent: float)
 
-@export var base_zoom_percent := 100.0
+@export var base_zoom_percent := 82.0
 @export var min_zoom_percent := 50.0
 @export var max_zoom_percent := 200.0
 @export var zoom_step_percent := 1.0
@@ -31,6 +31,7 @@ func reset_to_base() -> void:
 	_zoom_in_hold = -1.0
 	_zoom_out_hold = -1.0
 	_apply_zoom()
+	zoom_percent_changed.emit(_zoom_percent)
 
 
 func get_zoom_percent() -> float:

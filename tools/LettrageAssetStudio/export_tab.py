@@ -217,9 +217,19 @@ class ExportTab(ttk.Frame):
         paths = sorted(Path(folder).glob("*.png"))
         if not paths:
             paths = sorted(Path(folder).glob("*.PNG"))
+        self.load_frames(list(paths), Path(folder))
+
+    def load_frames(self, paths: list[Path], source_folder: Path | None = None) -> None:
+        """Load frames for export, preserving order from Animation Tester."""
         self.source_paths = list(paths)
-        folder_path = Path(folder)
-        self.source_label.config(text=f"{len(self.source_paths)} frames — {folder_path.name}")
+        if source_folder:
+            label = source_folder.name
+        elif paths:
+            label = paths[0].parent.name
+        else:
+            label = "—"
+        self.source_label.config(text=f"{len(self.source_paths)} frames — {label}")
+        self.status_label.config(text="Frames loaded — ready to export.")
         self._update_dest_preview()
 
     def _set_busy(self, busy: bool) -> None:

@@ -1,42 +1,42 @@
-[gd_scene load_steps=3 format=3 uid="uid://letter_shatter_vfx_test"]
+[gd_scene format=3 uid="uid://bvtndd8y4jpbq"]
 
-[ext_resource type="Script" path="res://scripts/test/letter_shatter_vfx_test.gd" id="1_root"]
+[ext_resource type="Script" uid="uid://bq8vku7lwspc1" path="res://scripts/test/letter_shatter_vfx_test.gd" id="1_root"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.05, 0.07, 0.1, 0.82)
 content_margin_left = 12.0
 content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
+bg_color = Color(0.05, 0.07, 0.1, 0.82)
 
-[node name="LetterShatterVfxTest" type="Node2D"]
+[node name="LetterShatterVfxTest" type="Node2D" unique_id=1270844645]
 script = ExtResource("1_root")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1858355401]
 
-[node name="Panel" type="PanelContainer" parent="CanvasLayer"]
+[node name="Panel" type="PanelContainer" parent="CanvasLayer" unique_id=1466631334]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 520.0
 offset_bottom = 120.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Margin" type="MarginContainer" parent="CanvasLayer/Panel"]
+[node name="Margin" type="MarginContainer" parent="CanvasLayer/Panel" unique_id=1452627481]
 layout_mode = 2
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel/Margin" unique_id=634969319]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+[node name="Title" type="Label" parent="CanvasLayer/Panel/Margin/VBox" unique_id=2137479113]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Letter shatter VFX preview"
 
-[node name="StyleLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+[node name="StyleLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox" unique_id=1465024038]
 layout_mode = 2
 text = "Active: Grid shatter"
 
-[node name="HintLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox"]
+[node name="HintLabel" type="Label" parent="CanvasLayer/Panel/Margin/VBox" unique_id=375777269]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "1 Grid shatter | 2 Pixel burst | 3 Soft dissolve | Space demo | Esc quit"

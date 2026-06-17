@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://db51y6s7ihvpf"]
 
-[ext_resource type="Script" uid="uid://by4ph12ytlta4" path="res://scenes/test/animation_test.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/test/character_preview_slot.tscn" id="2_slot"]
+[ext_resource type="Script" uid="uid://by4ph12ytlta4" path="res://scenes/test/archive/animation_test.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/test/archive/character_preview_slot.tscn" id="2_slot"]
 
 [node name="AnimationTest" type="Control" unique_id=702114715]
 layout_mode = 3

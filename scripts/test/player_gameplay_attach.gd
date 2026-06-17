@@ -29,8 +29,8 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 	var shooter := LetterShooter.new()
 	shooter.word_controller = word_controller
 	shooter.player_shield = shield
+	shooter.sync_to_body(pickup_center)
 	player.add_child(shooter)
-	shooter.attach_to_body(player)
 
 	return {"shield": shield, "collector": collector, "shooter": shooter}
 

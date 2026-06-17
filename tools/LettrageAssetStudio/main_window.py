@@ -18,6 +18,7 @@ from video_extract_tab import VideoExtractTab
 class MainWindow:
     APP_TITLE = "LETTRAGE ASSET STUDIO v1.0"
     TAB_ANIMATION_TESTER = 3
+    TAB_EXPORT = 4
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
@@ -26,6 +27,7 @@ class MainWindow:
         self.theme = Theme(root)
         self.notebook: ttk.Notebook | None = None
         self.animation_tester_tab: AnimationTesterTab | None = None
+        self.export_tab: ExportTab | None = None
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -55,15 +57,19 @@ class MainWindow:
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=12, pady=12)
 
-        export_tab = ExportTab(self.notebook, self.theme, on_project_changed=self._refresh_project_label)
-        self.animation_tester_tab = AnimationTesterTab(self.notebook, self.theme)
+        self.export_tab = ExportTab(self.notebook, self.theme, on_project_changed=self._refresh_project_label)
+        self.animation_tester_tab = AnimationTesterTab(
+            self.notebook,
+            self.theme,
+            on_save_complete=self._on_animation_save_complete,
+        )
 
         tabs: list[tuple[str, ttk.Frame]] = [
             ("Video Extract", VideoExtractTab(self.notebook, self.theme, on_preset_complete=self._on_preset_complete)),
             ("Green2Alpha", Green2AlphaTab(self.notebook, self.theme)),
             ("Resize", ResizeTab(self.notebook, self.theme)),
             ("Animation Tester", self.animation_tester_tab),
-            ("Export", export_tab),
+            ("Export", self.export_tab),
         ]
         for title, tab in tabs:
             self.notebook.add(tab, text=title)
@@ -82,6 +88,11 @@ class MainWindow:
         if self.notebook and self.animation_tester_tab:
             self.notebook.select(self.TAB_ANIMATION_TESTER)
             self.animation_tester_tab.load_from_folder(final_folder)
+
+    def _on_animation_save_complete(self, paths: list[Path], output_folder: Path) -> None:
+        if self.notebook and self.export_tab:
+            self.export_tab.load_frames(paths, output_folder)
+            self.notebook.select(self.TAB_EXPORT)
 
     def _refresh_project_label(self) -> None:
         project = load_lettrage_project()

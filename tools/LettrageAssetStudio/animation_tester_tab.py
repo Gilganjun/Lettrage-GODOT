@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import tkinter as tk
+from collections.abc import Callable
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -16,9 +17,15 @@ from utils import load_preview_image, run_in_thread
 class AnimationTesterTab(ttk.Frame):
     ZOOM = 2.0
 
-    def __init__(self, parent: tk.Misc, theme: Theme) -> None:
+    def __init__(
+        self,
+        parent: tk.Misc,
+        theme: Theme,
+        on_save_complete: Callable[[list[Path], Path], None] | None = None,
+    ) -> None:
         super().__init__(parent, style="TFrame")
         self.theme = theme
+        self.on_save_complete = on_save_complete
         self.frames: list[Path] = []
         self.source_folder: Path | None = None
         self.index = 0
@@ -277,7 +284,12 @@ class AnimationTesterTab(ttk.Frame):
                 self._refresh_listbox()
                 self._show_frame()
                 self.status_label.config(text=f"Saved {len(saved)} frames to {output_dir.name}")
-                messagebox.showinfo("Save Complete", f"Saved {len(saved)} frames to:\n{output_dir}")
+                messagebox.showinfo(
+                    "Save Complete",
+                    f"Saved {len(saved)} frames to:\n{output_dir}\n\nOpening Export…",
+                )
+                if self.on_save_complete:
+                    self.on_save_complete(saved, output_dir)
 
             self.after(0, done)
 

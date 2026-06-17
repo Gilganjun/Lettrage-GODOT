@@ -13,7 +13,7 @@ const EnemyWordStateScript := preload("res://scripts/enemy/enemy_word_state.gd")
 @export var word_complete_delay := 2.0
 
 var dictionary: RefCounted = EnemyDictionaryServiceScript.new()
-var word_state: RefCounted = EnemyWordStateScript.new()
+var word_state: EnemyWordState = EnemyWordState.new()
 var debug_enabled := false
 
 var _rng := RandomNumberGenerator.new()

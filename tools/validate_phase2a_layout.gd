@@ -1,8 +1,8 @@
 extends SceneTree
 
-const LAYOUT_SCENE := "res://scenes/test/phase2a_layout_verification.tscn"
+const LAYOUT_SCENE := "res://scenes/test/archive/phase2a_layout_verification.tscn"
 const TRANSFORMS := "res://resources/phase2a/instance_transforms.json"
-const FAILED_SCENE := "res://scenes/test/phase2a_movement_test_failed.tscn"
+const FAILED_SCENE := "res://scenes/test/archive/phase2a_movement_test_failed.tscn"
 
 var _errors: Array[String] = []
 

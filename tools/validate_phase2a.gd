@@ -1,7 +1,7 @@
 extends SceneTree
 
-const PHASE1_SCENE := "res://scenes/test/animation_test.tscn"
-const PHASE2A_SCENE := "res://scenes/test/phase2a_movement_test.tscn"
+const PHASE1_SCENE := "res://scenes/test/archive/animation_test.tscn"
+const PHASE2A_SCENE := "res://scenes/test/archive/phase2a_movement_test.tscn"
 const PLAYER_SCENE := "res://scenes/player/player.tscn"
 const PLAYER_PROFILE := "res://resources/characters/player_visual.tres"
 const MOVEMENT_ANIMS := ["Idle", "Run", "Jump", "Fall", "Climb"]

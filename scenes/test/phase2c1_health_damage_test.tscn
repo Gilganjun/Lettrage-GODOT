@@ -49,16 +49,18 @@ position = Vector2(80, 320)
 script = ExtResource("13_cannon")
 director_path = NodePath("../LetterSpawner")
 fire_direction = 0
-fire_interval = 3.0
-burst_count = 3
+fire_interval = 3.4
+burst_count = 2
+letter_speed = 150.0
 
 [node name="CannonRight" type="Node2D" parent="World"]
 position = Vector2(2020, 280)
 script = ExtResource("13_cannon")
 director_path = NodePath("../LetterSpawner")
 fire_direction = 1
-fire_interval = 3.5
-burst_count = 4
+fire_interval = 3.8
+burst_count = 2
+letter_speed = 150.0
 
 [node name="PlayerRoot" type="Node2D" parent="World"]
 

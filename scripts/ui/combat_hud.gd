@@ -104,6 +104,19 @@ var _player_word_hidden := false
 var _enemy_word_hidden := false
 
 
+func get_player_word_insert_position(current_word: String) -> Vector2:
+	if player_word_label == null:
+		return get_word_anchor_center(true)
+	var rect := player_word_label.get_global_rect()
+	var font: Font = player_word_label.get_theme_font("font")
+	var font_size := player_word_label.get_theme_font_size("font_size")
+	if font == null:
+		return rect.get_center()
+	var text_w := font.get_string_size(current_word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var char_w := font.get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	return Vector2(rect.position.x + text_w + char_w * 0.5, rect.get_center().y)
+
+
 func get_word_anchor_center(for_player: bool) -> Vector2:
 	var label := player_word_label if for_player else enemy_word_label
 	if label == null:

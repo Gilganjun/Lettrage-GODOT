@@ -14,10 +14,10 @@ const ShieldComponentScript := preload("res://scripts/components/shield_componen
 const PlayerWordStateScript := preload("res://scripts/word_game/player_word_state.gd")
 
 const PHASE2C1_SCENE := "res://scenes/test/phase2c1_health_damage_test.tscn"
-const PHASE2B2B_SCENE := "res://scenes/test/phase2b2b_shield_word_test.tscn"
-const PHASE2B2A_SCENE := "res://scenes/test/phase2b2a_enemy_movement_test.tscn"
-const PHASE2B1_SCENE := "res://scenes/test/phase2b1_word_game_test.tscn"
-const PHASE2A_SCENE := "res://scenes/test/phase2a_movement_corrected.tscn"
+const PHASE2B2B_SCENE := "res://scenes/test/archive/phase2b2b_shield_word_test.tscn"
+const PHASE2B2A_SCENE := "res://scenes/test/archive/phase2b2a_enemy_movement_test.tscn"
+const PHASE2B1_SCENE := "res://scenes/test/archive/phase2b1_word_game_test.tscn"
+const PHASE2A_SCENE := "res://scenes/test/archive/phase2a_movement_corrected.tscn"
 const LEVEL_SCENE := "res://scenes/levels/main2_heallthbartest_level.tscn"
 const COMBAT_SCENE := "res://scenes/components/character_combat.tscn"
 const ENEMY_SCENE := "res://scenes/enemy/enemy.tscn"

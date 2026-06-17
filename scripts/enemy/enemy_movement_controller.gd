@@ -11,12 +11,14 @@ signal target_changed(new_target_x: float)
 @export var target_reach_threshold := 20.0
 @export var target_deadband := 5.0
 @export var jump_cooldown_duration := 0.35
+@export var chase_jump_cooldown_duration := 0.28
 @export var stuck_velocity_threshold := 8.0
 @export var stuck_time_limit := 0.45
 
 var target_x := 0.0
 var direction := 1
 var jump_cooldown := 0.0
+var chase_jump_cooldown := 0.0
 var stuck_timer := 0.0
 
 var letter_chase_active := false
@@ -38,6 +40,8 @@ func configure_patrol(min_x: float, max_x: float, initial_x: float) -> void:
 func tick(delta: float) -> void:
 	if jump_cooldown > 0.0:
 		jump_cooldown = maxf(0.0, jump_cooldown - delta)
+	if chase_jump_cooldown > 0.0:
+		chase_jump_cooldown = maxf(0.0, chase_jump_cooldown - delta)
 
 
 func update_target(current_x: float) -> void:
@@ -94,6 +98,13 @@ func request_jump() -> bool:
 	if jump_cooldown > 0.0:
 		return false
 	jump_cooldown = jump_cooldown_duration
+	return true
+
+
+func request_chase_jump() -> bool:
+	if chase_jump_cooldown > 0.0:
+		return false
+	chase_jump_cooldown = chase_jump_cooldown_duration
 	return true
 
 

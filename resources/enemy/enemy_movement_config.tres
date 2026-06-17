@@ -4,3 +4,4 @@
 
 [resource]
 script = ExtResource("1_script")
+jump_speed = 920.0

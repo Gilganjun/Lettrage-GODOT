@@ -24,8 +24,8 @@ var _saved_sprite_rotation := 0.0
 var _upright_rotation := 0.0
 var _initialized := false
 var _is_knocked := false
-var _enemy_stun_active := false
-var _enemy_stun_idle_timer := 0.0
+var _word_stun_active := false
+var _word_stun_idle_timer := 0.0
 var _stun_death_anim_active := false
 var _stun_attacker_position := Vector2.ZERO
 var _stun_slide_target_x := 0.0
@@ -91,17 +91,17 @@ func configure_spawn(position: Vector2) -> void:
 
 func blocks_movement() -> bool:
 	_ensure_initialized()
-	return _health().is_dead or _injury().blocks_actions()
+	return _health().is_dead or _injury().blocks_actions() or is_word_stun_active()
 
 
 func blocks_collection() -> bool:
 	_ensure_initialized()
-	return _health().is_dead or _injury().blocks_actions() or is_enemy_stun_active()
+	return _health().is_dead or _injury().blocks_actions() or is_word_stun_active()
 
 
 func blocks_word_submit() -> bool:
 	_ensure_initialized()
-	return _health().is_dead or _injury().blocks_actions()
+	return _health().is_dead or _injury().blocks_actions() or is_word_stun_active()
 
 
 func blocks_ai() -> bool:
@@ -114,14 +114,19 @@ func is_dead() -> bool:
 	return _health().is_dead
 
 
+func is_word_stun_active() -> bool:
+	_ensure_initialized()
+	return _word_stun_active
+
+
 func is_enemy_stun_active() -> bool:
 	_ensure_initialized()
-	return owner_kind == "enemy" and _enemy_stun_active
+	return owner_kind == "enemy" and _word_stun_active
 
 
 func is_stun_position_locked() -> bool:
 	_ensure_initialized()
-	return owner_kind == "enemy" and _enemy_stun_active and _stun_slide_landed
+	return _word_stun_active and _stun_slide_landed
 
 
 func get_stun_locked_x() -> float:
@@ -137,9 +142,8 @@ func apply_word_damage(
 	_ensure_initialized()
 	if _health().is_dead:
 		return 0
-	if owner_kind == "enemy":
-		_last_word_hit_attacker_position = attacker_position
-		_stun_attacker_body = attacker_body
+	_last_word_hit_attacker_position = attacker_position
+	_stun_attacker_body = attacker_body
 	return _health().apply_damage(amount, source)
 
 
@@ -165,8 +169,8 @@ func reset_combat() -> void:
 	_ensure_initialized()
 	_pending_respawn = false
 	_death_timer = 0.0
-	_enemy_stun_active = false
-	_enemy_stun_idle_timer = 0.0
+	_word_stun_active = false
+	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
 	_stun_attacker_position = Vector2.ZERO
 	_stun_attacker_body = null
@@ -174,7 +178,7 @@ func reset_combat() -> void:
 	_stun_locked_x = 0.0
 	_stun_watchdog_deadline = 0.0
 	_last_word_hit_attacker_position = Vector2.INF
-	_release_enemy_shield_after_stun()
+	_release_shield_after_stun()
 	_injury().end_injury()
 	_health().reset_health()
 	if _sprite:
@@ -184,12 +188,12 @@ func reset_combat() -> void:
 
 
 func _process(delta: float) -> void:
-	if _enemy_stun_active and owner_kind == "enemy":
+	if _word_stun_active:
 		_tick_stun_watchdog()
-	if _enemy_stun_idle_timer > 0.0:
-		_enemy_stun_idle_timer = maxf(0.0, _enemy_stun_idle_timer - delta)
-		if _enemy_stun_idle_timer <= 0.0:
-			_finish_enemy_stun()
+	if _word_stun_idle_timer > 0.0:
+		_word_stun_idle_timer = maxf(0.0, _word_stun_idle_timer - delta)
+		if _word_stun_idle_timer <= 0.0:
+			_finish_word_stun()
 	if not _pending_respawn:
 		return
 	_death_timer -= delta
@@ -201,18 +205,15 @@ func _on_damaged(_amount: int, _source: String) -> void:
 	if _health().is_dead:
 		return
 	_hit_feedback().play_hit()
-	if owner_kind == "enemy":
-		_begin_enemy_word_stun(_last_word_hit_attacker_position)
-		_last_word_hit_attacker_position = Vector2.INF
-		return
-	_injury().start_injury()
+	_begin_word_stun(_last_word_hit_attacker_position)
+	_last_word_hit_attacker_position = Vector2.INF
 
 
-func _begin_enemy_word_stun(attacker_position: Vector2 = Vector2.INF) -> void:
-	if _enemy_stun_active:
+func _begin_word_stun(attacker_position: Vector2 = Vector2.INF) -> void:
+	if _word_stun_active:
 		return
-	_enemy_stun_active = true
-	_enemy_stun_idle_timer = 0.0
+	_word_stun_active = true
+	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = true
 	_stun_slide_landed = false
 	if _stun_attacker_body and is_instance_valid(_stun_attacker_body):
@@ -225,20 +226,28 @@ func _begin_enemy_word_stun(attacker_position: Vector2 = Vector2.INF) -> void:
 	_stun_attacker_body = null
 	_stun_slide_duration = _get_death_anim_duration()
 	_stun_slide_started_at = Time.get_ticks_msec() / 1000.0
-	if _body is Enemy and _stun_attacker_position != Vector2.INF:
-		var enemy := _body as Enemy
-		enemy.facing = -1 if _stun_attacker_position.x < _body.global_position.x else 1
-		if _sprite:
-			_sprite.flip_h = enemy.facing < 0
+	_set_stun_facing_toward_attacker()
 	_injury().start_injury(120.0)
-	_deactivate_enemy_shield_for_stun()
+	_deactivate_shield_for_stun()
 	_stun_watchdog_deadline = (
 		Time.get_ticks_msec() / 1000.0
 		+ _stun_slide_duration
 		+ enemy_stun_idle_after_death
 		+ stun_watchdog_buffer
 	)
-	_play_enemy_stun_death()
+	_play_word_stun_death()
+
+
+func _set_stun_facing_toward_attacker() -> void:
+	if _stun_attacker_position == Vector2.INF or _body == null:
+		return
+	var facing_val := -1 if _stun_attacker_position.x < _body.global_position.x else 1
+	if _body is Enemy:
+		(_body as Enemy).facing = facing_val
+	elif _body is PlayerMovement:
+		(_body as PlayerMovement).facing = facing_val
+	if _sprite:
+		_sprite.flip_h = facing_val < 0
 
 
 func compute_stun_slide_velocity() -> Vector2:
@@ -258,10 +267,11 @@ func _land_stun_slide() -> void:
 	if _stun_slide_landed:
 		return
 	_stun_slide_landed = true
-	_stun_locked_x = _stun_slide_target_x
 	if _body:
-		_body.global_position.x = _stun_locked_x
+		_stun_locked_x = _body.global_position.x
 		_body.velocity = Vector2.ZERO
+	else:
+		_stun_locked_x = _stun_slide_target_x
 	_stun_attacker_body = null
 
 
@@ -299,9 +309,9 @@ func _compute_stun_slide_target_x() -> float:
 	return _stun_attacker_position.x + side * stun_slide_stop_offset
 
 
-func _play_enemy_stun_death() -> void:
+func _play_word_stun_death() -> void:
 	if _sprite == null or _sprite.sprite_frames == null:
-		_finish_enemy_stun()
+		_finish_word_stun()
 		return
 	if not _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
 		_sprite.animation_finished.connect(_on_sprite_animation_finished)
@@ -309,7 +319,7 @@ func _play_enemy_stun_death() -> void:
 		_sprite.play("Death")
 	elif _sprite.sprite_frames.has_animation("Idle"):
 		_sprite.play("Idle")
-		_enemy_stun_idle_timer = enemy_stun_idle_after_death
+		_word_stun_idle_timer = enemy_stun_idle_after_death
 
 
 func _tick_stun_watchdog() -> void:
@@ -319,43 +329,54 @@ func _tick_stun_watchdog() -> void:
 	var death_phase_end := _stun_slide_started_at + _stun_slide_duration
 	if (
 		_stun_death_anim_active
-		and _enemy_stun_idle_timer <= 0.0
+		and _word_stun_idle_timer <= 0.0
 		and now >= death_phase_end
 	):
 		_recover_stun_after_death_phase()
 	if now >= _stun_watchdog_deadline:
 		_stun_watchdog_deadline = 0.0
-		_finish_enemy_stun()
+		_finish_word_stun()
 
 
 func _recover_stun_after_death_phase() -> void:
-	if not _enemy_stun_active:
+	if not _word_stun_active:
 		return
 	_stun_death_anim_active = false
 	if not _stun_slide_landed:
 		_lock_stun_at_current_x()
-	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
-		_sprite.play("Idle")
-	_enemy_stun_idle_timer = enemy_stun_idle_after_death
+	_hold_death_pose_at_last_frame()
+	_word_stun_idle_timer = enemy_stun_idle_after_death
 
 
 func _on_sprite_animation_finished() -> void:
-	if not _enemy_stun_active or owner_kind != "enemy":
+	if not _word_stun_active:
 		return
 	if _sprite == null or _sprite.animation != "Death":
 		return
 	_stun_death_anim_active = false
 	if not _stun_slide_landed:
 		_lock_stun_at_current_x()
-	if _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
-		_sprite.play("Idle")
-	_enemy_stun_idle_timer = enemy_stun_idle_after_death
+	_hold_death_pose_at_last_frame()
+	_word_stun_idle_timer = enemy_stun_idle_after_death
 
 
-func _finish_enemy_stun() -> void:
+func _hold_death_pose_at_last_frame() -> void:
+	if _sprite == null or _sprite.sprite_frames == null:
+		return
+	if not _sprite.sprite_frames.has_animation("Death"):
+		return
+	var last_frame := _sprite.sprite_frames.get_frame_count("Death") - 1
+	if last_frame < 0:
+		return
+	_sprite.play("Death")
+	_sprite.frame = last_frame
+	_sprite.pause()
+
+
+func _finish_word_stun() -> void:
 	_stun_watchdog_deadline = 0.0
-	_enemy_stun_active = false
-	_enemy_stun_idle_timer = 0.0
+	_word_stun_active = false
+	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
 	_stun_slide_landed = false
 	_stun_locked_x = 0.0
@@ -364,7 +385,7 @@ func _finish_enemy_stun() -> void:
 		_sprite.animation_finished.disconnect(_on_sprite_animation_finished)
 	if _health().is_dead:
 		return
-	_release_enemy_shield_after_stun()
+	_release_shield_after_stun()
 	_injury().end_injury()
 	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
 		_sprite.play("Idle")
@@ -372,15 +393,15 @@ func _finish_enemy_stun() -> void:
 
 func _on_died(source: String) -> void:
 	_stun_watchdog_deadline = 0.0
-	_enemy_stun_active = false
-	_enemy_stun_idle_timer = 0.0
+	_word_stun_active = false
+	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
 	_stun_slide_landed = false
 	_stun_locked_x = 0.0
 	_stun_attacker_body = null
 	if _sprite and _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
 		_sprite.animation_finished.disconnect(_on_sprite_animation_finished)
-	_release_enemy_shield_after_stun()
+	_release_shield_after_stun()
 	_injury().end_injury()
 	_disable_combat_actions()
 	death_started.emit(source)
@@ -406,7 +427,7 @@ func _disable_combat_actions() -> void:
 
 
 func _on_injury_started(_duration: float) -> void:
-	if owner_kind == "enemy":
+	if owner_kind == "enemy" or is_word_stun_active():
 		return
 	if _sprite == null or _is_knocked:
 		return
@@ -436,18 +457,23 @@ func _play_death_animation() -> void:
 		_sprite.play("Death")
 
 
-func _deactivate_enemy_shield_for_stun() -> void:
-	if _body == null or owner_kind != "enemy":
+func _deactivate_shield_for_stun() -> void:
+	if _body == null:
 		return
-	var shield_ctrl := _body.get_node_or_null("EnemyShieldController")
-	if shield_ctrl and shield_ctrl.has_method("enter_word_stun_lock"):
-		shield_ctrl.enter_word_stun_lock()
-	var shield_comp := _body.get_node_or_null("ShieldComponent")
-	if shield_comp and shield_comp.has_method("deactivate"):
-		shield_comp.deactivate("word_stun")
+	if owner_kind == "player":
+		var shield := _body.get_node_or_null("PlayerShield")
+		if shield and shield.has_method("set_active"):
+			shield.set_active(false)
+	elif owner_kind == "enemy":
+		var shield_ctrl := _body.get_node_or_null("EnemyShieldController")
+		if shield_ctrl and shield_ctrl.has_method("enter_word_stun_lock"):
+			shield_ctrl.enter_word_stun_lock()
+		var shield_comp := _body.get_node_or_null("ShieldComponent")
+		if shield_comp and shield_comp.has_method("deactivate"):
+			shield_comp.deactivate("word_stun")
 
 
-func _release_enemy_shield_after_stun() -> void:
+func _release_shield_after_stun() -> void:
 	if _body == null or owner_kind != "enemy":
 		return
 	var shield_ctrl := _body.get_node_or_null("EnemyShieldController")

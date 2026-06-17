@@ -17,21 +17,17 @@ Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 | Phase 2B1 — Player letters, spelling, dictionary, score | **Implemented** |
 | Phase 2B2A — Enemy movement, obstacle escape | **Implemented** |
 | Phase 2B2B — Shields, enemy word AI, HUD | **Implemented** — manual F5 sign-off pending |
-| Phase 2C+ — Health, damage, death, production scene | **Not started** |
+| Phase 2C+ — Health, damage, death, production scene | **In progress** — `phase2c1` active playtest |
 
 ## Scenes
 
 | Purpose | Scene |
 |---------|-------|
-| **F5 — current gameplay test** | `scenes/test/phase2b2b_shield_word_test.tscn` |
-| Phase 2B1 word game (player only) | `scenes/test/phase2b1_word_game_test.tscn` |
-| Phase 2B2A enemy movement | `scenes/test/phase2b2a_enemy_movement_test.tscn` |
-| Phase 2A movement reference | `scenes/test/phase2a_movement_corrected.tscn` |
-| Letter shatter VFX preview | `scenes/test/letter_shatter_vfx_test.tscn` |
+| **F5 — active playtest** | `scenes/test/phase2c1_health_damage_test.tscn` |
 | **Edit level in Godot 2D** | `scenes/levels/main2_heallthbartest_level.tscn` |
-| Phase 1 animation test | `scenes/test/animation_test.tscn` |
+| Older phase tests (archived) | `scenes/test/archive/` |
 
-Test scenes **instance** the baked level. Save edits in `main2_heallthbartest_level.tscn` — they persist across F5 runs.
+See `scenes/test/README.md` for details. Archived scenes are not used for F5.
 
 ### Authoritative level baseline
 

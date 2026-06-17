@@ -1,7 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://word_game_hud_phase2b1"]
+[gd_scene load_steps=5 format=3 uid="uid://word_game_hud_phase2b1"]
 
 [ext_resource type="Script" path="res://scripts/ui/word_game_hud.gd" id="1_hud"]
 [ext_resource type="FontFile" path="res://assets/Panton-BlackCaps.otf" id="2_font"]
+[ext_resource type="Script" path="res://scripts/ui/shield_hint_overlay.gd" id="3_hint"]
+[ext_resource type="FontFile" path="res://assets/PTSans-Bold.ttf" id="4_hint_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
+bg_color = Color(0, 0, 0, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
 
 [node name="WordGameHud" type="Control"]
 layout_mode = 3
@@ -37,7 +50,7 @@ theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 28
-	text = "Player word: —"
+text = "Player word: —"
 
 [node name="ScoreLabel" type="Label" parent="Margin/VBox"]
 layout_mode = 2
@@ -96,3 +109,41 @@ theme_override_colors/font_color = Color(1, 0.82, 0.72, 1)
 theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 text = "Enemy debug"
+
+[node name="ShieldHintOverlay" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -58.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("3_hint")
+
+[node name="Center" type="CenterContainer" parent="ShieldHintOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="ShieldHintOverlay/Center"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_hint")
+
+[node name="Label" type="Label" parent="ShieldHintOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.97, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.65)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("4_hint_font")
+theme_override_font_sizes/font_size = 17
+text = "Shield locked"
+horizontal_alignment = 1

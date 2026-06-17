@@ -3,7 +3,7 @@ extends Node
 
 ## Look-ahead + contact raycasts for jump vs reverse decisions.
 
-@export var max_jump_height := 100.0
+@export var max_jump_height := 110.0
 @export var min_step_height := 8.0
 @export var look_ahead_wall_range := 130.0
 @export var look_ahead_floor_forward := 72.0
@@ -58,6 +58,7 @@ func scan(direction: int) -> Dictionary:
 	}
 	if _body == null or direction == 0:
 		return result
+	var dir_f := float(direction)
 	var wall_ray := _wall_right if direction > 0 else _wall_left
 	var ledge_ray := _floor_right if direction > 0 else _floor_left
 	var body_wall: Vector2 = _probe_contact_wall(wall_ray, direction, 20.0)
@@ -80,8 +81,11 @@ func scan(direction: int) -> Dictionary:
 		_analyze_step_geometry(direction, result)
 	elif _body.is_on_floor() and ledge_ray and not ledge_ray.is_colliding():
 		result.ledge_ahead = true
-		if _look_ahead_floor and not _look_ahead_floor.is_colliding():
-			result.ahead_obstacle = true
+		result.ahead_obstacle = true
+		result.wall_point = _ray_origin_global(ledge_ray) + Vector2(dir_f * 18.0, 0.0)
+		result.distance_to_obstacle = 18.0
+		_analyze_step_geometry(direction, result)
+		if not result.floor_beyond and _look_ahead_floor and not _look_ahead_floor.is_colliding():
 			result.distance_to_obstacle = look_ahead_floor_forward
 	return result
 
@@ -125,7 +129,7 @@ func _analyze_step_geometry(direction: int, result: Dictionary) -> void:
 		result.obstacle_height >= min_step_height
 		and result.obstacle_height <= max_jump_height
 		and result.floor_beyond
-		and not result.head_blocked
+		and (not result.head_blocked or result.obstacle_height <= 36.0)
 	)
 	result.early_approach = (
 		result.ahead_obstacle

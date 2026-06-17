@@ -10,6 +10,7 @@ const PATH_FACE_ENEMY := "res://assets/shield/faceshield_red.png"
 
 ## Tight fit to collision rect (F3 debug box); keep character readable underneath.
 const BODY_FIT := 0.94
+const ENEMY_BODY_FIT := 0.94
 const FACE_ALPHA := 0.28
 const FACE_ALPHA_PULSE := 0.10
 const GLOW_ALPHA := 0.10
@@ -103,14 +104,15 @@ func _apply_layout() -> void:
 	var tint := ENEMY_TINT if _is_enemy else PLAYER_TINT
 	_face.sprite_frames = _build_face_frames()
 	var face_tex := _face.sprite_frames.get_frame_texture("shield", 0)
-	var body_fit := _size * BODY_FIT
-	_face.scale = _fit_texture_to_rect(face_tex, body_fit)
+	var fit_mul := ENEMY_BODY_FIT if _is_enemy else BODY_FIT
+	var body_fit := _size * fit_mul
+	_face.scale = _fit_texture_to_rect(face_tex, body_fit, _is_enemy)
 	var face_c := tint
 	face_c.a = _face_alpha_base()
 	_face.modulate = face_c
 
 	var glow_fit := body_fit * GLOW_SCALE_MUL
-	_glow.scale = _fit_texture_to_rect(_glow.texture, glow_fit)
+	_glow.scale = _fit_texture_to_rect(_glow.texture, glow_fit, _is_enemy)
 	var glow_c := tint
 	glow_c.a = _glow_alpha_base()
 	_glow.modulate = glow_c
@@ -125,6 +127,27 @@ func _apply_layout() -> void:
 	for burst in [_activate_burst, _impact_burst]:
 		burst.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 		burst.emission_rect_extents = burst_half
+		if _is_enemy:
+			burst.initial_velocity_min = 8.0
+			burst.initial_velocity_max = 22.0
+			burst.scale_amount_min = 0.10
+			burst.scale_amount_max = 0.20
+		else:
+			burst.initial_velocity_min = 12.0
+			burst.initial_velocity_max = 40.0
+			burst.scale_amount_min = 0.14
+			burst.scale_amount_max = 0.32
+	if _fizz:
+		if _is_enemy:
+			_fizz.initial_velocity_min = 6.0
+			_fizz.initial_velocity_max = 18.0
+			_fizz.scale_amount_min = 0.08
+			_fizz.scale_amount_max = 0.18
+		else:
+			_fizz.initial_velocity_min = 8.0
+			_fizz.initial_velocity_max = 28.0
+			_fizz.scale_amount_min = 0.12
+			_fizz.scale_amount_max = 0.28
 
 
 func _process(delta: float) -> void:
@@ -235,10 +258,15 @@ func _emit_one_shot(particles: CPUParticles2D) -> void:
 	particles.emitting = true
 
 
-func _fit_texture_to_rect(tex: Texture2D, target: Vector2) -> Vector2:
+func _fit_texture_to_rect(tex: Texture2D, target: Vector2, uniform: bool = false) -> Vector2:
 	if tex == null or tex.get_width() <= 0 or tex.get_height() <= 0:
 		return Vector2(0.2, 0.2)
-	return Vector2(target.x / tex.get_width(), target.y / tex.get_height())
+	var sx := target.x / tex.get_width()
+	var sy := target.y / tex.get_height()
+	if uniform:
+		var s := minf(sx, sy)
+		return Vector2(s, s)
+	return Vector2(sx, sy)
 
 
 func _rect_edge_points(size: Vector2, segments_per_edge: int) -> PackedVector2Array:

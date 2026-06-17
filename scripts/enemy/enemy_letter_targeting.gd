@@ -87,9 +87,17 @@ func is_within_collect_proximity(enemy_pos: Vector2) -> bool:
 func should_request_chase_jump(enemy_pos: Vector2, on_floor: bool) -> bool:
 	if not on_floor or current_target == null:
 		return false
-	if get_target_distance(enemy_pos) > 200.0:
+	var target_pos := current_target.global_position
+	var dy := target_pos.y - enemy_pos.y
+	var dx := absf(target_pos.x - enemy_pos.x)
+	# Chase-hop when the needed letter is above and roughly reachable.
+	if dy > -20.0:
 		return false
-	return _rng.randi_range(1, 4) == 1
+	if dx > 220.0:
+		return false
+	if get_target_distance(enemy_pos) > 300.0:
+		return false
+	return _rng.randi_range(1, 2) == 1
 
 
 func get_debug_info(enemy_pos: Vector2) -> Dictionary:

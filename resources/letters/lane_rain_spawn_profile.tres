@@ -5,8 +5,16 @@
 [resource]
 script = ExtResource("1_script")
 kind = 1
+spawn_interval = 0.25
 max_active_letters = 24
 letter_lifetime = 10.0
 letter_fade_start = 8.0
 lane_vowel_end = 0.33
 lane_common_end = 0.66
+vowel_spawn_interval = 0.92
+lane_rain_vowel_reroll_chance = 0.0
+lane_rain_consonant_reroll_chance = 0.0
+min_spawn_spacing_x = 110.0
+spawn_spacing_retries = 8
+min_horizontal_spacing_x = 220.0
+horizontal_lane_y_tolerance = 72.0

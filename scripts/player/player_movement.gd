@@ -73,7 +73,8 @@ func _physics_process(delta: float) -> void:
 	if combat and combat.blocks_movement():
 		_process_combat_lock(delta, combat)
 		move_and_slide()
-		floor_snap_length = FLOOR_SNAP
+		var word_stun: bool = combat is CharacterCombat and (combat as CharacterCombat).is_word_stun_active()
+		floor_snap_length = 0.0 if word_stun else FLOOR_SNAP
 		_update_movement_state()
 		return
 	_update_ladder_overlap()
@@ -183,11 +184,29 @@ func _process_platformer(delta: float) -> void:
 
 func _process_combat_lock(delta: float, combat: Node) -> void:
 	var cfg := _cfg()
-	velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
-	if not is_on_floor():
-		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	if combat.is_dead():
 		velocity = Vector2.ZERO
+		return
+	if combat.has_method("is_stun_position_locked") and combat.is_stun_position_locked():
+		global_position.x = combat.get_stun_locked_x()
+		velocity = Vector2.ZERO
+		return
+	var slide := Vector2.ZERO
+	if combat.has_method("compute_stun_slide_velocity"):
+		slide = combat.compute_stun_slide_velocity()
+	if combat.has_method("is_word_stun_active") and combat.is_word_stun_active() and slide == Vector2.ZERO:
+		velocity = Vector2.ZERO
+		if not is_on_floor():
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		return
+	if not is_on_floor():
+		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+	else:
+		velocity.y = 0.0
+	if slide.x != 0.0:
+		velocity.x = slide.x
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
 
 
 func _process_ladder(_delta: float) -> void:
@@ -235,6 +254,9 @@ func _overlaps_any_ladder() -> bool:
 
 
 func _update_movement_state() -> void:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.has_method("is_word_stun_active") and combat.is_word_stun_active():
+		return
 	var new_state: PlayerAnimation.MovementState
 	if is_on_ladder:
 		new_state = PlayerAnimation.MovementState.CLIMB

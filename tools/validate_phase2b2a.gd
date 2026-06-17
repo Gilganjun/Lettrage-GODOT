@@ -5,9 +5,9 @@ extends SceneTree
 const EnemyScript := preload("res://scripts/enemy/enemy.gd")
 const EnemyObstacleResponseScript := preload("res://scripts/enemy/enemy_obstacle_response.gd")
 
-const PHASE2B2A_SCENE := "res://scenes/test/phase2b2a_enemy_movement_test.tscn"
-const PHASE2B1_SCENE := "res://scenes/test/phase2b1_word_game_test.tscn"
-const PHASE2A_SCENE := "res://scenes/test/phase2a_movement_corrected.tscn"
+const PHASE2B2A_SCENE := "res://scenes/test/archive/phase2b2a_enemy_movement_test.tscn"
+const PHASE2B1_SCENE := "res://scenes/test/archive/phase2b1_word_game_test.tscn"
+const PHASE2A_SCENE := "res://scenes/test/archive/phase2a_movement_corrected.tscn"
 const LEVEL_SCENE := "res://scenes/levels/main2_heallthbartest_level.tscn"
 const ENEMY_SCENE := "res://scenes/enemy/enemy.tscn"
 const ENEMY_CFG := "res://resources/enemy/enemy_movement_config.tres"

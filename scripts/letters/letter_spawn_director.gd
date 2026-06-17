@@ -43,7 +43,7 @@ func _process(delta: float) -> void:
 	if _spawn_timer >= interval:
 		_spawn_timer = 0.0
 		_spawn_sequence_letter()
-	if _vowel_timer >= profile.vowel_spawn_interval:
+	if profile.vowel_spawn_interval > 0.0 and _vowel_timer >= profile.vowel_spawn_interval:
 		_vowel_timer = 0.0
 		_spawn_vowel_letter()
 	_tick_lifetime()
@@ -73,11 +73,17 @@ func spawn_letter_at(
 	initial_velocity: Vector2,
 	force_vowel_style: bool,
 	use_initial_velocity: bool = true,
+	allow_dense_horizontal_cluster: bool = false,
 ) -> Letter:
 	if letter_scene == null or catalog == null:
 		return null
 	if _active.size() >= profile.max_active_letters:
 		return null
+	if use_initial_velocity and absf(initial_velocity.x) > 20.0:
+		var world_pos := to_global(spawn_position)
+		var dir_sign := int(signf(initial_velocity.x))
+		if not can_spawn_horizontal_at(world_pos, dir_sign, allow_dense_horizontal_cluster):
+			return null
 	var letter: Letter = letter_scene.instantiate()
 	add_child(letter)
 	letter.position = spawn_position
@@ -134,12 +140,12 @@ func _spawn_sequence_letter() -> void:
 func _spawn_vowel_letter() -> void:
 	if _active.size() >= profile.max_active_letters:
 		return
+	if profile.vowel_spawn_interval <= 0.0:
+		return
 	var vowels := PackedStringArray(["A", "E", "I", "O", "U"])
 	var idx := _vowel_index % vowels.size()
 	_spawn_letter_in_profile(vowels[idx], true)
-	_vowel_index += 1
-	if _vowel_index > 5:
-		_vowel_index = 0
+	_vowel_index = (_vowel_index + 1) % vowels.size()
 
 
 func _spawn_letter_in_profile(ch: String, force_vowel_style: bool) -> void:
@@ -172,6 +178,39 @@ func _has_spacing_at(x: float) -> bool:
 	return true
 
 
+func can_spawn_horizontal_at(
+	world_pos: Vector2,
+	dir_sign: int,
+	allow_dense_cluster: bool = false,
+) -> bool:
+	var nearby := count_horizontal_neighbors(world_pos, dir_sign)
+	if nearby == 0:
+		return true
+	if nearby == 1:
+		return true
+	if nearby == 2 and allow_dense_cluster:
+		return true
+	return false
+
+
+func count_horizontal_neighbors(world_pos: Vector2, dir_sign: int) -> int:
+	var count := 0
+	var min_gap := profile.min_horizontal_spacing_x
+	var y_tol := profile.horizontal_lane_y_tolerance
+	for letter in _active:
+		if letter == null or not is_instance_valid(letter):
+			continue
+		if absf(letter.velocity.x) < 20.0:
+			continue
+		if int(signf(letter.velocity.x)) != dir_sign:
+			continue
+		if absf(letter.global_position.y - world_pos.y) > y_tol:
+			continue
+		if absf(letter.global_position.x - world_pos.x) < min_gap:
+			count += 1
+	return count
+
+
 func _lane_center_x(ch: String, force_vowel_style: bool) -> float:
 	var width := profile.spawn_x_max - profile.spawn_x_min
 	var lane := _lane_index_for_letter(ch, force_vowel_style)
@@ -199,16 +238,27 @@ func _lane_index_for_letter(ch: String, force_vowel_style: bool) -> int:
 
 func _pick_lane_biased_letter(default_ch: String, force_vowel_style: bool) -> String:
 	if force_vowel_style:
-		var vowels := PackedStringArray(["A", "E", "I", "O", "U"])
-		return vowels[_rng.randi_range(0, vowels.size() - 1)]
-	var roll := _rng.randf()
-	if roll < 0.34:
-		var vowels := PackedStringArray(["A", "E", "I", "O", "U"])
-		return vowels[_rng.randi_range(0, vowels.size() - 1)]
-	if roll < 0.78:
-		var common := _common_consonants()
-		return common[_rng.randi_range(0, common.size() - 1)]
-	return catalog.all_letters()[_rng.randi_range(0, 25)]
+		return default_ch
+	var ch := default_ch
+	if catalog.is_vowel(ch):
+		if profile.lane_rain_vowel_reroll_chance > 0.0 and _rng.randf() < profile.lane_rain_vowel_reroll_chance:
+			ch = _pick_random_vowel()
+	else:
+		if profile.lane_rain_consonant_reroll_chance > 0.0 and _rng.randf() < profile.lane_rain_consonant_reroll_chance:
+			ch = _pick_random_common_consonant()
+	return ch
+
+
+func _pick_random_vowel() -> String:
+	var vowels := PackedStringArray(["A", "E", "I", "O", "U"])
+	return vowels[_rng.randi_range(0, vowels.size() - 1)]
+
+
+func _pick_random_common_consonant() -> String:
+	var common := _common_consonants()
+	if common.is_empty():
+		return "T"
+	return common[_rng.randi_range(0, common.size() - 1)]
 
 
 func _common_consonants() -> PackedStringArray:

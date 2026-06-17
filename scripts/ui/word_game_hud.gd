@@ -11,6 +11,7 @@ extends Control
 @onready var controls_label: Label = $Margin/VBox/ControlsLabel
 @onready var debug_label: Label = $Margin/VBox/DebugLabel
 @onready var enemy_debug_label: Label = $Margin/VBox/EnemyDebugLabel
+@onready var shield_hint: ShieldHintOverlay = $ShieldHintOverlay
 
 var _controller: WordGameController
 var _spawner: LetterSpawner
@@ -30,8 +31,9 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
 	controls_label.text = (
-		"Shift+F2 HUD | Enter/C submit | Backspace undo | Hold LCtrl shield | F hold/release fire | A/D move Space jump | F3/V collision debug"
+		"Enter/C submit | Backspace undo | LCtrl tap=latch / hold=block | F aim+fire | A/D move Space jump | F3/V collision debug"
 	)
+	controls_label.visible = true
 	refresh_combat_hud()
 
 
@@ -49,6 +51,7 @@ func refresh_combat_hud() -> void:
 		word_label.text = "Player word: %s" % (ws.current_word if not ws.current_word.is_empty() else "—")
 		score_label.text = "Player score: %d" % ws.score
 	var player_shield_on := _player_shield != null and _player_shield.is_active
+	var player_shield_latched := _player_shield != null and _player_shield.is_latched
 	var enemy_shield_on := false
 	var enemy_word := "—"
 	var enemy_target := ""
@@ -68,8 +71,9 @@ func refresh_combat_hud() -> void:
 		% [enemy_word if not enemy_word.is_empty() else "—", enemy_target, enemy_needed]
 	)
 	enemy_score_label.text = "Enemy score: %d | %s" % [enemy_score, enemy_validation]
-	shield_label.text = "Player shield: %s | Enemy shield: %s" % [
+	shield_label.text = "Player shield: %s%s | Enemy shield: %s" % [
 		"ON" if player_shield_on else "OFF",
+		" (latched)" if player_shield_latched else "",
 		"ON" if enemy_shield_on else "OFF",
 	]
 
@@ -88,6 +92,8 @@ func set_player_shield(shield: PlayerShield) -> void:
 	_player_shield = shield
 	if _player_shield:
 		_player_shield.shield_toggled.connect(func(_a): refresh_combat_hud())
+	if shield_hint:
+		shield_hint.bind_shield(_player_shield)
 	refresh_combat_hud()
 
 
@@ -100,7 +106,7 @@ func set_debug_visible(enabled: bool) -> void:
 	enemy_score_label.visible = enabled
 	shield_label.visible = enabled
 	status_label.visible = enabled
-	controls_label.visible = enabled
+	controls_label.visible = true
 	debug_label.visible = enabled
 	enemy_debug_label.visible = enabled and _enemy != null
 	_refresh()

@@ -9,8 +9,8 @@ const SpokenAlphabetScript := preload("res://scripts/word_game/spoken_alphabet_s
 const LetterSpawnerScript := preload("res://scripts/letters/letter_spawner.gd")
 const LetterScript := preload("res://scripts/letters/letter.gd")
 
-const PHASE2A_SCENE := "res://scenes/test/phase2a_movement_corrected.tscn"
-const PHASE2B1_SCENE := "res://scenes/test/phase2b1_word_game_test.tscn"
+const PHASE2A_SCENE := "res://scenes/test/archive/phase2a_movement_corrected.tscn"
+const PHASE2B1_SCENE := "res://scenes/test/archive/phase2b1_word_game_test.tscn"
 const LEVEL_SCENE := "res://scenes/levels/main2_heallthbartest_level.tscn"
 const LETTER_SCENE := "res://scenes/letters/letter.tscn"
 const CATALOG := "res://resources/letters/alphabet_catalog.tres"

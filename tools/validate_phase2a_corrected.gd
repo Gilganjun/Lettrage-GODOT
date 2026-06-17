@@ -1,9 +1,9 @@
 extends SceneTree
 
-const CORRECTED_SCENE := "res://scenes/test/phase2a_movement_corrected.tscn"
+const CORRECTED_SCENE := "res://scenes/test/archive/phase2a_movement_corrected.tscn"
 const COLLISION_MANIFEST := "res://resources/phase2a/collision_manifest.json"
-const LAYOUT_VERIFY := "res://scenes/test/phase2a_layout_verification.tscn"
-const PHASE1_SCENE := "res://scenes/test/animation_test.tscn"
+const LAYOUT_VERIFY := "res://scenes/test/archive/phase2a_layout_verification.tscn"
+const PHASE1_SCENE := "res://scenes/test/archive/animation_test.tscn"
 
 var _errors: Array[String] = []
 var _validate_scene: Node

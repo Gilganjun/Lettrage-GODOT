@@ -35,8 +35,8 @@ def parse_profile_order(tres_text: str) -> list[str]:
 def main() -> int:
     print("=== Lettrage Phase 1 Validation (Python) ===\n")
     check((ROOT / "project.godot").is_file(), "project.godot", "project.godot missing")
-    check((ROOT / "scenes/test/animation_test.tscn").is_file(), "dual animation test scene", "test scene missing")
-    check((ROOT / "scenes/test/character_preview_slot.tscn").is_file(), "character preview slot scene", "slot scene missing")
+    check((ROOT / "scenes/test/archive/animation_test.tscn").is_file(), "dual animation test scene", "test scene missing")
+    check((ROOT / "scenes/test/archive/character_preview_slot.tscn").is_file(), "character preview slot scene", "slot scene missing")
     check((ROOT / "scripts/resources/character_visual_profile.gd").is_file(), "CharacterVisualProfile script", "profile script missing")
 
     for prof, order, label in (

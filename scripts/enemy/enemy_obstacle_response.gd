@@ -64,9 +64,13 @@ var _pause_then: EscapeAction = EscapeAction.NONE
 var _last_reverse_x := 0.0
 var _last_body_pos := Vector2.ZERO
 var _encounter_stall_timer := 0.0
+var _blocked_spot_jump_retries := 0
 var _rng := RandomNumberGenerator.new()
+
+const MAX_BLOCKED_SPOT_JUMP_RETRIES := 1
 var _movement_controller: EnemyMovementController
 var _movement_config: EnemyMovementConfig
+var _last_sensor: Dictionary = {}
 
 
 func _ready() -> void:
@@ -94,6 +98,7 @@ func reset_after_recovery() -> void:
 	stuck_timer = 0.0
 	_pushing_block_timer = 0.0
 	_encounter_stall_timer = 0.0
+	_blocked_spot_jump_retries = 0
 	jump_suppressed = false
 	failed_jump_count = 0
 	obstacle_decision_cooldown = 0.35
@@ -108,6 +113,7 @@ func tick(
 	horizontal_speed: float,
 	intended_direction: int,
 ) -> void:
+	_last_sensor = sensor
 	_last_body_pos = body_pos
 	if obstacle_decision_cooldown > 0.0:
 		obstacle_decision_cooldown = maxf(0.0, obstacle_decision_cooldown - delta)
@@ -264,9 +270,12 @@ func _pick_action(sensor: Dictionary) -> EscapeAction:
 	var early: bool = bool(sensor.get("early_approach", false))
 	var jump_weight := weight_jump_clear if jumpable else weight_jump_uncertain
 	var reverse_weight := weight_reverse_clear if jumpable else weight_reverse_uncertain
-	if bool(sensor.get("geometry_snag", false)):
+	if bool(sensor.get("geometry_snag", false)) and not jumpable:
 		jump_weight = 5
 		reverse_weight = 95
+	elif jumpable:
+		jump_weight += 20
+		reverse_weight = maxi(10, reverse_weight - 15)
 	if early and jumpable:
 		jump_weight += weight_jump_early_bonus
 		reverse_weight = maxi(10, reverse_weight - 15)
@@ -282,7 +291,9 @@ func _pick_action(sensor: Dictionary) -> EscapeAction:
 		return EscapeAction.JUMP
 	if early and jumpable and not pick_jump:
 		return EscapeAction.REVERSE
-	if _rng.randi_range(0, 99) < weight_pause_vs_immediate:
+	if pick_jump and jumpable:
+		return EscapeAction.JUMP
+	if _rng.randi_range(0, 99) < weight_pause_vs_immediate and not jumpable:
 		return EscapeAction.PAUSE_JUMP if base == EscapeAction.JUMP else EscapeAction.PAUSE_REVERSE
 	return base
 
@@ -342,7 +353,11 @@ func _tick_executing(
 ) -> void:
 	if selected_action == EscapeAction.JUMP and on_floor and _pending_jump_impulse <= 0.0:
 		if bool(sensor.get("blocked_wall", false)) and absf(body_pos.x - last_blocked_x) < failed_jump_block_radius:
-			_stuck_fallback(body_pos)
+			if _blocked_spot_jump_retries >= MAX_BLOCKED_SPOT_JUMP_RETRIES:
+				_execute_reverse()
+			else:
+				_blocked_spot_jump_retries += 1
+				_stuck_fallback(body_pos)
 		else:
 			_clear_encounter("jump_complete")
 
@@ -365,6 +380,25 @@ func _on_landed(body_pos: Vector2, sensor: Dictionary) -> void:
 
 
 func _stuck_fallback(body_pos: Vector2) -> void:
+	if (
+		bool(_last_sensor.get("jumpable", false))
+		and not jump_suppressed
+		and _blocked_spot_jump_retries < MAX_BLOCKED_SPOT_JUMP_RETRIES
+		and _movement_controller != null
+		and _movement_controller.request_jump()
+	):
+		_blocked_spot_jump_retries += 1
+		_pending_jump_impulse = _compute_hop_speed(
+			maxf(float(_last_sensor.get("obstacle_height", 0.0)), 24.0)
+		)
+		_jump_attempt_x = body_pos.x
+		_jump_in_progress = true
+		jumps_chosen += 1
+		last_escape_outcome = "stuck_jump"
+		obstacle_decision_cooldown = post_jump_cooldown_duration
+		stuck_timer = 0.0
+		_encounter_stall_timer = 0.0
+		return
 	stuck_fallbacks += 1
 	stuck_fallback_triggered.emit()
 	last_escape_outcome = "stuck_fallback_reverse"
@@ -395,6 +429,7 @@ func _clear_encounter(reason: String) -> void:
 		if reason in ["moved_away", "jump_passed"]:
 			failed_jump_count = 0
 			repeated_reverse_count = 0
+			_blocked_spot_jump_retries = 0
 
 
 func _is_movement_blocked(sensor: Dictionary, blocked: bool, pushing_without_sensor: bool) -> bool:

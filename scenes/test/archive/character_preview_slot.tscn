@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://character_preview_slot"]
 
-[ext_resource type="Script" path="res://scenes/test/character_preview_slot.gd" id="1_script"]
+[ext_resource type="Script" path="res://scenes/test/archive/character_preview_slot.gd" id="1_script"]
 
 [node name="CharacterPreviewSlot" type="VBoxContainer"]
 custom_minimum_size = Vector2(440, 520)

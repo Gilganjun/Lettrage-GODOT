@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SCENE := "res://scenes/test/phase2a_movement_corrected.tscn"
+const SCENE := "res://scenes/test/archive/phase2a_movement_corrected.tscn"
 
 var _scene: Node
 var _player: CharacterBody2D

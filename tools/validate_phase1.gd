@@ -4,7 +4,7 @@ const PLAYER_PROFILE := "res://resources/characters/player_visual.tres"
 const ENEMY_PROFILE := "res://resources/characters/enemy_visual.tres"
 const PLAYER_FRAMES := "res://resources/sprite_frames/player_frames.tres"
 const ENEMY_FRAMES := "res://resources/sprite_frames/enemy_frames.tres"
-const MAIN_SCENE := "res://scenes/test/animation_test.tscn"
+const MAIN_SCENE := "res://scenes/test/archive/animation_test.tscn"
 
 const PLAYER_ORDER: Array[String] = [
 	"Idle", "Run", "Climb", "Jump", "Fall", "Death", "Sprint", "Crouch", "Roll", "Kick2", "Kick",

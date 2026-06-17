@@ -18,10 +18,10 @@ signal movement_state_changed(state: EnemyAnimation.MovementState)
 @onready var movement_controller: EnemyMovementController = $EnemyMovementController
 @onready var obstacle_sensor: Node = $ObstacleSensor
 @onready var obstacle_response: EnemyObstacleResponse = $ObstacleResponse
-@onready var word_controller: Node = $EnemyWordController
-@onready var letter_targeting: Node = $EnemyLetterTargeting
-@onready var letter_collector: Node = $EnemyLetterCollector
-@onready var shield_controller: Node = $EnemyShieldController
+@onready var word_controller: EnemyWordController = $EnemyWordController
+@onready var letter_targeting: EnemyLetterTargeting = $EnemyLetterTargeting
+@onready var letter_collector: EnemyLetterCollector = $EnemyLetterCollector
+@onready var shield_controller: EnemyShieldController = $EnemyShieldController
 @onready var shield_component: ShieldComponent = $ShieldComponent
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var floor_ray_left: RayCast2D = $FloorRayLeft
@@ -48,12 +48,20 @@ var _spawn_position := Vector2(740.0, 406.0)
 var _chase_hop_impulse := 0.0
 var _ambient_idle_remaining := 0.0
 var _ambient_idle_deadline := 0.0
+var _air_jumps_remaining := 0
+var _letter_shooter: EnemyLetterShooter
 
 const FLOOR_SNAP := 4.0
+const MAX_AIR_JUMPS := 1
+const CHASE_HOP_IMPULSE := 440.0
+const MAX_JUMP_IMPULSE := 920.0
 const RECOVER_MIN_Y := -80.0
 const RECOVER_MAX_Y := 620.0
 const RECOVER_MIN_X := 40.0
 const RECOVER_MAX_X := 2400.0
+const RECOVER_CATASTROPHIC_MIN_Y := -520.0
+const RECOVER_CATASTROPHIC_MAX_Y := 720.0
+const RECOVER_CATASTROPHIC_X_MARGIN := 120.0
 
 
 func _ready() -> void:
@@ -75,9 +83,10 @@ func _ready() -> void:
 
 
 func _setup_word_and_shield() -> void:
-	var hit_size := Vector2(36, 48)
+	var shield_size := _shield_body_size()
+	var collector_size := shield_size
 	if collision_shape and collision_shape.shape is RectangleShape2D:
-		hit_size = (collision_shape.shape as RectangleShape2D).size
+		collector_size = (collision_shape.shape as RectangleShape2D).size
 	if shield_component:
 		shield_component.owner_group = "enemy"
 		shield_component.impact_source = "enemy_shield"
@@ -88,10 +97,10 @@ func _setup_word_and_shield() -> void:
 		shield_component.shield_impact_sounds = impact_sounds
 		shield_component.impact_volume = ShieldComponent.PLAYER_BREAK_VOLUME
 		if collision_shape:
-			shield_component.position = collision_shape.position
+			shield_component.position = Vector2(_half_w, _foot_y - shield_size.y * 0.5)
 		else:
 			shield_component.position = Vector2(_half_w, _display_size.y * 0.45)
-		shield_component.configure_body_shape(hit_size)
+		shield_component.configure_body_shape(shield_size)
 		shield_component.z_index = 20
 	if shield_controller:
 		shield_controller.setup(self, shield_component, letter_targeting)
@@ -106,19 +115,40 @@ func _setup_word_and_shield() -> void:
 		if shape == null:
 			shape = CollisionShape2D.new()
 			var rect := RectangleShape2D.new()
-			rect.size = hit_size
+			rect.size = collector_size
 			shape.shape = rect
 			letter_collector.add_child(shape)
 		elif shape.shape is RectangleShape2D:
-			var body_rect := collision_shape.shape as RectangleShape2D
-			if shape.shape is RectangleShape2D:
-				(shape.shape as RectangleShape2D).size = body_rect.size
+			(shape.shape as RectangleShape2D).size = collector_size
 		if not letter_collector.letter_collected.is_connected(_on_enemy_letter_collected):
 			letter_collector.letter_collected.connect(_on_enemy_letter_collected)
 	if word_controller:
 		word_controller.collect_sound = load("res://assets/361334__spoonsandlessspoons__charge-up-shot.wav")
 		if not word_controller.word_state.word_completed.is_connected(_on_enemy_word_completed):
 			word_controller.word_state.word_completed.connect(_on_enemy_word_completed)
+	_setup_letter_shooter()
+
+
+func _shield_body_size() -> Vector2:
+	if collision_shape and collision_shape.shape is RectangleShape2D:
+		var col := (collision_shape.shape as RectangleShape2D).size
+		# Torso-only rect — same wrap style as player shield, not full physics padding.
+		return Vector2(col.x * 0.72, col.y * 0.52)
+	if _display_size.x <= 0.0 or _foot_y <= 0.0:
+		return Vector2(36, 48)
+	return Vector2(_display_size.x * 0.40, _foot_y * 0.45)
+
+
+func _setup_letter_shooter() -> void:
+	_letter_shooter = EnemyLetterShooter.new()
+	_letter_shooter.word_controller = word_controller
+	_letter_shooter.shield_component = shield_component
+	_letter_shooter.letter_targeting = letter_targeting
+	if collision_shape:
+		_letter_shooter.sync_to_body(collision_shape.position)
+	else:
+		_letter_shooter.sync_to_body(Vector2(_half_w, _display_size.y * 0.45))
+	add_child(_letter_shooter)
 
 
 func configure_from_gdevelop(row: Dictionary) -> void:
@@ -267,6 +297,13 @@ func _tick_word_systems(delta: float) -> void:
 		letter_targeting.tick(delta, global_position, needed, shield_blocks)
 	if shield_controller:
 		shield_controller.tick(delta, global_position)
+	if _letter_shooter:
+		var blocked: bool = combat is CharacterCombat and (
+			(combat as CharacterCombat).is_dead()
+			or (combat as CharacterCombat).blocks_ai()
+			or (combat as CharacterCombat).blocks_collection()
+		)
+		_letter_shooter.tick(delta, global_position, facing, blocked)
 
 
 func _process_platformer(delta: float) -> void:
@@ -308,9 +345,9 @@ func _process_platformer(delta: float) -> void:
 		and chase_dir != 0
 		and letter_targeting
 		and letter_targeting.should_request_chase_jump(global_position, is_on_floor())
-		and movement_controller.request_jump()
+		and movement_controller.request_chase_jump()
 	):
-		_chase_hop_impulse = 380.0
+		_chase_hop_impulse = CHASE_HOP_IMPULSE
 	if obstacle_response.call("is_paused"):
 		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
 		if not is_on_floor():
@@ -327,19 +364,19 @@ func _process_platformer(delta: float) -> void:
 		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
 		_jump_time = 0.0
+		_air_jumps_remaining = MAX_AIR_JUMPS
 		var hop_impulse: float = obstacle_response.consume_jump_request()
 		if hop_impulse <= 0.0 and _chase_hop_impulse > 0.0:
 			hop_impulse = _chase_hop_impulse
 			_chase_hop_impulse = 0.0
 		if hop_impulse > 0.0:
-			velocity.y = -hop_impulse
-			_jump_held = false
-			_jump_time = 0.0
+			_apply_jump_impulse(hop_impulse, false)
 	if _jump_held and _jump_time <= cfg.jump_sustain_time and velocity.y < 0.0:
 		_jump_time += delta
-		velocity.y = -cfg.jump_speed
+		velocity.y = -minf(cfg.jump_speed, MAX_JUMP_IMPULSE)
 	else:
 		_jump_held = false
+	_try_intelligent_double_jump(cfg)
 	_try_mount_ladder()
 
 
@@ -353,6 +390,29 @@ func _on_enemy_letter_collected(_letter: Letter, _character: String) -> void:
 func _on_enemy_word_completed(_word: String) -> void:
 	if letter_targeting:
 		letter_targeting.drop_target("word_complete")
+
+
+func _try_intelligent_double_jump(cfg: EnemyMovementConfig) -> void:
+	if is_on_floor() or _air_jumps_remaining <= 0:
+		return
+	if velocity.y < -cfg.jump_speed * 0.35:
+		return
+	if letter_targeting == null:
+		return
+	var target: Letter = letter_targeting.get_valid_target()
+	if target == null:
+		return
+	var to_target: Vector2 = target.global_position - global_position
+	if to_target.y >= -48.0 or absf(to_target.x) > 180.0:
+		return
+	_air_jumps_remaining -= 1
+	_apply_jump_impulse(cfg.jump_speed * 0.72, false)
+
+
+func _apply_jump_impulse(impulse: float, allow_sustain: bool) -> void:
+	velocity.y = -minf(maxf(impulse, 0.0), MAX_JUMP_IMPULSE)
+	_jump_held = allow_sustain
+	_jump_time = 0.0
 
 
 func _process_ladder(_delta: float) -> void:
@@ -415,7 +475,7 @@ func _update_movement_state() -> void:
 	elif not is_on_floor():
 		new_state = (
 			EnemyAnimation.MovementState.JUMP
-			if velocity.y < 0.0
+			if velocity.y < -40.0
 			else EnemyAnimation.MovementState.FALL
 		)
 	elif obstacle_response.call("is_paused") or _is_ambient_idle_active():
@@ -548,13 +608,22 @@ func _on_ladder_area_exited(_area: Area2D) -> void:
 
 
 func _recover_if_out_of_bounds() -> void:
-	var out_of_bounds := (
+	var mildly_out := (
 		global_position.y < RECOVER_MIN_Y
 		or global_position.y > RECOVER_MAX_Y
 		or global_position.x < RECOVER_MIN_X
 		or global_position.x > RECOVER_MAX_X
 	)
-	if not out_of_bounds:
+	var catastrophically_out := (
+		global_position.y < RECOVER_CATASTROPHIC_MIN_Y
+		or global_position.y > RECOVER_CATASTROPHIC_MAX_Y
+		or global_position.x < RECOVER_MIN_X - RECOVER_CATASTROPHIC_X_MARGIN
+		or global_position.x > RECOVER_MAX_X + RECOVER_CATASTROPHIC_X_MARGIN
+	)
+	if not mildly_out and not catastrophically_out:
+		return
+	# High jumps are valid — do not teleport mid-air back to spawn.
+	if not catastrophically_out and not is_on_floor():
 		return
 	global_position = _spawn_position
 	velocity = Vector2.ZERO
