@@ -43,6 +43,7 @@ func scan(direction: int) -> Dictionary:
 	var result := {
 		"direction": direction,
 		"blocked_wall": false,
+		"geometry_snag": false,
 		"ahead_obstacle": false,
 		"ledge_ahead": false,
 		"wall_point": Vector2.ZERO,
@@ -59,11 +60,17 @@ func scan(direction: int) -> Dictionary:
 		return result
 	var wall_ray := _wall_right if direction > 0 else _wall_left
 	var ledge_ray := _floor_right if direction > 0 else _floor_left
-	_position_contact_wall_ray(wall_ray, direction)
+	var body_wall: Vector2 = _probe_contact_wall(wall_ray, direction, 20.0)
+	var foot_wall: Vector2 = _probe_contact_wall(wall_ray, direction, 5.0)
 	_position_look_ahead_rays(direction)
-	if wall_ray and wall_ray.is_colliding():
+	if _wall_probe_hit(body_wall):
 		result.blocked_wall = true
-		result.wall_point = wall_ray.get_collision_point()
+		result.wall_point = body_wall
+		result.distance_to_obstacle = _ray_origin_global(wall_ray).distance_to(result.wall_point)
+	elif _wall_probe_hit(foot_wall):
+		result.geometry_snag = true
+		result.blocked_wall = true
+		result.wall_point = foot_wall
 		result.distance_to_obstacle = _ray_origin_global(wall_ray).distance_to(result.wall_point)
 	elif _look_ahead_wall and _look_ahead_wall.is_colliding():
 		result.ahead_obstacle = true
@@ -128,13 +135,20 @@ func _analyze_step_geometry(direction: int, result: Dictionary) -> void:
 	)
 
 
-func _position_contact_wall_ray(wall_ray: RayCast2D, direction: int) -> void:
+func _probe_contact_wall(wall_ray: RayCast2D, direction: int, height_from_foot: float) -> Vector2:
 	if wall_ray == null:
-		return
-	var lead := Vector2(_half_w + float(direction) * 4.0, _foot_y_local - 20.0)
+		return Vector2(INF, INF)
+	var lead := Vector2(_half_w + float(direction) * 4.0, _foot_y_local - height_from_foot)
 	wall_ray.position = lead
 	wall_ray.target_position = Vector2(float(direction) * 28.0, 0.0)
 	wall_ray.force_raycast_update()
+	if wall_ray.is_colliding():
+		return wall_ray.get_collision_point()
+	return Vector2(INF, INF)
+
+
+func _wall_probe_hit(point: Vector2) -> bool:
+	return point.is_finite()
 
 
 func _position_look_ahead_rays(direction: int) -> void:

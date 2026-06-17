@@ -80,6 +80,16 @@ func reverse_direction() -> void:
 	set_direction(-direction)
 
 
+func retreat_from_obstacle(current_x: float, block_direction: int, margin: float = 140.0) -> void:
+	if block_direction > 0:
+		target_x = clampf(current_x - margin, patrol_min_x, patrol_max_x)
+		set_direction(-1)
+	elif block_direction < 0:
+		target_x = clampf(current_x + margin, patrol_min_x, patrol_max_x)
+		set_direction(1)
+	target_changed.emit(target_x)
+
+
 func request_jump() -> bool:
 	if jump_cooldown > 0.0:
 		return false

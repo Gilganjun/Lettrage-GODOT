@@ -1,33 +1,28 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ds1skdv75xgr7"]
 
-[ext_resource type="Script" path="res://scripts/level/main2_level.gd" id="1_50jov"]
-[ext_resource type="Texture2D" path="res://assets/environment/out_18.jpg" id="2_rg3rl"]
-[ext_resource type="Texture2D" path="res://assets/environment/out_18_3.png" id="3_q0swt"]
-[ext_resource type="Texture2D" path="res://assets/environment/platform1Compr.png" id="4_0gmxj"]
-[ext_resource type="Texture2D" path="res://assets/environment/Tower1.png" id="5_fc5ad"]
-[ext_resource type="Texture2D" path="res://assets/environment/Ground2_Comp.png" id="6_amae3"]
-[ext_resource type="Texture2D" path="res://assets/environment/platform2Compr.png" id="7_0duhj"]
-[ext_resource type="Texture2D" path="res://assets/environment/Ladder1_7.png" id="8_fdiaf"]
-[ext_resource type="Texture2D" path="res://assets/environment/boundary.png" id="9_66uqh"]
-[ext_resource type="Texture2D" path="res://assets/environment/NewSprite4-1-8.png" id="10_8ungt"]
+[ext_resource type="Script" uid="uid://dlkl0h14xs78p" path="res://scripts/level/main2_level.gd" id="1_50jov"]
+[ext_resource type="Texture2D" uid="uid://nwxbyjh668n7" path="res://assets/environment/out_18.jpg" id="2_rg3rl"]
+[ext_resource type="Texture2D" uid="uid://cysdhy2f1cf2o" path="res://assets/environment/out_18_3.png" id="3_q0swt"]
+[ext_resource type="Texture2D" uid="uid://dcwudc4u0qb0a" path="res://assets/environment/platform1Compr.png" id="4_0gmxj"]
+[ext_resource type="Texture2D" uid="uid://onhrmn1ab4rq" path="res://assets/environment/Tower1.png" id="5_fc5ad"]
+[ext_resource type="Texture2D" uid="uid://b7yy26h8ju3ls" path="res://assets/environment/Ground2_Comp.png" id="6_amae3"]
+[ext_resource type="Texture2D" uid="uid://cy8qjlqqd3uf3" path="res://assets/environment/platform2Compr.png" id="7_0duhj"]
+[ext_resource type="Texture2D" uid="uid://brr0c217ib1t8" path="res://assets/environment/Ladder1_7.png" id="8_fdiaf"]
+[ext_resource type="Texture2D" uid="uid://cmldb7w0151fo" path="res://assets/environment/boundary.png" id="9_66uqh"]
+[ext_resource type="Texture2D" uid="uid://ckoclwg2p8f16" path="res://assets/environment/NewSprite4-1-8.png" id="10_8ungt"]
+[ext_resource type="PackedScene" path="res://scenes/level/screen_sky_backdrop.tscn" id="11_sky"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oimwn"]
 size = Vector2(382.0099, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e7kvw"]
-size = Vector2(220, 761)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hmte3"]
-size = Vector2(261, 32)
+size = Vector2(314, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_joktt"]
 size = Vector2(261, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_du2nt"]
 size = Vector2(2031.0498, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1oqdy"]
-size = Vector2(544, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_htwki"]
 size = Vector2(381.15506, 32)
@@ -43,6 +38,8 @@ size = Vector2(160, 928)
 
 [node name="Main2_heallthbartestLevel" type="Node2D" unique_id=571159355]
 script = ExtResource("1_50jov")
+
+[node name="ScreenSkyBackdrop" parent="." unique_id=302751931 instance=ExtResource("11_sky")]
 
 [node name="Backgrounds" type="Node2D" parent="." unique_id=955824865]
 
@@ -99,16 +96,17 @@ texture = ExtResource("5_fc5ad")
 centered = false
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Platforms/Tower1_001" unique_id=1350708358]
-position = Vector2(110, 380.5)
+position = Vector2(157, 16)
 collision_mask = 4
 metadata/source_name = "Tower1"
 metadata/collision_type = "floor"
 metadata/platform_type = "NormalPlatform"
 metadata/visible_pair = "Tower1"
-metadata/shape_note = "floor mask-top y=-266.0 (image y=0.0)"
+metadata/shape_note = "floor top slab only (was full 220x761 tower box blocking walkway)"
 metadata/walk_surface_y = -266.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Tower1_001/StaticBody2D" unique_id=1585855298]
+z_index = -2
 shape = SubResource("RectangleShape2D_e7kvw")
 
 [node name="Platform1_001" type="Node2D" parent="Platforms" unique_id=1745168192]
@@ -116,6 +114,7 @@ z_index = 3
 position = Vector2(920, 469)
 
 [node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1_001" unique_id=78959691]
+position = Vector2(138, 257.00003)
 scale = Vector2(0.32063884, 0.43404108)
 texture = ExtResource("6_amae3")
 centered = false
@@ -130,9 +129,6 @@ metadata/platform_type = "NormalPlatform"
 metadata/visible_pair = "Platform1"
 metadata/shape_note = "floor mask-top y=486.2 (image y=164.0)"
 metadata/walk_surface_y = 486.2058090195244
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform1_001/StaticBody2D" unique_id=1730501725]
-shape = SubResource("RectangleShape2D_hmte3")
 
 [node name="Platform1_002" type="Node2D" parent="Platforms" unique_id=815721048]
 z_index = 3
@@ -162,14 +158,14 @@ z_index = 67
 position = Vector2(120, 469)
 
 [node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1_003" unique_id=1338385870]
-position = Vector2(4.4803796, -1.5258789e-05)
-scale = Vector2(1.4054667, 1)
+position = Vector2(-137, 5)
+scale = Vector2(1.5626534, 1)
 texture = ExtResource("6_amae3")
 centered = false
 offset = Vector2(-11.049933, -124.35903)
 
 [node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform1_003/Sprite2D" unique_id=933483497]
-position = Vector2(636.45746, 4.9999847)
+position = Vector2(773.0441, -9.000015)
 scale = Vector2(1.4054667, 1)
 texture = ExtResource("6_amae3")
 centered = false
@@ -186,7 +182,7 @@ metadata/shape_note = "floor mask-top y=508.6 (image y=164.0)"
 metadata/walk_surface_y = 508.6409683227539
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform1_003/StaticBody2D" unique_id=1641390811]
-position = Vector2(608.525, 0)
+position = Vector2(601.0499, 0.3590088)
 shape = SubResource("RectangleShape2D_du2nt")
 
 [node name="Platform3_001" type="Node2D" parent="Platforms" unique_id=1151276926]
@@ -194,7 +190,8 @@ z_index = 502
 position = Vector2(1702, 279)
 
 [node name="Sprite2D" type="Sprite2D" parent="Platforms/Platform3_001" unique_id=1924621038]
-scale = Vector2(0.68, 0.728)
+position = Vector2(41.000065, 243.99997)
+scale = Vector2(0.51125, 0.68799996)
 texture = ExtResource("7_0duhj")
 centered = false
 
@@ -207,9 +204,6 @@ metadata/platform_type = "NormalPlatform"
 metadata/visible_pair = "Platform3"
 metadata/shape_note = "floor mask-top y=482.0 (image y=278.9)"
 metadata/walk_surface_y = 482.0430168457031
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Platform3_001/StaticBody2D" unique_id=1313374531]
-shape = SubResource("RectangleShape2D_1oqdy")
 
 [node name="Platform3_002" type="Node2D" parent="Platforms" unique_id=286949793]
 z_index = 1002
@@ -266,6 +260,7 @@ z_index = 38
 position = Vector2(0, -256)
 
 [node name="Sprite2D" type="Sprite2D" parent="Boundaries/LeftBoundary_001" unique_id=918117922]
+visible = false
 scale = Vector2(4.21875, 29)
 texture = ExtResource("9_66uqh")
 centered = false
@@ -281,6 +276,7 @@ metadata/shape_note = "wall"
 metadata/walk_surface_y = -256.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/LeftBoundary_001/StaticBody2D" unique_id=1118751710]
+z_index = -2
 shape = SubResource("RectangleShape2D_wsyct")
 
 [node name="RightBoundary_001" type="Node2D" parent="Boundaries" unique_id=1948169943]
@@ -288,6 +284,7 @@ z_index = 90
 position = Vector2(2112, -256)
 
 [node name="Sprite2D" type="Sprite2D" parent="Boundaries/RightBoundary_001" unique_id=1202475711]
+visible = false
 scale = Vector2(5, 29)
 texture = ExtResource("9_66uqh")
 centered = false
@@ -306,6 +303,7 @@ metadata/walk_surface_y = -256.0
 shape = SubResource("RectangleShape2D_3vhxw")
 
 [node name="CollisionHelpers" type="Node2D" parent="." unique_id=23660769]
+visible = false
 
 [node name="TopBoundary_001" type="Node2D" parent="CollisionHelpers" unique_id=569239710]
 z_index = 59

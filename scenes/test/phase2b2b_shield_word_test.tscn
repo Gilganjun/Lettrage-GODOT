@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://phase2b2b_shield_word_test"]
+[gd_scene load_steps=10 format=3 uid="uid://phase2b2b_shield_word_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2b2b_shield_word_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/letters/letter_spawner.gd" id="4_spawner"]
 [ext_resource type="Script" path="res://scripts/word_game/word_game_controller.gd" id="5_controller"]
 [ext_resource type="PackedScene" path="res://scenes/ui/word_game_hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="7_backdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
 bg_color = Color(0, 0, 0, 0.55)
@@ -16,6 +17,8 @@ content_margin_bottom = 4.0
 
 [node name="Phase2B2BShieldWordTest" type="Node2D"]
 script = ExtResource("1_root")
+
+[node name="ViewportBackdropFill" parent="." instance=ExtResource("7_backdrop")]
 
 [node name="WordGameController" type="Node" parent="."]
 script = ExtResource("5_controller")

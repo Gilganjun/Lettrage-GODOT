@@ -1,8 +1,11 @@
 {
   "layout": "Main2_heallthbartest",
   "name": "Enemy",
-  "source_x": 740.0,
+  "source_x": 1955.0,
   "source_y": 406.0,
+  "debug_note": "TEMP — Platform1_002 right-edge lip; revert to 740/406",
+  "debug_initial_direction": 1,
+  "debug_patrol_target_x": 2000.0,
   "source_angle": 0.0,
   "source_z_order": 100,
   "source_custom_size": true,

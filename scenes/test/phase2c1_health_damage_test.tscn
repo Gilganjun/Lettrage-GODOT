@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://phase2c1_health_damage_test"]
+[gd_scene load_steps=14 format=3 uid="uid://phase2c1_health_damage_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -8,6 +8,10 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/word_game_hud.tscn" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="7_combat"]
 [ext_resource type="Script" path="res://scripts/combat/word_damage_bridge.gd" id="8_bridge"]
+[ext_resource type="Script" path="res://scripts/ui/word_celebration_player.gd" id="9_celeb"]
+[ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="10_backdrop"]
+[ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
+[ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
 bg_color = Color(0, 0, 0, 0.55)
@@ -18,6 +22,13 @@ content_margin_bottom = 4.0
 
 [node name="Phase2C1HealthDamageTest" type="Node2D"]
 script = ExtResource("1_root")
+
+[node name="SceneAmbientAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_ambient")
+ambient_level = 0.2
+script = ExtResource("12_ambient")
+
+[node name="ViewportBackdropFill" parent="." instance=ExtResource("10_backdrop")]
 
 [node name="WordGameController" type="Node" parent="."]
 script = ExtResource("5_controller")
@@ -45,6 +56,10 @@ script = ExtResource("3_coldebug")
 [node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]
 
 [node name="CombatHud" parent="UI" instance=ExtResource("7_combat")]
+
+[node name="WordCelebrationPlayer" type="CanvasLayer" parent="UI"]
+layer = 20
+script = ExtResource("9_celeb")
 
 [node name="TopBar" type="PanelContainer" parent="UI"]
 offset_left = 6.0

@@ -37,7 +37,11 @@ func _on_player_valid_word(word: String, word_length: int, score_delta: int) -> 
 	var event_id := _next_event_id("player_word:%s" % word)
 	if _is_duplicate(event_id):
 		return
-	var applied: int = enemy_combat.apply_word_damage(damage, "player_valid_word")
+	var attacker_body := _combat_body(player_combat)
+	var attacker_pos := attacker_body.global_position if attacker_body else Vector2.INF
+	var applied: int = enemy_combat.apply_word_damage(
+		damage, "player_valid_word", attacker_pos, attacker_body,
+	)
 	_record_event({
 		"id": event_id,
 		"attacker": "player",
@@ -60,7 +64,11 @@ func _on_enemy_word_completed(word: String) -> void:
 	var event_id := _next_event_id("enemy_word:%s" % word)
 	if _is_duplicate(event_id):
 		return
-	var applied: int = player_combat.apply_word_damage(damage, "enemy_word_complete")
+	var attacker_body := _combat_body(enemy_combat)
+	var attacker_pos := attacker_body.global_position if attacker_body else Vector2.INF
+	var applied: int = player_combat.apply_word_damage(
+		damage, "enemy_word_complete", attacker_pos, attacker_body,
+	)
 	_record_event({
 		"id": event_id,
 		"attacker": "enemy",
@@ -88,3 +96,9 @@ func _is_duplicate(event_id: String) -> bool:
 func _record_event(event: Dictionary) -> void:
 	last_damage_event = event
 	word_damage_applied.emit(event)
+
+
+func _combat_body(combat: Node) -> Node2D:
+	if combat == null:
+		return null
+	return combat.get_parent() as Node2D

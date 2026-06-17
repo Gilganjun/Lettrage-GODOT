@@ -11,6 +11,7 @@ signal movement_state_changed(state: PlayerAnimation.MovementState)
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var animation_controller: PlayerAnimation = $AnimationController
 @onready var camera: Camera2D = $Camera2D
+@onready var camera_zoom: Camera2D = $Camera2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var facing: int = 1
@@ -34,14 +35,20 @@ const FLOOR_SNAP := 4.0
 
 func _ready() -> void:
 	add_to_group("player")
-	camera.zoom = Vector2(1.0, 1.0)
+	if camera_zoom and camera_zoom.has_method("reset_to_base"):
+		camera_zoom.reset_to_base()
+	else:
+		camera.zoom = Vector2(1.0, 1.0)
 	_apply_visual_profile()
 	animation_controller.sprite = sprite
 	activate_follow_camera()
 
 
 func activate_follow_camera() -> void:
-	camera.zoom = Vector2(1.0, 1.0)
+	if camera_zoom and camera_zoom.has_method("reset_to_base"):
+		camera_zoom.reset_to_base()
+	else:
+		camera.zoom = Vector2(1.0, 1.0)
 	camera.enabled = true
 	for fixed in get_tree().get_nodes_in_group("fixed_camera"):
 		if fixed is Camera2D:
@@ -120,6 +127,7 @@ func get_debug_info() -> Dictionary:
 		"on_ladder": is_on_ladder,
 		"facing": facing,
 		"sprint": _sprint_active,
+		"camera_zoom_percent": camera_zoom.call("get_zoom_percent") if camera_zoom and camera_zoom.has_method("get_zoom_percent") else 100.0,
 	}
 
 

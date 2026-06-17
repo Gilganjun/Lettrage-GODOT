@@ -13,6 +13,16 @@ extends Resource
 
 @export var modulate: Color = Color.WHITE
 @export var display_scale: float = 0.45
+@export var native_width_override: float = 0.0
+@export var native_height_override: float = 0.0
+## Y pixel row of the feet in native sprite art (0 = use full frame height).
+@export var native_foot_y: float = 0.0
+## Multiplier on spawn display size (e.g. 1.3 = 30% larger).
+@export var graphics_scale_multiplier: float = 1.0
+## When true, scale X and Y uniformly from art aspect (height target from spawn box).
+@export var use_proportional_sprite_scale := false
+## Extra horizontal scale applied after proportional sizing (1.3 = 30% wider).
+@export var sprite_width_scale_multiplier: float = 1.0
 
 # GDevelop effect metadata (Main2_heallthbartest baseline)
 @export var glow_enabled: bool = false

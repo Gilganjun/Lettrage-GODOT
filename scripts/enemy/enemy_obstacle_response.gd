@@ -16,6 +16,8 @@ signal stuck_fallback_triggered
 @export var pause_min := 0.15
 @export var pause_max := 0.45
 @export var stuck_time_limit := 1.25
+@export var snag_stuck_time_limit := 0.45
+@export var encounter_stall_time_limit := 0.75
 @export var stuck_velocity_threshold := 6.0
 @export var failed_jump_block_radius := 28.0
 @export var local_reverse_radius := 80.0
@@ -60,6 +62,8 @@ var _was_airborne := false
 var _executing := false
 var _pause_then: EscapeAction = EscapeAction.NONE
 var _last_reverse_x := 0.0
+var _last_body_pos := Vector2.ZERO
+var _encounter_stall_timer := 0.0
 var _rng := RandomNumberGenerator.new()
 var _movement_controller: EnemyMovementController
 var _movement_config: EnemyMovementConfig
@@ -89,6 +93,7 @@ func reset_after_recovery() -> void:
 	pause_timer = 0.0
 	stuck_timer = 0.0
 	_pushing_block_timer = 0.0
+	_encounter_stall_timer = 0.0
 	jump_suppressed = false
 	failed_jump_count = 0
 	obstacle_decision_cooldown = 0.35
@@ -103,6 +108,7 @@ func tick(
 	horizontal_speed: float,
 	intended_direction: int,
 ) -> void:
+	_last_body_pos = body_pos
 	if obstacle_decision_cooldown > 0.0:
 		obstacle_decision_cooldown = maxf(0.0, obstacle_decision_cooldown - delta)
 	if reversal_cooldown > 0.0:
@@ -136,13 +142,14 @@ func tick(
 		or bool(sensor.get("ledge_ahead", false))
 		or early_jump_zone
 	)
-	if (
+	var pushing_without_sensor := (
 		not blocked
 		and on_floor
 		and intended_direction != 0
 		and horizontal_speed < stuck_velocity_threshold
 		and not bool(sensor.get("ahead_obstacle", false))
-	):
+	)
+	if pushing_without_sensor:
 		_pushing_block_timer += delta
 	else:
 		_pushing_block_timer = 0.0
@@ -150,21 +157,31 @@ func tick(
 		blocked = true
 		if last_obstacle_point == Vector2.ZERO:
 			last_obstacle_point = body_pos + Vector2(float(intended_direction) * 20.0, 0.0)
+	var movement_blocked := _is_movement_blocked(sensor, blocked, pushing_without_sensor)
 	if blocked and not encounter_active and obstacle_decision_cooldown <= 0.0 and on_floor and not _jump_in_progress:
 		_start_encounter(sensor, body_pos)
 	elif (
-		blocked
+		movement_blocked
 		and on_floor
 		and intended_direction != 0
 		and horizontal_speed < stuck_velocity_threshold
-		and bool(sensor.get("blocked_wall", false))
 	):
 		stuck_timer += delta
 		max_stuck_duration = maxf(max_stuck_duration, stuck_timer)
-		if stuck_timer >= stuck_time_limit:
+		if stuck_timer >= _stuck_time_for(sensor):
 			_stuck_fallback(body_pos)
 	else:
 		stuck_timer = 0.0
+	if encounter_active and not _executing and not _jump_in_progress and on_floor:
+		if movement_blocked and intended_direction != 0 and horizontal_speed < stuck_velocity_threshold:
+			_encounter_stall_timer += delta
+			var stall_limit := encounter_stall_time_limit
+			if bool(sensor.get("geometry_snag", false)):
+				stall_limit = snag_stuck_time_limit
+			if _encounter_stall_timer >= stall_limit:
+				_stuck_fallback(body_pos)
+		else:
+			_encounter_stall_timer = 0.0
 
 
 func is_jump_in_progress() -> bool:
@@ -186,11 +203,13 @@ func consume_jump_request() -> float:
 func get_debug_info(sensor: Dictionary) -> Dictionary:
 	var detected := (
 		bool(sensor.get("blocked_wall", false))
+		or bool(sensor.get("geometry_snag", false))
 		or bool(sensor.get("ledge_ahead", false))
 		or bool(sensor.get("ahead_obstacle", false))
 	)
 	return {
 		"obstacle_detected": detected,
+		"geometry_snag": bool(sensor.get("geometry_snag", false)),
 		"ahead_obstacle": bool(sensor.get("ahead_obstacle", false)),
 		"distance_to_obstacle": sensor.get("distance_to_obstacle", INF),
 		"early_approach": bool(sensor.get("early_approach", false)),
@@ -214,6 +233,7 @@ func get_debug_info(sensor: Dictionary) -> Dictionary:
 		"stuck_fallbacks": stuck_fallbacks,
 		"max_stuck_duration": max_stuck_duration,
 		"pushing_block_timer": _pushing_block_timer,
+		"encounter_stall_timer": _encounter_stall_timer,
 	}
 
 
@@ -244,6 +264,9 @@ func _pick_action(sensor: Dictionary) -> EscapeAction:
 	var early: bool = bool(sensor.get("early_approach", false))
 	var jump_weight := weight_jump_clear if jumpable else weight_jump_uncertain
 	var reverse_weight := weight_reverse_clear if jumpable else weight_reverse_uncertain
+	if bool(sensor.get("geometry_snag", false)):
+		jump_weight = 5
+		reverse_weight = 95
 	if early and jumpable:
 		jump_weight += weight_jump_early_bonus
 		reverse_weight = maxi(10, reverse_weight - 15)
@@ -294,8 +317,10 @@ func _compute_hop_speed(step_height: float) -> float:
 
 
 func _execute_reverse() -> void:
+	var block_dir := _movement_controller.direction if _movement_controller else 1
 	if _movement_controller:
 		_movement_controller.reverse_direction()
+		_movement_controller.retreat_from_obstacle(_last_body_pos.x, block_dir)
 		if absf(_last_reverse_x) > 0.01 and absf(_movement_controller.direction) > 0:
 			if absf(last_blocked_x - _last_reverse_x) < local_reverse_radius:
 				repeated_reverse_count += 1
@@ -304,11 +329,11 @@ func _execute_reverse() -> void:
 	reversal_cooldown = reversal_cooldown_duration
 	obstacle_decision_cooldown = decision_cooldown_duration
 	last_escape_outcome = "reverse"
-	_executing = false
+	_clear_encounter("reverse")
 
 
 func _tick_executing(
-	_delta: float,
+	delta: float,
 	sensor: Dictionary,
 	body_pos: Vector2,
 	on_floor: bool,
@@ -317,7 +342,7 @@ func _tick_executing(
 ) -> void:
 	if selected_action == EscapeAction.JUMP and on_floor and _pending_jump_impulse <= 0.0:
 		if bool(sensor.get("blocked_wall", false)) and absf(body_pos.x - last_blocked_x) < failed_jump_block_radius:
-			_executing = false
+			_stuck_fallback(body_pos)
 		else:
 			_clear_encounter("jump_complete")
 
@@ -343,15 +368,17 @@ func _stuck_fallback(body_pos: Vector2) -> void:
 	stuck_fallbacks += 1
 	stuck_fallback_triggered.emit()
 	last_escape_outcome = "stuck_fallback_reverse"
+	var block_dir := _movement_controller.direction if _movement_controller else 1
 	if _movement_controller:
 		_movement_controller.reverse_direction()
+		_movement_controller.retreat_from_obstacle(body_pos.x, block_dir)
 		reverses_chosen += 1
 	reversal_cooldown = reversal_cooldown_duration
 	obstacle_decision_cooldown = decision_cooldown_duration
 	stuck_timer = 0.0
+	_encounter_stall_timer = 0.0
 	last_blocked_x = body_pos.x
-	_executing = false
-	encounter_active = false
+	_clear_encounter("stuck_fallback")
 
 
 func _clear_encounter(reason: String) -> void:
@@ -362,8 +389,23 @@ func _clear_encounter(reason: String) -> void:
 	selected_action = EscapeAction.NONE
 	_executing = false
 	_pause_then = EscapeAction.NONE
-	if reason in ["moved_away", "jump_passed", "reverse", "jump_complete"]:
+	_encounter_stall_timer = 0.0
+	if reason in ["moved_away", "jump_passed", "reverse", "jump_complete", "stuck_fallback"]:
 		jump_suppressed = false
 		if reason in ["moved_away", "jump_passed"]:
 			failed_jump_count = 0
 			repeated_reverse_count = 0
+
+
+func _is_movement_blocked(sensor: Dictionary, blocked: bool, pushing_without_sensor: bool) -> bool:
+	return (
+		blocked
+		or bool(sensor.get("geometry_snag", false))
+		or pushing_without_sensor
+	)
+
+
+func _stuck_time_for(sensor: Dictionary) -> float:
+	if bool(sensor.get("geometry_snag", false)):
+		return snag_stuck_time_limit
+	return stuck_time_limit

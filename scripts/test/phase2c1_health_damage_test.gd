@@ -9,6 +9,7 @@ const CATALOG := preload("res://resources/letters/alphabet_catalog.tres")
 const LETTER_SCENE := preload("res://scenes/letters/letter.tscn")
 const LayoutBuilder := preload("res://scripts/level/gdevelop_layout_builder.gd")
 const PlayerAttach := preload("res://scripts/test/player_gameplay_attach.gd")
+const WordGameFeatures := preload("res://scripts/word_game/word_game_features.gd")
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 
@@ -26,6 +27,7 @@ const POP_SOUNDS := [
 @onready var collision_debug: Node2D = $World/CollisionDebug
 @onready var hud: Control = $UI/WordGameHud
 @onready var combat_hud: Control = $UI/CombatHud
+@onready var word_celebration: CanvasLayer = $UI/WordCelebrationPlayer
 @onready var top_bar: Control = $UI/TopBar
 @onready var damage_bridge: Node = $WordDamageBridge
 
@@ -71,6 +73,13 @@ func _ready() -> void:
 		combat_hud.bind_words(word_controller, _enemy)
 	if hud.has_method("set_word_display_on_combat_hud"):
 		hud.set_word_display_on_combat_hud(true)
+	if word_celebration.has_method("setup"):
+		word_celebration.setup(combat_hud)
+	if word_celebration.has_method("bind_player_words"):
+		word_celebration.bind_player_words(word_controller)
+	if word_celebration.has_method("bind_enemy_words"):
+		word_celebration.bind_enemy_words(_enemy)
+	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
 	combat_hud.set_debug_visible(_word_debug)
 	_apply_hud_chrome_visibility()
 	call_deferred("_activate_player_camera")

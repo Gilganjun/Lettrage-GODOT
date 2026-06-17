@@ -14,6 +14,11 @@ const FACE_ALPHA := 0.28
 const FACE_ALPHA_PULSE := 0.10
 const GLOW_ALPHA := 0.10
 const GLOW_ALPHA_PULSE := 0.06
+const ENEMY_FACE_ALPHA := 0.12
+const ENEMY_FACE_ALPHA_PULSE := 0.04
+const ENEMY_GLOW_ALPHA := 0.04
+const ENEMY_GLOW_ALPHA_PULSE := 0.02
+const ENEMY_FIZZ_ALPHA := 0.18
 const GLOW_SCALE_MUL := 0.82
 
 const PLAYER_TINT := Color(0.72, 0.9, 1.0, 1.0)
@@ -101,20 +106,20 @@ func _apply_layout() -> void:
 	var body_fit := _size * BODY_FIT
 	_face.scale = _fit_texture_to_rect(face_tex, body_fit)
 	var face_c := tint
-	face_c.a = FACE_ALPHA
+	face_c.a = _face_alpha_base()
 	_face.modulate = face_c
 
 	var glow_fit := body_fit * GLOW_SCALE_MUL
 	_glow.scale = _fit_texture_to_rect(_glow.texture, glow_fit)
 	var glow_c := tint
-	glow_c.a = GLOW_ALPHA
+	glow_c.a = _glow_alpha_base()
 	_glow.modulate = glow_c
 
 	var half := body_fit * 0.5
 	_fizz.emission_shape = CPUParticles2D.EMISSION_SHAPE_POINTS
 	_fizz.emission_points = _rect_edge_points(body_fit, 14)
 	_fizz.color = tint
-	_fizz.color.a = 0.38
+	_fizz.color.a = ENEMY_FIZZ_ALPHA if _is_enemy else 0.38
 
 	var burst_half := half * 0.72
 	for burst in [_activate_burst, _impact_burst]:
@@ -130,12 +135,28 @@ func _process(delta: float) -> void:
 	var tint := ENEMY_TINT if _is_enemy else PLAYER_TINT
 	if _glow:
 		var glow_c := tint
-		glow_c.a = GLOW_ALPHA + GLOW_ALPHA_PULSE * pulse
+		glow_c.a = _glow_alpha_base() + _glow_alpha_pulse() * pulse
 		_glow.modulate = glow_c
 	if _face:
 		var face_c := tint
-		face_c.a = FACE_ALPHA + FACE_ALPHA_PULSE * pulse
+		face_c.a = _face_alpha_base() + _face_alpha_pulse() * pulse
 		_face.modulate = face_c
+
+
+func _face_alpha_base() -> float:
+	return ENEMY_FACE_ALPHA if _is_enemy else FACE_ALPHA
+
+
+func _face_alpha_pulse() -> float:
+	return ENEMY_FACE_ALPHA_PULSE if _is_enemy else FACE_ALPHA_PULSE
+
+
+func _glow_alpha_base() -> float:
+	return ENEMY_GLOW_ALPHA if _is_enemy else GLOW_ALPHA
+
+
+func _glow_alpha_pulse() -> float:
+	return ENEMY_GLOW_ALPHA_PULSE if _is_enemy else GLOW_ALPHA_PULSE
 
 
 func _build_face_frames() -> SpriteFrames:

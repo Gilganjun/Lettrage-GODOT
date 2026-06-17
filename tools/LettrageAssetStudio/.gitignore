@@ -1,0 +1,4 @@
+Outputs/*
+!Outputs/.gitkeep
+__pycache__/
+settings.json

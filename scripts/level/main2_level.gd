@@ -3,9 +3,28 @@ extends Node2D
 ## Persistent editor-authored Main2_heallthbartest layout.
 ## Open this scene in the Godot 2D editor to move platforms, ladders, and collision shapes.
 
+## GDevelop debug art — hidden in Godot; real collision lives on StaticBody2D / Area2D children.
+## - CollisionHelpers: near-white NewSprite4 placeholders (z 2020+)
+## - Boundaries/* Sprite2D: red boundary.png editor markers (z 38/90)
+@export var show_collision_helper_art := false
+@export var show_boundary_debug_art := false
+
 
 func _ready() -> void:
+	_apply_gdevelop_debug_art_visibility()
 	_register_level_groups()
+
+
+func _apply_gdevelop_debug_art_visibility() -> void:
+	var helpers := get_node_or_null("CollisionHelpers")
+	if helpers:
+		helpers.visible = show_collision_helper_art
+	var boundaries := get_node_or_null("Boundaries")
+	if boundaries:
+		for child in boundaries.get_children():
+			var sprite := child.get_node_or_null("Sprite2D") as Sprite2D
+			if sprite:
+				sprite.visible = show_boundary_debug_art
 
 
 func get_player_spawn_position() -> Vector2:

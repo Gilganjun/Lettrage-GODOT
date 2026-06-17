@@ -16,6 +16,7 @@ var shield: Node2D
 
 var _reactivate_timer := 0.0
 var _waiting_reactivate := false
+var _word_stun_locked := false
 var _body: CharacterBody2D
 var _targeting: Node
 
@@ -35,7 +36,25 @@ func setup(body: CharacterBody2D, shield_component: Node2D, targeting: Node) -> 
 			shield.activate("depart_scene")
 
 
+func enter_word_stun_lock() -> void:
+	_word_stun_locked = true
+	_waiting_reactivate = false
+	_reactivate_timer = 0.0
+	if shield:
+		shield.deactivate("word_stun")
+	last_activation_reason = "word_stun"
+	state_changed.emit()
+
+
+func exit_word_stun_lock() -> void:
+	_word_stun_locked = false
+
+
 func tick(delta: float, enemy_pos: Vector2) -> void:
+	if _word_stun_locked:
+		if shield and shield.is_active:
+			shield.deactivate("word_stun")
+		return
 	if _waiting_reactivate:
 		_reactivate_timer -= delta
 		if _reactivate_timer <= 0.0:
@@ -86,6 +105,7 @@ func get_debug_info() -> Dictionary:
 	var info: Dictionary = shield.get_debug_info() if shield else {}
 	info["last_activation_reason"] = last_activation_reason
 	info["reactivate_timer"] = _reactivate_timer
+	info["word_stun_locked"] = _word_stun_locked
 	return info
 
 

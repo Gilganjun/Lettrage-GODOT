@@ -4,7 +4,11 @@ extends Area2D
 ## Single falling collectible letter (A–Z) with authoritative resolution.
 
 const LetterShatterEffectScript := preload("res://scripts/letters/letter_shatter_effect.gd")
+const LetterReboundEffectScript := preload("res://scripts/letters/letter_rebound_effect.gd")
 const LetterTint := preload("res://scripts/letters/letter_tint.gd")
+
+## Shield breaks only: chance per collision for spin-away rebound instead of standard shatter.
+const SHIELD_REBOUND_CHANCE := 0.3
 
 enum Resolution {
 	NONE,
@@ -70,14 +74,14 @@ func is_resolved() -> bool:
 	return resolution != Resolution.NONE
 
 
-func try_resolve(outcome: Resolution, source: String = "") -> bool:
+func try_resolve(outcome: Resolution, source: String = "", knockback_from: Vector2 = Vector2.ZERO) -> bool:
 	if is_resolved():
 		return false
 	resolution = outcome
 	resolution_source = source
 	set_deferred("monitoring", false)
 	if shatter_on_resolve and _should_shatter(outcome):
-		_play_shatter_vfx()
+		_play_resolve_vfx(outcome, knockback_from)
 	resolved.emit(self, outcome, character)
 	queue_free()
 	return true
@@ -92,7 +96,13 @@ func _should_shatter(outcome: Resolution) -> bool:
 	)
 
 
-func _play_shatter_vfx() -> void:
+func _should_use_shield_rebound(outcome: Resolution) -> bool:
+	if outcome != Resolution.PLAYER_SHIELD and outcome != Resolution.ENEMY_SHIELD:
+		return false
+	return randf() < SHIELD_REBOUND_CHANCE
+
+
+func _play_resolve_vfx(outcome: Resolution, knockback_from: Vector2) -> void:
 	var sprite := $Sprite2D as Sprite2D
 	if sprite == null or sprite.texture == null:
 		return
@@ -100,6 +110,30 @@ func _play_shatter_vfx() -> void:
 	var parent := get_parent()
 	if parent == null:
 		parent = get_tree().current_scene
+	if _should_use_shield_rebound(outcome):
+		var knock_dir := global_position - knockback_from
+		LetterReboundEffectScript.spawn(
+			parent,
+			global_position,
+			sprite.texture,
+			tint_color,
+			sprite.scale,
+			knock_dir,
+		)
+	else:
+		_play_shatter_vfx(sprite, parent)
+
+
+func _play_shatter_vfx(sprite: Sprite2D = null, parent: Node = null) -> void:
+	if sprite == null:
+		sprite = $Sprite2D as Sprite2D
+	if sprite == null or sprite.texture == null:
+		return
+	sprite.visible = false
+	if parent == null:
+		parent = get_parent()
+		if parent == null:
+			parent = get_tree().current_scene
 	LetterShatterEffectScript.spawn(
 		parent,
 		global_position,

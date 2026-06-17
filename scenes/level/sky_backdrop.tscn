@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://sky_backdrop_main2"]
+
+[ext_resource type="Script" path="res://scripts/level/sky_backdrop.gd" id="1_sky"]
+[ext_resource type="Shader" path="res://shaders/sky_backdrop.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("2_shader")
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_unit"]
+size = Vector2i(8, 8)
+
+[node name="SkyBackdrop" type="Node2D"]
+script = ExtResource("1_sky")
+
+[node name="SkyQuad" type="Sprite2D" parent="."]
+z_index = -100
+position = Vector2(-720, -620)
+scale = Vector2(450, 210)
+centered = false
+texture = SubResource("PlaceholderTexture2D_unit")
+material = SubResource("ShaderMaterial_sky")

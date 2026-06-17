@@ -38,6 +38,8 @@ func _initialize() -> void:
 	_check_injury_component()
 	_check_word_damage_bridge()
 	_check_level_baseline()
+	_check_viewport_background()
+	_check_collision_helpers_hidden()
 	_load_scenes()
 	_run_combat_simulations()
 	_run_shield_regression()
@@ -56,7 +58,12 @@ func _check_files() -> void:
 		"scripts/combat/word_damage_bridge.gd",
 		"scripts/combat/word_damage_calculator.gd",
 		"scripts/combat/hit_feedback.gd",
-		"scripts/ui/health_bar.gd",
+		"scripts/ui/word_celebration_effect.gd",
+		"scripts/ui/word_celebration_player.gd",
+		"scripts/ui/viewport_backdrop_fill.gd",
+		"scenes/ui/viewport_backdrop_fill.tscn",
+		"shaders/sky_backdrop_screen.gdshader",
+		"scenes/level/screen_sky_backdrop.tscn",
 		"scenes/ui/health_bar.tscn",
 		"scenes/ui/combat_hud.tscn",
 		"reports/PHASE2C1_SOURCE_MAP.md",
@@ -175,6 +182,75 @@ func _check_level_baseline() -> void:
 		print("[OK] Authoritative level collision marker preserved")
 	else:
 		_fail("Level baseline marker missing")
+
+
+func _check_viewport_background() -> void:
+	var project_text := FileAccess.get_file_as_string("res://project.godot")
+	if "default_clear_color=Color(0.062745, 0.078431, 0.109804, 1)" in project_text:
+		print("[OK] Project default clear color set to #10141c")
+	else:
+		_fail("Project default_clear_color not set to #10141c")
+	for scene_path in [PHASE2C1_SCENE, PHASE2B2B_SCENE]:
+		var packed: PackedScene = load(scene_path)
+		if packed == null:
+			_fail("Load failed for viewport backdrop check: %s" % scene_path)
+			continue
+		var root: Node = packed.instantiate()
+		if root.get_node_or_null("ViewportBackdropFill/FallbackFill") == null:
+			_fail("ViewportBackdropFill missing from %s" % scene_path)
+		else:
+			print("[OK] ViewportBackdropFill wired in %s" % scene_path)
+		root.free()
+	var level: PackedScene = load(LEVEL_SCENE)
+	if level == null:
+		_fail("Level load failed for sky backdrop check")
+		return
+	var level_root: Node = level.instantiate()
+	if level_root.get_node_or_null("ScreenSkyBackdrop/SkyFill") == null:
+		_fail("ScreenSkyBackdrop missing from level scene")
+	else:
+		print("[OK] ScreenSkyBackdrop optional starfield in level scene")
+	level_root.free()
+
+
+func _check_collision_helpers_hidden() -> void:
+	var level: PackedScene = load(LEVEL_SCENE)
+	if level == null:
+		_fail("Level load failed for collision helper check")
+		return
+	var root: Node = level.instantiate()
+	var helpers := root.get_node_or_null("CollisionHelpers")
+	if helpers == null:
+		_fail("CollisionHelpers node missing from level")
+	elif helpers.visible:
+		_fail("CollisionHelpers must stay hidden (near-white debug sprites at z 2020+)")
+	else:
+		print("[OK] CollisionHelpers hidden (white debug overlay removed)")
+	var left_sprite := root.get_node_or_null("Boundaries/LeftBoundary_001/Sprite2D") as Sprite2D
+	var right_sprite := root.get_node_or_null("Boundaries/RightBoundary_001/Sprite2D") as Sprite2D
+	if left_sprite == null or right_sprite == null:
+		_fail("Boundary debug sprites missing from level")
+	elif left_sprite.visible or right_sprite.visible:
+		_fail("Boundary debug sprites must stay hidden (red boundary.png overlays)")
+	else:
+		print("[OK] Boundary debug sprites hidden (wall StaticBody2D kept)")
+	var left_body := root.get_node_or_null("Boundaries/LeftBoundary_001/StaticBody2D")
+	var right_body := root.get_node_or_null("Boundaries/RightBoundary_001/StaticBody2D")
+	if left_body == null or right_body == null:
+		_fail("Boundary wall StaticBody2D missing — do not remove collision")
+	else:
+		print("[OK] Boundary wall collision preserved")
+	var tower_shape := root.get_node_or_null(
+		"Platforms/Tower1_001/StaticBody2D/CollisionShape2D"
+	) as CollisionShape2D
+	if tower_shape == null or tower_shape.shape == null:
+		_fail("Tower1 collision shape missing")
+	elif tower_shape.shape.size.y > 64.0:
+		_fail("Tower1 collision too tall (%s) — blocks walkway" % tower_shape.shape.size)
+	else:
+		print("[OK] Tower1 collision is top slab only (%.0fx%.0f)"
+			% [tower_shape.shape.size.x, tower_shape.shape.size.y])
+	root.free()
 
 
 func _load_scenes() -> void:

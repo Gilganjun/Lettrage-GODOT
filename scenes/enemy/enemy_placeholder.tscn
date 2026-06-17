@@ -1,0 +1,122 @@
+[gd_scene load_steps=14 format=3 uid="uid://enemy_placeholder_baseline"]
+
+[ext_resource type="Script" path="res://scripts/enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_animation.gd" id="2_anim"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_movement_controller.gd" id="3_move"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_obstacle_sensor.gd" id="4_sensor"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_obstacle_response.gd" id="5_response"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_word_controller.gd" id="6_word"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_letter_targeting.gd" id="7_target"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_letter_collector.gd" id="8_collect"]
+[ext_resource type="Script" path="res://scripts/enemy/enemy_shield_controller.gd" id="9_shield_ctrl"]
+[ext_resource type="Script" path="res://scripts/components/shield_component.gd" id="10_shield"]
+[ext_resource type="Resource" path="res://resources/characters/enemy_visual.tres" id="7_visual"]
+[ext_resource type="Resource" path="res://resources/enemy/enemy_movement_config.tres" id="8_cfg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(52, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ladder"]
+size = Vector2(42, 88)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_collect"]
+size = Vector2(36, 48)
+
+[node name="Enemy" type="CharacterBody2D"]
+collision_layer = 16
+collision_mask = 3
+floor_snap_length = 4.0
+script = ExtResource("1_enemy")
+visual_profile = ExtResource("7_visual")
+movement_config = ExtResource("8_cfg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(46, 50)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 8)
+
+[node name="AnimationController" type="Node" parent="."]
+script = ExtResource("2_anim")
+
+[node name="EnemyMovementController" type="Node" parent="."]
+script = ExtResource("3_move")
+
+[node name="ObstacleSensor" type="Node" parent="."]
+script = ExtResource("4_sensor")
+
+[node name="ObstacleResponse" type="Node" parent="."]
+script = ExtResource("5_response")
+
+[node name="EnemyWordController" type="Node" parent="."]
+script = ExtResource("6_word")
+
+[node name="EnemyLetterTargeting" type="Node" parent="."]
+script = ExtResource("7_target")
+
+[node name="EnemyLetterCollector" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 8
+monitoring = true
+script = ExtResource("8_collect")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyLetterCollector"]
+shape = SubResource("RectangleShape2D_collect")
+
+[node name="EnemyShieldController" type="Node" parent="."]
+script = ExtResource("9_shield_ctrl")
+
+[node name="ShieldComponent" type="Node2D" parent="."]
+position = Vector2(46, 52)
+script = ExtResource("10_shield")
+owner_group = "enemy"
+impact_source = "enemy_shield"
+
+[node name="FloorRayLeft" type="RayCast2D" parent="."]
+position = Vector2(32, 116)
+target_position = Vector2(0, 36)
+
+[node name="FloorRayRight" type="RayCast2D" parent="."]
+position = Vector2(60, 116)
+target_position = Vector2(0, 36)
+
+[node name="WallRayLeft" type="RayCast2D" parent="."]
+position = Vector2(36, 92)
+target_position = Vector2(-22, 0)
+
+[node name="WallRayRight" type="RayCast2D" parent="."]
+position = Vector2(56, 92)
+target_position = Vector2(22, 0)
+
+[node name="FloorProbe" type="RayCast2D" parent="."]
+position = Vector2(46, 116)
+target_position = Vector2(0, 64)
+
+[node name="FloorBeyondRay" type="RayCast2D" parent="."]
+position = Vector2(46, 116)
+target_position = Vector2(0, 110)
+
+[node name="HeadClearanceRay" type="RayCast2D" parent="."]
+position = Vector2(46, -4)
+target_position = Vector2(42, 0)
+
+[node name="LookAheadWallRay" type="RayCast2D" parent="."]
+position = Vector2(50, 80)
+target_position = Vector2(130, 0)
+
+[node name="LookAheadFloorRay" type="RayCast2D" parent="."]
+position = Vector2(118, 116)
+target_position = Vector2(0, 56)
+
+[node name="StepLandingRay" type="RayCast2D" parent="."]
+position = Vector2(46, 116)
+target_position = Vector2(0, 170)
+
+[node name="LadderDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+position = Vector2(46, 58)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LadderDetector"]
+shape = SubResource("RectangleShape2D_ladder")

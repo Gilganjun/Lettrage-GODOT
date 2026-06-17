@@ -10,7 +10,7 @@
 [ext_resource type="Script" path="res://scripts/enemy/enemy_letter_collector.gd" id="8_collect"]
 [ext_resource type="Script" path="res://scripts/enemy/enemy_shield_controller.gd" id="9_shield_ctrl"]
 [ext_resource type="Script" path="res://scripts/components/shield_component.gd" id="10_shield"]
-[ext_resource type="Resource" path="res://resources/characters/enemy_visual.tres" id="7_visual"]
+[ext_resource type="Resource" path="res://resources/characters/alien01_visual.tres" id="7_visual"]
 [ext_resource type="Resource" path="res://resources/enemy/enemy_movement_config.tres" id="8_cfg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
@@ -29,6 +29,7 @@ floor_snap_length = 4.0
 script = ExtResource("1_enemy")
 visual_profile = ExtResource("7_visual")
 movement_config = ExtResource("8_cfg")
+ambient_idle_enabled = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(46, 50)

@@ -87,13 +87,47 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 
 
 func refresh_words() -> void:
-	if _word_controller:
+	if _player_word_hidden:
+		player_word_label.text = ""
+	elif _word_controller:
 		player_word_label.text = _word_controller.word_state.current_word
-	if _enemy:
+	if _enemy_word_hidden:
+		enemy_word_label.text = ""
+	elif _enemy:
 		var info := _enemy.get_debug_info()
 		enemy_word_label.text = str(info.get("enemy_word", ""))
 	else:
 		enemy_word_label.text = ""
+
+
+var _player_word_hidden := false
+var _enemy_word_hidden := false
+
+
+func get_word_anchor_center(for_player: bool) -> Vector2:
+	var label := player_word_label if for_player else enemy_word_label
+	if label == null:
+		return Vector2(80.0, 56.0) if for_player else Vector2(880.0, 56.0)
+	return label.get_global_rect().get_center()
+
+
+func get_word_exit_target(for_player: bool) -> Vector2:
+	var viewport := get_viewport().get_visible_rect()
+	var margin := 48.0
+	if for_player:
+		return Vector2(viewport.end.x + margin, viewport.position.y + viewport.size.y * 0.35)
+	return Vector2(viewport.position.x - margin, viewport.position.y + viewport.size.y * 0.35)
+
+
+func set_side_word_visible(for_player: bool, visible: bool) -> void:
+	if for_player:
+		_player_word_hidden = not visible
+		player_word_label.visible = visible
+	else:
+		_enemy_word_hidden = not visible
+		enemy_word_label.visible = visible
+	if visible:
+		refresh_words()
 
 
 func set_debug_visible(enabled: bool) -> void:

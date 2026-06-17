@@ -179,7 +179,7 @@ func _try_break_letter(letter: Letter) -> void:
 		if _shield_visual
 		else Vector2.ZERO
 	)
-	if letter.try_resolve(outcome, impact_source):
+	if letter.try_resolve(outcome, impact_source, global_position):
 		if _shield_visual:
 			_shield_visual.play_impact_burst(burst_pos)
 		letter_broken.emit(letter, letter.character)

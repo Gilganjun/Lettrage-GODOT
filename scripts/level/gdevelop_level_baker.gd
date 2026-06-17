@@ -154,7 +154,9 @@ static func _add_boundary_group(
 ) -> Node2D:
 	var group := _make_group_node(_next_name(counters, str(row.get("name", "Boundary"))), row)
 	parent.add_child(group)
-	_add_sprite(row, group)
+	var sprite := _add_sprite(row, group)
+	if sprite:
+		sprite.visible = false
 	var key := _instance_key(str(row.get("name", "")), row)
 	var entry: Dictionary = _dict_value(collider_map, key)
 	if not entry.is_empty():

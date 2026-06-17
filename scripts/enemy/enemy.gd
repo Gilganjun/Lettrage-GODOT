@@ -8,6 +8,10 @@ signal movement_state_changed(state: EnemyAnimation.MovementState)
 @export var visual_profile: CharacterVisualProfile
 @export var movement_config: EnemyMovementConfig
 @export var obstacle_rng_seed: int = -1
+@export var ambient_idle_enabled := false
+@export var ambient_idle_min_interval := 55.0
+@export var ambient_idle_max_interval := 65.0
+@export var ambient_idle_duration := 5.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var animation_controller: EnemyAnimation = $AnimationController
@@ -42,6 +46,8 @@ var _floor_distance: float = INF
 var _last_sensor: Dictionary = {}
 var _spawn_position := Vector2(740.0, 406.0)
 var _chase_hop_impulse := 0.0
+var _ambient_idle_remaining := 0.0
+var _ambient_idle_deadline := 0.0
 
 const FLOOR_SNAP := 4.0
 const RECOVER_MIN_Y := -80.0
@@ -64,6 +70,8 @@ func _ready() -> void:
 	ladder_detector.area_exited.connect(_on_ladder_area_exited)
 	if movement_controller:
 		movement_controller.direction_changed.connect(func(_d): direction_changes += 1)
+	if ambient_idle_enabled:
+		_schedule_ambient_idle()
 
 
 func _setup_word_and_shield() -> void:
@@ -117,6 +125,8 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 	global_position = Vector2(float(row.get("source_x", 740)), float(row.get("source_y", 406)))
 	_spawn_position = global_position
 	_display_size = Vector2(float(row.get("display_width", 93)), float(row.get("display_height", 116)))
+	if visual_profile and visual_profile.graphics_scale_multiplier > 0.0:
+		_display_size *= visual_profile.graphics_scale_multiplier
 	if visual_profile == null:
 		visual_profile = load("res://resources/characters/enemy_visual.tres")
 	if visual_profile == null:
@@ -124,6 +134,12 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 	sprite.sprite_frames = visual_profile.sprite_frames
 	sprite.modulate = visual_profile.modulate
 	sprite.play("Idle")
+	var native_w := float(row.get("native_width", 145))
+	var native_h := float(row.get("native_height", 191))
+	if visual_profile.native_width_override > 0.0:
+		native_w = visual_profile.native_width_override
+	if visual_profile.native_height_override > 0.0:
+		native_h = visual_profile.native_height_override
 	GDevelopTransform.apply_to_animated_sprite(
 		sprite,
 		float(row["source_x"]),
@@ -132,16 +148,21 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 		float(row.get("origin_y", 0)),
 		_display_size.x,
 		_display_size.y,
-		float(row.get("native_width", 145)),
-		float(row.get("native_height", 191)),
+		native_w,
+		native_h,
 		1.0,
 		float(row.get("source_angle", 0)),
 	)
+	_apply_profile_sprite_scale(native_w, native_h)
 	_align_collision_to_visual()
 	_setup_word_and_shield()
 	obstacle_sensor.call("setup", self, _foot_y, _half_w)
 	if movement_controller:
 		movement_controller.configure_patrol(300.0, 2000.0, global_position.x)
+		if row.has("debug_initial_direction"):
+			movement_controller.set_direction(int(row["debug_initial_direction"]))
+		if row.has("debug_patrol_target_x"):
+			movement_controller.target_x = float(row["debug_patrol_target_x"])
 
 
 func set_obstacle_rng_seed(seed_value: int) -> void:
@@ -183,6 +204,9 @@ func get_debug_info() -> Dictionary:
 		info["enemy_validation"] = word_controller.word_state.last_validation
 	if shield_controller:
 		info.merge(shield_controller.get_debug_info())
+	if ambient_idle_enabled:
+		info["ambient_idle_active"] = _is_ambient_idle_active()
+		info["ambient_idle_remaining"] = _ambient_idle_remaining
 	if letter_targeting:
 		info.merge(letter_targeting.get_debug_info(global_position))
 	info.merge(obstacle_response.call("get_debug_info", _last_sensor) if obstacle_response else {})
@@ -215,11 +239,12 @@ func _physics_process(delta: float) -> void:
 	if combat and combat.blocks_ai():
 		_process_combat_lock(delta)
 		move_and_slide()
-		floor_snap_length = FLOOR_SNAP
+		floor_snap_length = 0.0 if combat.is_enemy_stun_active() else FLOOR_SNAP
 		_update_movement_state()
 		return
 	if movement_controller:
 		movement_controller.tick(delta)
+	_tick_ambient_idle(delta)
 	_update_floor_probe()
 	_tick_word_systems(delta)
 	if is_on_ladder:
@@ -246,21 +271,14 @@ func _tick_word_systems(delta: float) -> void:
 
 func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
+	if _is_ambient_idle_active():
+		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
+		if not is_on_floor():
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		return
 	var patrol_dir := movement_controller.get_desired_direction(global_position.x) if movement_controller else 1
 	var chase_dir: int = letter_targeting.get_chase_direction(global_position) if letter_targeting else 0
 	var desired := patrol_dir
-	var obstacle_busy := (
-		obstacle_response.encounter_active
-		or obstacle_response.is_paused()
-		or obstacle_response.is_jump_in_progress()
-	)
-	if chase_dir != 0 and not obstacle_busy:
-		movement_controller.set_letter_chase_direction(chase_dir)
-		desired = chase_dir
-	elif not obstacle_busy:
-		movement_controller.clear_letter_chase()
-	if movement_controller and movement_controller.direction != 0 and chase_dir == 0:
-		desired = movement_controller.direction
 	_last_sensor = obstacle_sensor.call("scan", desired)
 	obstacle_response.call(
 		"tick",
@@ -272,6 +290,19 @@ func _process_platformer(delta: float) -> void:
 		absf(velocity.x),
 		desired,
 	)
+	var obstacle_busy := (
+		obstacle_response.encounter_active
+		or obstacle_response.is_paused()
+		or obstacle_response.is_jump_in_progress()
+	)
+	if chase_dir != 0 and not obstacle_busy:
+		movement_controller.set_letter_chase_direction(chase_dir)
+		desired = chase_dir
+	elif not obstacle_busy:
+		movement_controller.clear_letter_chase()
+		desired = patrol_dir
+	if movement_controller and movement_controller.direction != 0 and chase_dir == 0:
+		desired = movement_controller.direction
 	if (
 		not obstacle_busy
 		and chase_dir != 0
@@ -334,11 +365,27 @@ func _process_ladder(_delta: float) -> void:
 
 func _process_combat_lock(delta: float) -> void:
 	var cfg := _cfg()
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.has_method("is_stun_position_locked") and combat.is_stun_position_locked():
+		global_position.x = combat.get_stun_locked_x()
+		velocity = Vector2.ZERO
+		return
+	var slide := Vector2.ZERO
+	if combat and combat.has_method("compute_stun_slide_velocity"):
+		slide = combat.compute_stun_slide_velocity()
+	if combat and combat.has_method("is_enemy_stun_active") and combat.is_enemy_stun_active() and slide == Vector2.ZERO:
+		velocity = Vector2.ZERO
+		if not is_on_floor():
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		return
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
 		velocity.y = 0.0
-	velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
+	if slide.x != 0.0:
+		velocity.x = slide.x
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
 
 
 func _try_mount_ladder() -> void:
@@ -359,6 +406,9 @@ func _overlaps_any_ladder() -> bool:
 
 
 func _update_movement_state() -> void:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.has_method("is_enemy_stun_active") and combat.is_enemy_stun_active():
+		return
 	var new_state: EnemyAnimation.MovementState
 	if is_on_ladder:
 		new_state = EnemyAnimation.MovementState.CLIMB
@@ -368,7 +418,7 @@ func _update_movement_state() -> void:
 			if velocity.y < 0.0
 			else EnemyAnimation.MovementState.FALL
 		)
-	elif obstacle_response.call("is_paused"):
+	elif obstacle_response.call("is_paused") or _is_ambient_idle_active():
 		new_state = EnemyAnimation.MovementState.IDLE
 	elif absf(velocity.x) > 8.0:
 		new_state = EnemyAnimation.MovementState.RUN
@@ -422,14 +472,32 @@ func _apply_visual_profile() -> void:
 	sprite.play("Idle")
 
 
+func _apply_profile_sprite_scale(native_w: float, native_h: float) -> void:
+	if visual_profile == null or sprite == null or native_h <= 0.0 or native_w <= 0.0:
+		return
+	if visual_profile.use_proportional_sprite_scale:
+		var uniform := _display_size.y / native_h
+		sprite.scale = Vector2(uniform, uniform)
+	else:
+		sprite.scale = GDevelopTransform.compute_scale(
+			_display_size.x,
+			_display_size.y,
+			native_w,
+			native_h,
+		)
+	if visual_profile.sprite_width_scale_multiplier != 1.0:
+		sprite.scale.x *= visual_profile.sprite_width_scale_multiplier
+	_display_size = Vector2(native_w * sprite.scale.x, native_h * sprite.scale.y)
+
+
 func _align_collision_to_visual() -> void:
 	var rect := collision_shape.shape as RectangleShape2D
 	if rect == null:
 		return
 	_half_w = _display_size.x * 0.5
-	_foot_y = _display_size.y
-	rect.size = Vector2(_display_size.x * 0.56, _display_size.y * 0.86)
-	collision_shape.position = Vector2(_half_w, _display_size.y - rect.size.y * 0.5)
+	_foot_y = _resolve_foot_y()
+	rect.size = Vector2(_display_size.x * 0.56, _foot_y * 0.86)
+	collision_shape.position = Vector2(_half_w, _foot_y - rect.size.y * 0.5)
 	floor_ray_left.position = Vector2(_half_w - 14.0, _foot_y)
 	floor_ray_right.position = Vector2(_half_w + 14.0, _foot_y)
 	floor_ray_left.target_position = Vector2(0, 36)
@@ -440,17 +508,35 @@ func _align_collision_to_visual() -> void:
 	wall_ray_right.target_position = Vector2(22, 0)
 	floor_probe.position = Vector2(_half_w, _foot_y)
 	floor_probe.target_position = Vector2(0, 64)
-	ladder_detector.position = Vector2(_half_w, _display_size.y * 0.5)
+	ladder_detector.position = Vector2(_half_w, _foot_y * 0.5)
 	var ladder_shape := ladder_detector.get_node("CollisionShape2D").shape as RectangleShape2D
 	if ladder_shape:
-		ladder_shape.size = Vector2(_display_size.x * 0.45, _display_size.y * 0.75)
+		ladder_shape.size = Vector2(_display_size.x * 0.45, _foot_y * 0.75)
 	var beyond := get_node_or_null("FloorBeyondRay") as RayCast2D
 	if beyond:
+		beyond.position = Vector2(_half_w, _foot_y)
 		beyond.target_position = Vector2(0, 110)
+	var look_floor := get_node_or_null("LookAheadFloorRay") as RayCast2D
+	if look_floor:
+		look_floor.position = Vector2(_half_w + 72.0, _foot_y)
+	var step := get_node_or_null("StepLandingRay") as RayCast2D
+	if step:
+		step.position = Vector2(_half_w, _foot_y)
 	var head := get_node_or_null("HeadClearanceRay") as RayCast2D
 	if head:
 		head.position = Vector2(_half_w, _foot_y - 120.0)
 		head.target_position = Vector2(42, 0)
+
+
+func _resolve_foot_y() -> float:
+	if visual_profile == null:
+		return _display_size.y
+	var native_h := visual_profile.native_height_override
+	if native_h <= 0.0:
+		return _display_size.y
+	if visual_profile.native_foot_y > 0.0:
+		return _display_size.y * clampf(visual_profile.native_foot_y / native_h, 0.1, 1.0)
+	return _display_size.y
 
 
 func _on_ladder_area_entered(_area: Area2D) -> void:
@@ -488,3 +574,24 @@ func _cfg() -> EnemyMovementConfig:
 	if movement_config == null:
 		movement_config = load("res://resources/enemy/enemy_movement_config.tres")
 	return movement_config
+
+
+func _schedule_ambient_idle() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_ambient_idle_deadline = now + randf_range(ambient_idle_min_interval, ambient_idle_max_interval)
+
+
+func _tick_ambient_idle(delta: float) -> void:
+	if not ambient_idle_enabled:
+		return
+	if _ambient_idle_remaining > 0.0:
+		_ambient_idle_remaining = maxf(0.0, _ambient_idle_remaining - delta)
+		return
+	var now := Time.get_ticks_msec() / 1000.0
+	if now >= _ambient_idle_deadline:
+		_ambient_idle_remaining = ambient_idle_duration
+		_schedule_ambient_idle()
+
+
+func _is_ambient_idle_active() -> bool:
+	return ambient_idle_enabled and _ambient_idle_remaining > 0.0

@@ -10,6 +10,7 @@ const CATALOG := preload("res://resources/letters/alphabet_catalog.tres")
 const LETTER_SCENE := preload("res://scenes/letters/letter.tscn")
 const LayoutBuilder := preload("res://scripts/level/gdevelop_layout_builder.gd")
 const PlayerAttach := preload("res://scripts/test/player_gameplay_attach.gd")
+const WordGameFeatures := preload("res://scripts/word_game/word_game_features.gd")
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 
@@ -60,6 +61,7 @@ func _ready() -> void:
 		hud.set_player_shield(_player_shield)
 	if hud.has_method("set_debug_visible"):
 		hud.set_debug_visible(_word_debug)
+	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
 	_apply_hud_chrome_visibility()
 	call_deferred("_activate_player_camera")
 

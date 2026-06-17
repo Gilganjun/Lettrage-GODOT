@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://screen_sky_backdrop"]
+
+[ext_resource type="Script" path="res://scripts/level/screen_sky_backdrop.gd" id="1_screen"]
+[ext_resource type="Shader" path="res://shaders/sky_backdrop_screen.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_screen"]
+shader = ExtResource("2_shader")
+
+[node name="ScreenSkyBackdrop" type="CanvasLayer"]
+layer = -100
+script = ExtResource("1_screen")
+
+[node name="SkyFill" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.062745, 0.078431, 0.109804, 1)
+material = SubResource("ShaderMaterial_screen")
