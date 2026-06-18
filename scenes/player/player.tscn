@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://player_phase2a"]
+[gd_scene load_steps=8 format=3 uid="uid://player_phase2a"]
 
 [ext_resource type="Script" path="res://scripts/player/player_movement.gd" id="1_move"]
 [ext_resource type="Script" path="res://scripts/player/player_animation.gd" id="2_anim"]
 [ext_resource type="Script" path="res://scripts/player/camera_zoom_controller.gd" id="3_zoom"]
+[ext_resource type="Script" path="res://scripts/player/player_death_frame_alignment.gd" id="4_align"]
 [ext_resource type="Resource" path="res://resources/characters/player_visual.tres" id="3_visual"]
 [ext_resource type="Resource" path="res://resources/player/movement_config.tres" id="4_cfg"]
 
@@ -26,6 +27,9 @@ position = Vector2(0, 8)
 
 [node name="AnimationController" type="Node" parent="."]
 script = ExtResource("2_anim")
+
+[node name="DeathFrameAlignment" type="Node" parent="."]
+script = ExtResource("4_align")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 enabled = true

@@ -31,6 +31,7 @@ const POP_SOUNDS := [
 @onready var word_celebration: CanvasLayer = $UI/WordCelebrationPlayer
 @onready var top_bar: Control = $UI/TopBar
 @onready var damage_bridge: Node = $WordDamageBridge
+@onready var visual_pass: Phase2C1VisualPass = $Phase2C1VisualPass
 
 var _collider_nodes: Array[Node] = []
 var _debug_enabled := false
@@ -84,6 +85,16 @@ func _ready() -> void:
 	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
 	combat_hud.set_debug_visible(_word_debug)
 	_apply_hud_chrome_visibility()
+	if visual_pass:
+		visual_pass.setup(
+			level_root,
+			letter_spawner,
+			word_controller,
+			_enemy,
+			combat_hud,
+			player_root,
+			enemy_root,
+		)
 	call_deferred("_activate_player_camera")
 
 

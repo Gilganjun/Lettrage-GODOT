@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://phase2c1_visual_pass"]
+
+[ext_resource type="Script" path="res://scripts/visual/phase2c1_visual_pass.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/visual/gameplay_focus_band.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/visual/background_blur.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/visual/platform_readability.gd" id="4"]
+
+[node name="Phase2C1VisualPass" type="Node"]
+script = ExtResource("1")
+
+[node name="GameplayFocusBand" type="Node2D" parent="."]
+script = ExtResource("2")
+
+[node name="BackgroundBlur" type="Node" parent="."]
+blur_screen_px = 10.0
+script = ExtResource("3")
+
+[node name="PlatformReadability" type="Node" parent="."]
+script = ExtResource("4")

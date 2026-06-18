@@ -12,6 +12,7 @@ extends Control
 @onready var debug_label: Label = $Margin/VBox/DebugLabel
 @onready var enemy_debug_label: Label = $Margin/VBox/EnemyDebugLabel
 @onready var shield_hint: ShieldHintOverlay = $ShieldHintOverlay
+@onready var margin: MarginContainer = $Margin
 
 var _controller: WordGameController
 var _spawner: LetterSpawner
@@ -39,8 +40,21 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 
 func set_word_display_on_combat_hud(enabled: bool) -> void:
 	_words_on_combat_hud = enabled
-	word_label.visible = not enabled
-	enemy_word_label.visible = not enabled
+	_apply_primary_visibility()
+
+
+func _apply_primary_visibility() -> void:
+	var show_legacy_panel := not _words_on_combat_hud or _show_debug
+	if margin:
+		margin.visible = show_legacy_panel
+	word_label.visible = show_legacy_panel
+	enemy_word_label.visible = show_legacy_panel
+	if _words_on_combat_hud and not _show_debug:
+		score_label.visible = false
+		enemy_score_label.visible = false
+		shield_label.visible = false
+		status_label.visible = false
+		controls_label.visible = false
 
 
 func refresh_combat_hud() -> void:
@@ -99,6 +113,7 @@ func set_player_shield(shield: PlayerShield) -> void:
 
 func set_debug_visible(enabled: bool) -> void:
 	_show_debug = enabled
+	_apply_primary_visibility()
 	if not _words_on_combat_hud:
 		word_label.visible = true
 		enemy_word_label.visible = true
@@ -106,7 +121,7 @@ func set_debug_visible(enabled: bool) -> void:
 	enemy_score_label.visible = enabled
 	shield_label.visible = enabled
 	status_label.visible = enabled
-	controls_label.visible = true
+	controls_label.visible = enabled or not _words_on_combat_hud
 	debug_label.visible = enabled
 	enemy_debug_label.visible = enabled and _enemy != null
 	_refresh()
@@ -194,14 +209,15 @@ func refresh_enemy_debug() -> void:
 
 
 func _on_validation(status: String, message: String) -> void:
-	match status:
-		"valid":
-			status_label.modulate = Color(0.4, 1.0, 0.5)
-		"invalid":
-			status_label.modulate = Color(1.0, 0.45, 0.4)
-		"collected", "deleted", "undone":
-			status_label.modulate = Color(0.85, 0.9, 1.0)
-		_:
-			status_label.modulate = Color(1, 1, 1)
-	status_label.text = message
+	if not _words_on_combat_hud or _show_debug:
+		match status:
+			"valid":
+				status_label.modulate = Color(0.4, 1.0, 0.5)
+			"invalid":
+				status_label.modulate = Color(1.0, 0.45, 0.4)
+			"collected", "deleted", "undone":
+				status_label.modulate = Color(0.85, 0.9, 1.0)
+			_:
+				status_label.modulate = Color(1, 1, 1)
+		status_label.text = message
 	_refresh()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://phase2c1_health_damage_test"]
+[gd_scene load_steps=17 format=3 uid="uid://phase2c1_health_damage_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -13,6 +13,7 @@
 [ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
 [ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
 [ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
+[ext_resource type="PackedScene" path="res://scenes/visual/phase2c1_visual_pass.tscn" id="14_visual"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
 bg_color = Color(0, 0, 0, 0.55)
@@ -23,6 +24,8 @@ content_margin_bottom = 4.0
 
 [node name="Phase2C1HealthDamageTest" type="Node2D"]
 script = ExtResource("1_root")
+
+[node name="Phase2C1VisualPass" parent="." instance=ExtResource("14_visual")]
 
 [node name="SceneAmbientAudio" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("11_ambient")

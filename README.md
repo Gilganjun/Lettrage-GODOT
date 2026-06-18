@@ -29,6 +29,8 @@ Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 
 See `scenes/test/README.md` for details. Archived scenes are not used for F5.
 
+Visual hierarchy rules: `VISUAL_STYLE.md` (phase2c1 visual pass).
+
 ### Authoritative level baseline
 
 **`main2_heallthbartest_level.tscn` is the source of truth** for platform positions, collision shapes, ladders, and spawn.

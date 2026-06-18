@@ -2,32 +2,25 @@ extends Control
 
 ## Player + Enemy health bars, spell text under each bar, optional combat debug.
 
-@onready var player_bar: Control = $TopRow/PlayerColumn/PlayerHealthBar
-@onready var enemy_bar: Control = $TopRow/EnemyColumn/EnemyHealthBar
-@onready var player_word_label: Label = $TopRow/PlayerColumn/PlayerWordLabel
-@onready var enemy_word_label: Label = $TopRow/EnemyColumn/EnemyWordLabel
-@onready var debug_label: Label = $CombatDebugLabel
+const WORD_FONT_SIZE := 28
+const WORD_PANEL_PAD_X := 22.0
+const WORD_PANEL_PAD_Y := 12.0
 
-const WORD_OUTLINE_SIZE := 3
-const WORD_OUTLINE_COLOR := Color(1.0, 1.0, 1.0, 1.0)
+@onready var player_bar: Control = $TopRow/PlayerSide/PlayerHealthPanel/PlayerHealthBar
+@onready var enemy_bar: Control = $TopRow/EnemySide/EnemyHealthPanel/EnemyHealthBar
+@onready var player_word_panel: PanelContainer = $TopRow/PlayerSide/PlayerWordPanel
+@onready var enemy_word_panel: PanelContainer = $TopRow/EnemySide/EnemyWordPanel
+@onready var player_word_label: Label = $TopRow/PlayerSide/PlayerWordPanel/PlayerWordLabel
+@onready var enemy_word_label: Label = $TopRow/EnemySide/EnemyWordPanel/EnemyWordLabel
+@onready var status_label: Label = $StatusLabel
+@onready var debug_label: Label = $CombatDebugLabel
 
 var _player_combat: Node
 var _enemy_combat: Node
 var _damage_bridge: Node
 var _word_controller: WordGameController
 var _enemy: Enemy
-
-
-func _ready() -> void:
-	_apply_word_label_outline(player_word_label)
-	_apply_word_label_outline(enemy_word_label)
-
-
-func _apply_word_label_outline(label: Label) -> void:
-	if label == null:
-		return
-	label.add_theme_constant_override("outline_size", WORD_OUTLINE_SIZE)
-	label.add_theme_color_override("font_outline_color", WORD_OUTLINE_COLOR)
+var _framed_word_ui := false
 
 
 func setup(
@@ -77,7 +70,8 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 	if _word_controller:
 		_word_controller.word_state.word_changed.connect(func(_w): refresh_words())
 		_word_controller.word_state.score_changed.connect(func(_s): refresh_words())
-		_word_controller.word_state.validation_changed.connect(func(_a, _b): refresh_words())
+		_word_controller.word_state.validation_changed.connect(func(a, b): _on_validation(a, b))
+		_word_controller.valid_word_submitted.connect(func(_w, _l, _d): refresh_words())
 	if _enemy and _enemy.has_method("get_word_controller"):
 		var wc: Node = _enemy.get_word_controller()
 		wc.word_state.word_changed.connect(func(_a, _b): refresh_words())
@@ -86,18 +80,73 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 	refresh_words()
 
 
+func _on_validation(status: String, message: String) -> void:
+	if status_label == null or not _framed_word_ui:
+		return
+	match status:
+		"valid":
+			status_label.modulate = Color(0.4, 1.0, 0.5)
+		"invalid":
+			status_label.modulate = Color(1.0, 0.45, 0.4)
+		"collected", "deleted", "undone":
+			status_label.modulate = Color(0.85, 0.9, 1.0)
+		_:
+			status_label.modulate = Color(0.88, 0.92, 1.0)
+	status_label.text = message
+
+
+func set_word_slots_enabled(enabled: bool) -> void:
+	_framed_word_ui = enabled
+	if status_label:
+		status_label.visible = enabled
+	refresh_words()
+
+
 func refresh_words() -> void:
-	if _player_word_hidden:
-		player_word_label.text = ""
-	elif _word_controller:
-		player_word_label.text = _word_controller.word_state.current_word
-	if _enemy_word_hidden:
-		enemy_word_label.text = ""
-	elif _enemy:
+	var player_word := ""
+	var enemy_word := ""
+	if _word_controller:
+		player_word = _word_controller.word_state.current_word
+	if _enemy:
 		var info := _enemy.get_debug_info()
-		enemy_word_label.text = str(info.get("enemy_word", ""))
-	else:
-		enemy_word_label.text = ""
+		enemy_word = str(info.get("enemy_word", ""))
+	_update_letter_hub(player_word_panel, player_word_label, player_word, _player_word_hidden)
+	_update_letter_hub(enemy_word_panel, enemy_word_label, enemy_word, _enemy_word_hidden)
+
+
+func _update_letter_hub(panel: PanelContainer, label: Label, word: String, force_hidden: bool) -> void:
+	if panel == null or label == null:
+		return
+	var show := (
+		_framed_word_ui
+		and not force_hidden
+		and not word.is_empty()
+	)
+	panel.visible = show
+	if not show:
+		label.text = ""
+		panel.custom_minimum_size = Vector2.ZERO
+		return
+	label.text = word
+	var text_w := _measure_word_width(label, word)
+	var text_h := _measure_word_height(label)
+	panel.custom_minimum_size = Vector2(text_w + WORD_PANEL_PAD_X, text_h + WORD_PANEL_PAD_Y)
+
+
+func _measure_word_width(label: Label, word: String) -> float:
+	var font: Font = label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	if font == null or word.is_empty():
+		return 8.0
+	return font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+
+
+func _measure_word_height(label: Label) -> float:
+	var font: Font = label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	if font:
+		return font.get_height(font_size)
+	return float(WORD_FONT_SIZE)
 
 
 var _player_word_hidden := false
@@ -105,7 +154,7 @@ var _enemy_word_hidden := false
 
 
 func get_player_word_insert_position(current_word: String) -> Vector2:
-	if player_word_label == null:
+	if player_word_panel == null or not player_word_panel.visible or player_word_label == null:
 		return get_word_anchor_center(true)
 	var rect := player_word_label.get_global_rect()
 	var font: Font = player_word_label.get_theme_font("font")
@@ -118,10 +167,15 @@ func get_player_word_insert_position(current_word: String) -> Vector2:
 
 
 func get_word_anchor_center(for_player: bool) -> Vector2:
+	var panel := player_word_panel if for_player else enemy_word_panel
 	var label := player_word_label if for_player else enemy_word_label
-	if label == null:
-		return Vector2(80.0, 56.0) if for_player else Vector2(880.0, 56.0)
-	return label.get_global_rect().get_center()
+	if panel != null and panel.visible and label != null:
+		return label.get_global_rect().get_center()
+	if for_player and player_bar != null:
+		var hp_rect := player_bar.get_global_rect()
+		return Vector2(hp_rect.position.x + 40.0, hp_rect.end.y + 28.0)
+	var viewport := get_viewport().get_visible_rect()
+	return Vector2(viewport.end.x - 40.0, 56.0)
 
 
 func get_word_exit_target(for_player: bool) -> Vector2:
@@ -135,12 +189,9 @@ func get_word_exit_target(for_player: bool) -> Vector2:
 func set_side_word_visible(for_player: bool, visible: bool) -> void:
 	if for_player:
 		_player_word_hidden = not visible
-		player_word_label.visible = visible
 	else:
 		_enemy_word_hidden = not visible
-		enemy_word_label.visible = visible
-	if visible:
-		refresh_words()
+	refresh_words()
 
 
 func set_debug_visible(enabled: bool) -> void:

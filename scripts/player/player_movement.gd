@@ -110,6 +110,9 @@ func configure_from_gdevelop(row: Dictionary) -> void:
 		1.0,
 		float(row.get("source_angle", 0)),
 	)
+	var death_align := get_node_or_null("DeathFrameAlignment")
+	if death_align and death_align.has_method("refresh_base_offset"):
+		death_align.refresh_base_offset()
 	_align_collision_to_visual()
 
 

@@ -8,6 +8,8 @@ This is the project main scene (`project.godot` → `run/main_scene`). Press **F
 
 Includes: Main2 level, player, enemy, letter rain, word game, combat HUD, health/damage, death animation.
 
+**Visual pass:** `Phase2C1VisualPass` applies readability treatment (see `VISUAL_STYLE.md`). Disable that node to compare before/after.
+
 **F6** runs whichever scene tab you have open (use only if you intentionally want a different scene).
 
 ## Level editing
