@@ -29,6 +29,7 @@ const POP_SOUNDS := [
 @onready var hud: Control = $UI/WordGameHud
 @onready var combat_hud: Control = $UI/CombatHud
 @onready var word_celebration: CanvasLayer = $UI/WordCelebrationPlayer
+@onready var word_garble_player: CanvasLayer = $UI/WordGarblePlayer
 @onready var top_bar: Control = $UI/TopBar
 @onready var damage_bridge: Node = $WordDamageBridge
 @onready var visual_pass: Phase2C1VisualPass = $Phase2C1VisualPass
@@ -82,6 +83,8 @@ func _ready() -> void:
 		word_celebration.bind_player_words(word_controller)
 	if word_celebration.has_method("bind_enemy_words"):
 		word_celebration.bind_enemy_words(_enemy)
+	if word_garble_player and word_garble_player.has_method("setup"):
+		word_garble_player.setup(combat_hud, word_controller)
 	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
 	combat_hud.set_debug_visible(_word_debug)
 	_apply_hud_chrome_visibility()

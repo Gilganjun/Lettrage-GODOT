@@ -9,6 +9,7 @@ extends Resource
 @export var sprint_max_speed: float = 400.0
 @export var double_tap_window: float = 1.0
 @export var max_falling_speed: float = 400.0
+@export var fast_fall_speed: float = 800.0
 @export var acceleration: float = 1125.0
 @export var deceleration: float = 1125.0
 @export var ladder_climbing_speed: float = 300.0

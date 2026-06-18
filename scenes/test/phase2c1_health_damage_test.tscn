@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://phase2c1_health_damage_test"]
+[gd_scene load_steps=18 format=3 uid="uid://phase2c1_health_damage_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="7_combat"]
 [ext_resource type="Script" path="res://scripts/combat/word_damage_bridge.gd" id="8_bridge"]
 [ext_resource type="Script" path="res://scripts/ui/word_celebration_player.gd" id="9_celeb"]
+[ext_resource type="Script" path="res://scripts/ui/word_garble_player.gd" id="10_garble"]
 [ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="10_backdrop"]
 [ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
 [ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
@@ -82,6 +83,10 @@ script = ExtResource("3_coldebug")
 [node name="WordCelebrationPlayer" type="CanvasLayer" parent="UI"]
 layer = 20
 script = ExtResource("9_celeb")
+
+[node name="WordGarblePlayer" type="CanvasLayer" parent="UI"]
+layer = 21
+script = ExtResource("10_garble")
 
 [node name="TopBar" type="PanelContainer" parent="UI"]
 offset_left = 6.0

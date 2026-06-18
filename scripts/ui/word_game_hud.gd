@@ -32,7 +32,7 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
 	controls_label.text = (
-		"Enter/C submit | Backspace undo | LCtrl tap=latch / hold=block | F aim+fire | A/D move Space jump | F3/V collision debug"
+		"Enter/C submit | Backspace undo | LCtrl tap=latch / hold=block | F aim+fire | Stand still+hold F 1s precision aim | A/D move Space jump | F3/V collision debug"
 	)
 	controls_label.visible = true
 	refresh_combat_hud()

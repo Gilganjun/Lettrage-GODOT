@@ -1,11 +1,13 @@
 class_name DictionaryService
 extends RefCounted
 
-## Loads EnglishWords4.txt once for newline-wrapped word lookup (GDevelop StrFind style).
+## Loads EnglishWords5.txt once for newline-wrapped word lookup (GDevelop StrFind style).
+## Built from EnglishWords4.txt minus dictionary/OmissionList.txt (abbreviations/codes).
 
-const DICTIONARY_PATH := "res://dictionary/EnglishWords4.txt"
+const DICTIONARY_PATH := "res://dictionary/EnglishWords5.txt"
 
 var _words: Dictionary = {}
+var _prefixes: Dictionary = {}
 var word_count: int = 0
 var load_time_ms: float = 0.0
 var loaded: bool = false
@@ -27,7 +29,10 @@ func load_dictionary() -> bool:
 		var line := file.get_line().strip_edges()
 		if line.is_empty():
 			continue
-		_words[line.to_upper()] = true
+		var word := line.to_upper()
+		_words[word] = true
+		for i in range(1, word.length() + 1):
+			_prefixes[word.substr(0, i)] = true
 	file.close()
 	word_count = _words.size()
 	load_time_ms = float(Time.get_ticks_msec() - start)
@@ -42,3 +47,13 @@ func contains_word(word: String) -> bool:
 	if normalized.is_empty():
 		return false
 	return _words.has(normalized)
+
+
+## True when some dictionary word starts with `prefix` (used at 20-letter garble check).
+func has_dictionary_prefix(prefix: String) -> bool:
+	if not loaded:
+		return false
+	var normalized := prefix.strip_edges().to_upper()
+	if normalized.is_empty():
+		return false
+	return _prefixes.has(normalized)

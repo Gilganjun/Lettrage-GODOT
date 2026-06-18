@@ -156,16 +156,22 @@ func _align_collision_to_visual() -> void:
 
 func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
+	var aim_mode := _is_aiming_letter_shot()
 	_update_double_tap_sprint(delta)
-	var input_x := Input.get_axis("move_left", "move_right")
-	if input_x != 0.0:
-		facing = 1 if input_x > 0.0 else -1
-	var max_speed := cfg.sprint_max_speed if _sprint_active else cfg.max_speed
-	var target_speed := input_x * max_speed
-	var rate := cfg.acceleration if absf(target_speed) > absf(velocity.x) else cfg.deceleration
-	velocity.x = move_toward(velocity.x, target_speed, rate * delta)
+	var input_x := 0.0 if aim_mode else Input.get_axis("move_left", "move_right")
+	var air_fast_fall := not is_on_floor() and Input.is_action_pressed("climb_down")
+	if not air_fast_fall:
+		if input_x != 0.0:
+			facing = 1 if input_x > 0.0 else -1
+		var max_speed := cfg.sprint_max_speed if _sprint_active else cfg.max_speed
+		var target_speed := input_x * max_speed
+		var rate := cfg.acceleration if absf(target_speed) > absf(velocity.x) else cfg.deceleration
+		velocity.x = move_toward(velocity.x, target_speed, rate * delta)
 	if not is_on_floor():
-		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		if air_fast_fall:
+			_apply_air_fast_fall(cfg, input_x, delta)
+		else:
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
 		_jump_time = 0.0
 	if Input.is_action_just_pressed("jump"):
@@ -179,7 +185,12 @@ func _process_platformer(delta: float) -> void:
 	if Input.is_action_pressed("jump"):
 		_jump_held = true
 		_jump_time += delta
-		if _jump_held and _jump_time <= cfg.jump_sustain_time and velocity.y < 0.0:
+		if (
+			not air_fast_fall
+			and _jump_held
+			and _jump_time <= cfg.jump_sustain_time
+			and velocity.y < 0.0
+		):
 			velocity.y = -cfg.jump_speed
 	else:
 		_jump_held = false
@@ -192,7 +203,11 @@ func _process_combat_lock(delta: float, combat: Node) -> void:
 		return
 	if combat.has_method("is_stun_position_locked") and combat.is_stun_position_locked():
 		global_position.x = combat.get_stun_locked_x()
-		velocity = Vector2.ZERO
+		if combat.has_method("is_stun_grounded") and combat.is_stun_grounded():
+			velocity = Vector2.ZERO
+		else:
+			velocity.x = 0.0
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 		return
 	var slide := Vector2.ZERO
 	if combat.has_method("compute_stun_slide_velocity"):
@@ -283,6 +298,8 @@ func _update_movement_state() -> void:
 
 
 func _update_double_tap_sprint(delta: float) -> void:
+	if _is_aiming_letter_shot():
+		return
 	var cfg := _cfg()
 	var window := cfg.double_tap_window
 	_update_direction_double_tap(1, "move_right", delta, window)
@@ -367,3 +384,22 @@ func _cfg() -> PlayerMovementConfig:
 	if movement_config == null:
 		movement_config = load("res://resources/player/movement_config.tres")
 	return movement_config
+
+
+func _is_aiming_letter_shot() -> bool:
+	for child in get_children():
+		if child is LetterShooter and (child as LetterShooter).is_aim_mode_active():
+			return true
+	return false
+
+
+func _apply_air_fast_fall(cfg: PlayerMovementConfig, input_x: float, delta: float) -> void:
+	_jump_held = false
+	var speed := cfg.fast_fall_speed
+	if absf(input_x) > 0.1:
+		var dir := Vector2(signf(input_x), 1.0).normalized()
+		velocity = dir * speed
+		facing = 1 if input_x > 0.0 else -1
+	else:
+		velocity.y = speed
+		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * 2.0 * delta)

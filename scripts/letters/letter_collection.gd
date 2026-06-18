@@ -17,6 +17,8 @@ static func try_player_collect(
 		return letter.try_resolve(Letter.Resolution.PLAYER_SHIELD, source)
 	if controller == null:
 		return false
+	if controller.has_method("is_garble_busy") and controller.is_garble_busy():
+		return false
 	if letter.try_resolve(resolution, source):
 		controller.on_letter_collected(letter.character)
 		return true

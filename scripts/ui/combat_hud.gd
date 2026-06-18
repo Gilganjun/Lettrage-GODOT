@@ -88,6 +88,8 @@ func _on_validation(status: String, message: String) -> void:
 			status_label.modulate = Color(0.4, 1.0, 0.5)
 		"invalid":
 			status_label.modulate = Color(1.0, 0.45, 0.4)
+		"garble":
+			status_label.modulate = Color(1.0, 0.72, 0.45)
 		"collected", "deleted", "undone":
 			status_label.modulate = Color(0.85, 0.9, 1.0)
 		_:
@@ -164,6 +166,42 @@ func get_player_word_insert_position(current_word: String) -> Vector2:
 	var text_w := font.get_string_size(current_word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	var char_w := font.get_string_size("M", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	return Vector2(rect.position.x + text_w + char_w * 0.5, rect.get_center().y)
+
+
+func get_player_word_letter_positions(word: String) -> PackedVector2Array:
+	var positions := PackedVector2Array()
+	if player_word_panel == null or player_word_label == null or word.is_empty():
+		return positions
+	if not player_word_panel.visible:
+		return positions
+	var font: Font = player_word_label.get_theme_font("font")
+	var font_size := player_word_label.get_theme_font_size("font_size")
+	if font == null:
+		return positions
+	var rect := player_word_label.get_global_rect()
+	var x := rect.position.x
+	var center_y := rect.get_center().y
+	for i in word.length():
+		var ch := word.substr(i, 1)
+		var char_w := font.get_string_size(ch, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		positions.append(Vector2(x + char_w * 0.5, center_y))
+		x += char_w
+	return positions
+
+
+func get_garble_message_anchor() -> Vector2:
+	if player_word_panel != null and player_word_panel.visible:
+		var word_rect := player_word_panel.get_global_rect()
+		return Vector2(word_rect.position.x, word_rect.end.y + 8.0)
+	if player_bar != null:
+		var hp_rect := player_bar.get_global_rect()
+		return Vector2(hp_rect.position.x, hp_rect.end.y + 8.0)
+	return Vector2(10.0, 72.0)
+
+
+func show_garble_message(_message: String) -> void:
+	# Garble quips render under the letter hub via WordGarblePurgeEffect.
+	pass
 
 
 func get_word_anchor_center(for_player: bool) -> Vector2:

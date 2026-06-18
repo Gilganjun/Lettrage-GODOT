@@ -269,7 +269,7 @@ func _physics_process(delta: float) -> void:
 	if combat and combat.blocks_ai():
 		_process_combat_lock(delta)
 		move_and_slide()
-		floor_snap_length = 0.0 if combat.is_enemy_stun_active() else FLOOR_SNAP
+		floor_snap_length = FLOOR_SNAP
 		_update_movement_state()
 		return
 	if movement_controller:
@@ -428,7 +428,11 @@ func _process_combat_lock(delta: float) -> void:
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.has_method("is_stun_position_locked") and combat.is_stun_position_locked():
 		global_position.x = combat.get_stun_locked_x()
-		velocity = Vector2.ZERO
+		if combat.has_method("is_stun_grounded") and combat.is_stun_grounded():
+			velocity = Vector2.ZERO
+		else:
+			velocity.x = 0.0
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 		return
 	var slide := Vector2.ZERO
 	if combat and combat.has_method("compute_stun_slide_velocity"):

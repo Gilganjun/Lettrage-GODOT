@@ -248,6 +248,17 @@ def phase1() -> dict:
             shutil.copy2(src, dest)
             copy_log.append({"source": f"Dictionary/{name}", "dest": dest.relative_to(ROOT).as_posix(), "status": "COPIED"})
 
+    ew4 = ROOT / "dictionary" / "EnglishWords4.txt"
+    build_script = ROOT / "tools" / "build_clean_dictionary.py"
+    if ew4.is_file() and build_script.is_file():
+        import subprocess
+        subprocess.run([sys.executable, str(build_script)], check=True, cwd=ROOT)
+        copy_log.append({
+            "source": "tools/build_clean_dictionary.py",
+            "dest": "dictionary/EnglishWords5.txt",
+            "status": "GENERATED",
+        })
+
     # Fonts referenced in project resources
     for res in data.get("resources", {}).get("resources", []):
         if res.get("kind") == "font":

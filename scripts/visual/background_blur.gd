@@ -1,7 +1,7 @@
 class_name BackgroundBlur
 extends Node
 
-## Gaussian blur on the large level backdrop sprites (out_18 layers).
+## Mild gaussian blur on the large level backdrop sprites (out_18 layers).
 ## blur_screen_px is measured in on-screen pixels, not texture texels.
 
 const BLUR_SHADER := preload("res://shaders/background_blur.gdshader")

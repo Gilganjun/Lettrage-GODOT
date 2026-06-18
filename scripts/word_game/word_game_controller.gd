@@ -5,6 +5,7 @@ extends Node
 
 signal debug_state_changed
 signal valid_word_submitted(word: String, word_length: int, score_delta: int)
+signal word_garble_purged(word: String, message: String)
 
 @export var collect_sounds: Array[AudioStream] = []
 @export var valid_word_sound: AudioStream
@@ -22,6 +23,8 @@ var debug_enabled := false
 var _audio: AudioStreamPlayer
 var _spoken_audio: AudioStreamPlayer
 var _last_collect_ms: int = 0
+var _garble_busy := false
+var _pending_garble_message := ""
 const COLLECT_COOLDOWN_MS := 80
 
 
@@ -38,6 +41,8 @@ func _ready() -> void:
 
 
 func on_letter_collected(character: String) -> void:
+	if _garble_busy:
+		return
 	var now := Time.get_ticks_msec()
 	if now - _last_collect_ms < COLLECT_COOLDOWN_MS:
 		return
@@ -46,9 +51,12 @@ func on_letter_collected(character: String) -> void:
 	word_state.set_validation("collected", "Collected %s — Backspace to undo" % character)
 	_play_collect_sound()
 	_play_spoken_letter(character)
+	_maybe_trigger_garble_check()
 
 
 func delete_last_letter() -> void:
+	if _garble_busy:
+		return
 	if word_state.current_word.is_empty():
 		word_state.set_validation("empty", "Nothing to delete")
 		return
@@ -61,6 +69,8 @@ func delete_last_letter() -> void:
 
 
 func submit_word() -> void:
+	if _garble_busy:
+		return
 	var word := word_state.current_word.strip_edges().to_upper()
 	if word.is_empty():
 		word_state.set_validation("empty", "Nothing to submit")
@@ -82,6 +92,30 @@ func submit_word() -> void:
 func debug_clear_word() -> void:
 	word_state.clear_word()
 	word_state.set_validation("debug", "Word cleared (debug)")
+
+
+func finish_garble_purge() -> void:
+	_garble_busy = false
+	word_state.clear_word()
+	_pending_garble_message = ""
+
+
+func is_garble_busy() -> bool:
+	return _garble_busy
+
+
+func _maybe_trigger_garble_check() -> void:
+	if word_state.current_word.length() != WordGarbleConfig.CHECK_AT_LETTER_COUNT:
+		return
+	if not dictionary.loaded:
+		return
+	var prefix := word_state.current_word.substr(0, WordGarbleConfig.REQUIRED_PREFIX_LENGTH)
+	if dictionary.has_dictionary_prefix(prefix):
+		return
+	_garble_busy = true
+	_pending_garble_message = WordGarbleConfig.random_message()
+	word_garble_purged.emit(word_state.current_word, _pending_garble_message)
+	_play_one_shot(invalid_word_sound)
 
 
 func _play_collect_sound() -> void:

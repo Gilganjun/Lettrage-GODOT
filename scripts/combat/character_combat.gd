@@ -33,6 +33,7 @@ var _stun_slide_started_at := 0.0
 var _stun_slide_duration := 2.2
 var _stun_attacker_body: Node2D = null
 var _stun_slide_landed := false
+var _stun_horizontal_done := false
 var _stun_locked_x := 0.0
 var _stun_watchdog_deadline := 0.0
 var _last_word_hit_attacker_position := Vector2.INF
@@ -126,6 +127,11 @@ func is_enemy_stun_active() -> bool:
 
 func is_stun_position_locked() -> bool:
 	_ensure_initialized()
+	return _word_stun_active and _stun_horizontal_done
+
+
+func is_stun_grounded() -> bool:
+	_ensure_initialized()
 	return _word_stun_active and _stun_slide_landed
 
 
@@ -175,6 +181,7 @@ func reset_combat() -> void:
 	_stun_attacker_position = Vector2.ZERO
 	_stun_attacker_body = null
 	_stun_slide_landed = false
+	_stun_horizontal_done = false
 	_stun_locked_x = 0.0
 	_stun_watchdog_deadline = 0.0
 	_last_word_hit_attacker_position = Vector2.INF
@@ -190,6 +197,7 @@ func reset_combat() -> void:
 func _process(delta: float) -> void:
 	if _word_stun_active:
 		_tick_stun_watchdog()
+		_tick_stun_grounding()
 	if _word_stun_idle_timer > 0.0:
 		_word_stun_idle_timer = maxf(0.0, _word_stun_idle_timer - delta)
 		if _word_stun_idle_timer <= 0.0:
@@ -216,6 +224,7 @@ func _begin_word_stun(attacker_position: Vector2 = Vector2.INF) -> void:
 	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = true
 	_stun_slide_landed = false
+	_stun_horizontal_done = false
 	if _stun_attacker_body and is_instance_valid(_stun_attacker_body):
 		_stun_attacker_position = _stun_attacker_body.global_position
 	elif attacker_position != Vector2.INF:
@@ -251,7 +260,7 @@ func _set_stun_facing_toward_attacker() -> void:
 
 
 func compute_stun_slide_velocity() -> Vector2:
-	if not _stun_death_anim_active or _body == null or _stun_slide_landed:
+	if not _stun_death_anim_active or _body == null or _stun_horizontal_done:
 		return Vector2.ZERO
 	var dx := _stun_slide_target_x - _body.global_position.x
 	if absf(dx) < 10.0:
@@ -264,24 +273,42 @@ func compute_stun_slide_velocity() -> Vector2:
 
 
 func _land_stun_slide() -> void:
-	if _stun_slide_landed:
+	if _stun_horizontal_done:
 		return
-	_stun_slide_landed = true
+	_stun_horizontal_done = true
 	if _body:
 		_stun_locked_x = _body.global_position.x
-		_body.velocity = Vector2.ZERO
+		if _body.is_on_floor():
+			_finalize_stun_ground_lock()
 	else:
 		_stun_locked_x = _stun_slide_target_x
 	_stun_attacker_body = null
 
 
 func _lock_stun_at_current_x() -> void:
+	if _stun_horizontal_done or _body == null:
+		return
+	_stun_horizontal_done = true
+	_stun_locked_x = _body.global_position.x
+	if _body.is_on_floor():
+		_finalize_stun_ground_lock()
+	else:
+		_body.velocity.x = 0.0
+	_stun_attacker_body = null
+
+
+func _finalize_stun_ground_lock() -> void:
 	if _stun_slide_landed or _body == null:
 		return
 	_stun_slide_landed = true
-	_stun_locked_x = _body.global_position.x
 	_body.velocity = Vector2.ZERO
-	_stun_attacker_body = null
+
+
+func _tick_stun_grounding() -> void:
+	if not _stun_horizontal_done or _stun_slide_landed or _body == null:
+		return
+	if _body.is_on_floor():
+		_finalize_stun_ground_lock()
 
 
 func _stun_slide_time_remaining() -> float:
@@ -342,7 +369,7 @@ func _recover_stun_after_death_phase() -> void:
 	if not _word_stun_active:
 		return
 	_stun_death_anim_active = false
-	if not _stun_slide_landed:
+	if not _stun_horizontal_done:
 		_lock_stun_at_current_x()
 	_hold_death_pose_at_last_frame()
 	_word_stun_idle_timer = enemy_stun_idle_after_death
@@ -354,7 +381,7 @@ func _on_sprite_animation_finished() -> void:
 	if _sprite == null or _sprite.animation != "Death":
 		return
 	_stun_death_anim_active = false
-	if not _stun_slide_landed:
+	if not _stun_horizontal_done:
 		_lock_stun_at_current_x()
 	_hold_death_pose_at_last_frame()
 	_word_stun_idle_timer = enemy_stun_idle_after_death
@@ -379,6 +406,7 @@ func _finish_word_stun() -> void:
 	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
 	_stun_slide_landed = false
+	_stun_horizontal_done = false
 	_stun_locked_x = 0.0
 	_stun_attacker_body = null
 	if _sprite and _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
@@ -397,6 +425,7 @@ func _on_died(source: String) -> void:
 	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
 	_stun_slide_landed = false
+	_stun_horizontal_done = false
 	_stun_locked_x = 0.0
 	_stun_attacker_body = null
 	if _sprite and _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
