@@ -11,6 +11,8 @@ enum State { IDLE, APPROACH, SUPER_JUMP, STRIKE, RECOVER }
 
 const ATTACK1_FRAME_COUNT := 121
 const ATTACK1_PATH := "res://assets/Characters/Player/Attack1/Player_Attack1_%03d.png"
+const ATTACK2_FRAME_COUNT := 61
+const ATTACK2_PATH := "res://assets/Characters/Player/Attack2/Attack2_%03d.png"
 
 @export var max_action_charges: int = 1
 @export var debug_infinite_action: bool = true ## TEMP — remove before shipping.
@@ -38,7 +40,7 @@ var _state_time := 0.0
 var _sequence_time := 0.0
 var _hit_applied: Array[bool] = []
 var _player: PlayerMovement
-var _attack1_ready := false
+var _attack_anim_loaded := ""
 
 
 func _ready() -> void:
@@ -118,7 +120,7 @@ func _begin_sequence() -> void:
 	if not debug_infinite_action:
 		_charges -= 1
 		action_charge_changed.emit(_charges, max_action_charges)
-	_attack = _build_attack1_definition()
+	_attack = _build_attack2_definition()
 	_state = State.APPROACH
 	_state_time = 0.0
 	_sequence_time = 0.0
@@ -132,12 +134,40 @@ func _begin_sequence() -> void:
 	action_sequence_started.emit(_attack.attack_id)
 
 
+func _build_attack2_definition() -> ActionAttackDefinition:
+	var def := ActionAttackDefinition.new()
+	def.attack_id = "Attack2"
+	def.display_name = "Attack 2"
+	def.animation_name = "Attack2"
+	def.animation_fps = 24.0
+	def.frame_count = ATTACK2_FRAME_COUNT
+	def.frame_path_pattern = ATTACK2_PATH
+	def.hit_frames = [10, 19, 29, 33, 35, 49, 55]
+	def.hit_vfx_pixels = [
+		Vector2(262.0, 106.0),
+		Vector2(299.0, 242.0),
+		Vector2(238.0, 170.0),
+		Vector2(282.0, 197.0),
+		Vector2(287.0, 193.0),
+		Vector2(277.0, 89.0),
+		Vector2(315.0, 108.0),
+	]
+	def.hit_vfx_kinds = ["fist", "foot", "fist", "foot", "tail", "fist", "fist"]
+	def.hit_damage = [2, 1, 2, 1, 1, 2, 1]
+	def.vfx_scale = 0.5
+	def.vfx_particle_amount_scale = 0.2
+	def.damage = action_damage
+	return def
+
+
 func _build_attack1_definition() -> ActionAttackDefinition:
 	var def := ActionAttackDefinition.new()
 	def.attack_id = "Attack1"
 	def.display_name = "Attack 1"
 	def.animation_name = "Attack1"
 	def.animation_fps = 24.0
+	def.frame_count = ATTACK1_FRAME_COUNT
+	def.frame_path_pattern = ATTACK1_PATH
 	def.hit_frames = [17, 56, 91]
 	def.hit_contact_offsets = [
 		Vector2(157.0, -12.0),
@@ -204,7 +234,7 @@ func _begin_strike() -> void:
 	_state_time = 0.0
 	_player.velocity = Vector2.ZERO
 	_update_facing_toward_enemy()
-	_ensure_attack1_animation()
+	_ensure_attack_animation()
 	if _attack and _player.sprite and _player.sprite.sprite_frames:
 		if _player.sprite.sprite_frames.has_animation(_attack.animation_name):
 			_player.sprite.sprite_frames.set_animation_speed(
@@ -307,7 +337,13 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	var kind := "fist"
 	if hit_idx < _attack.hit_vfx_kinds.size():
 		kind = _attack.hit_vfx_kinds[hit_idx]
-	ActionStrikeExplosion.spawn_at(world, strike_pos, kind)
+	ActionStrikeExplosion.spawn_at(
+		world,
+		strike_pos,
+		kind,
+		_attack.vfx_scale,
+		_attack.vfx_particle_amount_scale,
+	)
 	ActionPowEffect.spawn_at(world, strike_pos + Vector2(0.0, -6.0))
 
 
@@ -349,21 +385,24 @@ func _finish_sequence() -> void:
 	action_sequence_finished.emit()
 
 
-func _ensure_attack1_animation() -> void:
-	if _attack1_ready or _player == null or _player.sprite == null:
+func _ensure_attack_animation() -> void:
+	if _attack == null or _player == null or _player.sprite == null:
+		return
+	var anim_name := _attack.animation_name
+	if _attack_anim_loaded == anim_name:
 		return
 	var sprite_frames := _player.sprite.sprite_frames
 	if sprite_frames == null:
 		return
-	if not sprite_frames.has_animation("Attack1"):
-		sprite_frames.add_animation("Attack1")
-		for i in range(1, ATTACK1_FRAME_COUNT + 1):
-			var tex: Texture2D = load(ATTACK1_PATH % i)
+	if not sprite_frames.has_animation(anim_name):
+		sprite_frames.add_animation(anim_name)
+		for i in range(1, _attack.frame_count + 1):
+			var tex: Texture2D = load(_attack.frame_path_pattern % i)
 			if tex:
-				sprite_frames.add_frame("Attack1", tex, 1.0)
-		sprite_frames.set_animation_loop("Attack1", false)
-	sprite_frames.set_animation_speed("Attack1", _attack.animation_fps if _attack else 24.0)
-	_attack1_ready = true
+				sprite_frames.add_frame(anim_name, tex, 1.0)
+		sprite_frames.set_animation_loop(anim_name, false)
+	sprite_frames.set_animation_speed(anim_name, _attack.animation_fps)
+	_attack_anim_loaded = anim_name
 
 
 func _update_facing_toward_enemy() -> void:

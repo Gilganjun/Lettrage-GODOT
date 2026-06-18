@@ -6,18 +6,29 @@ extends Node2D
 const LIFETIME := 0.65
 
 
-static func spawn_at(world_parent: Node, global_pos: Vector2, kind: String = "fist") -> void:
+static func spawn_at(
+	world_parent: Node,
+	global_pos: Vector2,
+	kind: String = "fist",
+	effect_scale: float = 1.0,
+	particle_amount_scale: float = 1.0,
+) -> void:
 	if world_parent == null:
 		return
 	var fx := ActionStrikeExplosion.new()
+	fx._particle_amount_scale = particle_amount_scale
 	world_parent.add_child(fx)
 	fx.global_position = global_pos
+	fx.scale = Vector2.ONE * effect_scale
 	fx._play(kind)
+
+
+var _particle_amount_scale := 1.0
 
 
 func _play(kind: String) -> void:
 	z_index = 135
-	var is_kick := kind == "kick"
+	var is_kick := kind in ["kick", "foot", "tail"]
 	_add_shockwave(is_kick)
 	_add_burst_particles(is_kick, Color(1.0, 0.95, 0.55, 1.0), 0.0, is_kick)
 	_add_burst_particles(is_kick, Color(1.0, 0.55, 0.12, 1.0), 0.04, not is_kick)
@@ -61,7 +72,8 @@ func _add_burst_particles(is_kick: bool, color: Color, delay: float, is_primary:
 	particles.one_shot = true
 	particles.explosiveness = 1.0
 	particles.lifetime = 0.5 if is_primary else 0.62
-	particles.amount = 64 if is_kick and is_primary else (42 if is_primary else 28)
+	var base_amount := 64 if is_kick and is_primary else (42 if is_primary else 28)
+	particles.amount = maxi(1, int(round(float(base_amount) * _particle_amount_scale)))
 	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
 	particles.emission_sphere_radius = 6.0 if is_kick else 4.0
 	particles.direction = Vector2(0, -1)
