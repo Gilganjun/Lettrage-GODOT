@@ -29,10 +29,28 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 	var shooter := LetterShooter.new()
 	shooter.word_controller = word_controller
 	shooter.player_shield = shield
+	shooter.unlimited_ammo = false
+	shooter.max_ammo = LetterShooter.DEFAULT_CLIP_SIZE
+	shooter.starting_ammo = LetterShooter.DEFAULT_CLIP_SIZE
 	shooter.sync_to_body(pickup_center)
 	player.add_child(shooter)
 
-	return {"shield": shield, "collector": collector, "shooter": shooter}
+	const PlayerRollScript := preload("res://scripts/player/player_roll.gd")
+	const PlayerActionControllerScript := preload("res://scripts/player/player_action_controller.gd")
+
+	var roll: Node = PlayerRollScript.new()
+	player.add_child(roll)
+
+	var action: Node = PlayerActionControllerScript.new()
+	player.add_child(action)
+
+	return {
+		"shield": shield,
+		"collector": collector,
+		"shooter": shooter,
+		"roll": roll,
+		"action": action,
+	}
 
 
 static func attach_combat(body: CharacterBody2D, owner_kind: String, spawn_position: Vector2) -> Node:

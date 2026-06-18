@@ -12,6 +12,8 @@ const WORD_PANEL_PAD_Y := 12.0
 @onready var enemy_word_panel: PanelContainer = $TopRow/EnemySide/EnemyWordPanel
 @onready var player_word_label: Label = $TopRow/PlayerSide/PlayerWordPanel/PlayerWordLabel
 @onready var enemy_word_label: Label = $TopRow/EnemySide/EnemyWordPanel/EnemyWordLabel
+@onready var player_ammo_label: Label = $PlayerAmmoLabel
+@onready var action_charge_icon: Label = $ActionChargeIcon
 @onready var status_label: Label = $StatusLabel
 @onready var debug_label: Label = $CombatDebugLabel
 
@@ -21,6 +23,8 @@ var _damage_bridge: Node
 var _word_controller: WordGameController
 var _enemy: Enemy
 var _framed_word_ui := false
+var _shooter: LetterShooter
+var _action_controller: Node
 
 
 func setup(
@@ -78,6 +82,30 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 		wc.word_state.score_changed.connect(func(_s): refresh_words())
 		wc.word_state.validation_changed.connect(func(_a, _b): refresh_words())
 	refresh_words()
+
+
+func bind_combat_actions(shooter: LetterShooter, action_controller: Node) -> void:
+	_shooter = shooter
+	_action_controller = action_controller
+	if _shooter:
+		_shooter.ammo_changed.connect(_on_ammo_changed)
+		_on_ammo_changed(_shooter.ammo, _shooter.max_ammo)
+	if _action_controller:
+		_action_controller.action_charge_changed.connect(_on_action_charge_changed)
+		_on_action_charge_changed(_action_controller.get_charges(), _action_controller.max_action_charges)
+
+
+func _on_ammo_changed(current: int, maximum: int) -> void:
+	if player_ammo_label == null:
+		return
+	player_ammo_label.visible = true
+	player_ammo_label.text = "Ammo %d/%d" % [current, maximum]
+
+
+func _on_action_charge_changed(charges: int, _max_charges: int) -> void:
+	if action_charge_icon == null:
+		return
+	action_charge_icon.visible = charges > 0
 
 
 func _on_validation(status: String, message: String) -> void:

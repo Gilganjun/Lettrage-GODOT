@@ -42,6 +42,8 @@ func try_collect_letter(letter: Letter) -> bool:
 		var combat := player.get_node_or_null("CharacterCombat")
 		if combat and combat.blocks_collection():
 			return false
+		if _blocks_special_moves(player):
+			return false
 	if player_shield and player_shield.blocks_letter_collection():
 		return false
 	if controller == null:
@@ -64,3 +66,10 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	if try_collect_letter(letter):
 		_processed_this_frame[id] = true
+
+
+func _blocks_special_moves(player: CharacterBody2D) -> bool:
+	for child in player.get_children():
+		if child.has_method("blocks_collection") and child.call("blocks_collection"):
+			return true
+	return false

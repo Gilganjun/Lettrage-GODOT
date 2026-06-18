@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://letter_ammo_pickup_phase2c2"]
+
+[ext_resource type="Script" path="res://scripts/collectibles/letter_ammo_pickup.gd" id="1"]
+
+[node name="LetterAmmoPickup" type="Area2D"]
+script = ExtResource("1")

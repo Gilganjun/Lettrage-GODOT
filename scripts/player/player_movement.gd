@@ -69,6 +69,10 @@ func set_camera_follow_enabled(enabled: bool) -> void:
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel"):
 		get_tree().quit()
+	if _process_action_sequence(delta):
+		return
+	if _process_roll(delta):
+		return
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.blocks_movement():
 		_process_combat_lock(delta, combat)
@@ -275,6 +279,9 @@ func _update_movement_state() -> void:
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.has_method("is_word_stun_active") and combat.is_word_stun_active():
 		return
+	var action := _get_action_controller()
+	if action and action.is_active() and action.locks_movement_animation():
+		return
 	var new_state: PlayerAnimation.MovementState
 	if is_on_ladder:
 		new_state = PlayerAnimation.MovementState.CLIMB
@@ -403,3 +410,41 @@ func _apply_air_fast_fall(cfg: PlayerMovementConfig, input_x: float, delta: floa
 	else:
 		velocity.y = speed
 		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * 2.0 * delta)
+
+
+func _process_action_sequence(delta: float) -> bool:
+	var action := _get_action_controller()
+	if action == null:
+		return false
+	if action.process_action(self, delta):
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return true
+	return false
+
+
+func _process_roll(delta: float) -> bool:
+	var roll := _get_roll()
+	if roll == null:
+		return false
+	if roll.process_roll(self, delta):
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return true
+	return false
+
+
+func _get_action_controller() -> Node:
+	for child in get_children():
+		if child.has_method("process_action"):
+			return child
+	return null
+
+
+func _get_roll() -> Node:
+	for child in get_children():
+		if child.has_method("process_roll"):
+			return child
+	return null

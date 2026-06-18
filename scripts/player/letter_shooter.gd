@@ -19,11 +19,15 @@ const STILL_VELOCITY_Y := 8.0
 @export var aim_line_length: float = 260.0
 @export var aim_pivot_offset: Vector2 = Vector2(0.0, -48.0)
 @export var aim_arc_radius: float = 72.0
-@export var unlimited_ammo: bool = true
+@export var unlimited_ammo: bool = false
+@export var max_ammo: int = DEFAULT_CLIP_SIZE
 @export var starting_ammo: int = DEFAULT_CLIP_SIZE
+@export var ammo_per_shot: int = 1
+@export var ammo_regen_interval: float = 1.0
 @export var clip_pickup_size: int = DEFAULT_CLIP_SIZE
 
 var ammo: int = DEFAULT_CLIP_SIZE
+var _regen_timer := 0.0
 
 var _aiming := false
 var _precision_aim_active := false
@@ -60,6 +64,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_regen_ammo(delta)
 	_handle_input(delta)
 	_update_aim_visuals()
 
@@ -80,13 +85,27 @@ func add_ammo_clip(amount: int = -1) -> void:
 	var add_amount := clip_pickup_size if amount < 0 else amount
 	if add_amount <= 0:
 		return
-	ammo += add_amount
-	ammo_changed.emit(ammo, clip_pickup_size)
+	ammo = mini(max_ammo, ammo + add_amount)
+	ammo_changed.emit(ammo, max_ammo)
 
 
 func set_ammo(count: int) -> void:
-	ammo = maxi(0, count)
-	ammo_changed.emit(ammo, clip_pickup_size)
+	ammo = clampi(count, 0, max_ammo)
+	ammo_changed.emit(ammo, max_ammo)
+
+
+func cancel_aim() -> void:
+	_reset_aim_state()
+
+
+func _regen_ammo(delta: float) -> void:
+	if unlimited_ammo or ammo >= max_ammo:
+		return
+	_regen_timer += delta
+	while _regen_timer >= ammo_regen_interval and ammo < max_ammo:
+		_regen_timer -= ammo_regen_interval
+		ammo += 1
+		ammo_changed.emit(ammo, max_ammo)
 
 
 func get_debug_info() -> Dictionary:
@@ -103,6 +122,9 @@ func get_debug_info() -> Dictionary:
 
 func _handle_input(delta: float) -> void:
 	var body := get_parent() as CharacterBody2D
+	if body and _player_blocks_gun(body):
+		_reset_aim_state()
+		return
 	if body:
 		var combat := body.get_node_or_null("CharacterCombat")
 		if combat and combat.has_method("blocks_collection") and combat.blocks_collection():
@@ -177,8 +199,8 @@ func _fire() -> void:
 	if _bullet_scene == null or _muzzle == null:
 		return
 	if not unlimited_ammo:
-		ammo -= 1
-		ammo_changed.emit(ammo, clip_pickup_size)
+		ammo = maxi(0, ammo - ammo_per_shot)
+		ammo_changed.emit(ammo, max_ammo)
 	var bullet: LetterBullet = _bullet_scene.instantiate()
 	bullet.player_shield = player_shield
 	bullet.word_controller = word_controller
@@ -233,6 +255,15 @@ func _build_arc_points(
 		var dir := Vector2.UP.rotated(deg_to_rad(deg))
 		pts.append(center + dir * radius)
 	return pts
+
+
+func _player_blocks_gun(body: CharacterBody2D) -> bool:
+	for child in body.get_children():
+		if child.has_method("is_rolling") and child.call("is_rolling"):
+			return true
+		if child.has_method("is_active") and child.call("is_active"):
+			return true
+	return false
 
 
 func _find_world_node() -> Node2D:

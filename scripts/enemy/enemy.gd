@@ -50,6 +50,7 @@ var _ambient_idle_remaining := 0.0
 var _ambient_idle_deadline := 0.0
 var _air_jumps_remaining := 0
 var _letter_shooter: EnemyLetterShooter
+var _action_sequence_targeted := false
 
 const FLOOR_SNAP := 4.0
 const MAX_AIR_JUMPS := 1
@@ -259,6 +260,14 @@ func debug_force_validation() -> void:
 		word_controller.debug_force_validation()
 
 
+func set_action_sequence_targeted(active: bool) -> void:
+	_action_sequence_targeted = active
+
+
+func is_action_sequence_targeted() -> bool:
+	return _action_sequence_targeted
+
+
 func _physics_process(delta: float) -> void:
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.is_dead():
@@ -378,6 +387,8 @@ func _process_platformer(delta: float) -> void:
 		_jump_held = false
 	_try_intelligent_double_jump(cfg)
 	_try_mount_ladder()
+	if _action_sequence_targeted:
+		velocity.x *= 0.35
 
 
 func _on_enemy_letter_collected(_letter: Letter, _character: String) -> void:

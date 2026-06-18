@@ -1,0 +1,27 @@
+class_name ActionAttackDefinition
+extends Resource
+
+## Data for cinematic ACTION attacks — plug in Kling animations later.
+
+@export var attack_id: String = "Attack1"
+@export var display_name: String = "Attack 1"
+@export var animation_name: String = "Attack1"
+@export var animation_fps: float = 24.0
+@export var native_frame_size: Vector2 = Vector2(316.0, 316.0)
+@export var hit_frames: Array[int] = [17, 56, 91]
+## Strike-point offsets from the frame center in native pixels (right-side contact art).
+@export var hit_contact_offsets: Array[Vector2] = [
+	Vector2(157.0, -12.0),
+	Vector2(148.0, -62.0),
+	Vector2(157.0, -67.0),
+]
+## Texture pixel coords of visible fist/foot sparks in 316x316 Attack1 frames.
+@export var hit_vfx_pixels: Array[Vector2] = [
+	Vector2(315.0, 101.0),
+	Vector2(306.0, 96.0),
+	Vector2(315.0, 90.0),
+]
+@export var hit_vfx_kinds: Array[String] = ["kick", "fist", "fist"]
+@export var hit_damage: Array[int] = [4, 3, 3]
+@export var enemy_contact_offset: Vector2 = Vector2(0.0, -36.0)
+@export var damage: int = 10

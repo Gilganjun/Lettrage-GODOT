@@ -14,6 +14,8 @@ signal respawn_completed
 @export var stun_slide_speed_min := 650.0
 @export var stun_slide_speed_max := 2800.0
 @export var stun_watchdog_buffer := 0.75
+@export var action_injury_duration := 0.65
+@export var action_knockback_speed := 280.0
 
 var _body: CharacterBody2D
 var _sprite: AnimatedSprite2D
@@ -153,6 +155,25 @@ func apply_word_damage(
 	return _health().apply_damage(amount, source)
 
 
+func apply_action_damage(
+	amount: int,
+	source: String,
+	attacker_position: Vector2 = Vector2.INF,
+) -> int:
+	_ensure_initialized()
+	if _health().is_dead:
+		return 0
+	var dealt: int = (_health() as HealthComponent).apply_damage(amount, source)
+	if dealt <= 0:
+		return dealt
+	_hit_feedback().play_hit()
+	if _health().is_dead:
+		return dealt
+	_injury().start_injury(action_injury_duration)
+	_apply_action_knockback(attacker_position)
+	return dealt
+
+
 func force_death(source: String = "debug") -> void:
 	_ensure_initialized()
 	if _health().is_dead:
@@ -209,8 +230,10 @@ func _process(delta: float) -> void:
 		_finish_respawn()
 
 
-func _on_damaged(_amount: int, _source: String) -> void:
+func _on_damaged(_amount: int, source: String) -> void:
 	if _health().is_dead:
+		return
+	if source.begins_with("action_"):
 		return
 	_hit_feedback().play_hit()
 	_begin_word_stun(_last_word_hit_attacker_position)
@@ -417,6 +440,15 @@ func _finish_word_stun() -> void:
 	_injury().end_injury()
 	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
 		_sprite.play("Idle")
+
+
+func _apply_action_knockback(attacker_position: Vector2) -> void:
+	if _body == null:
+		return
+	var kb_dir := signf(_body.global_position.x - attacker_position.x)
+	if kb_dir == 0.0:
+		kb_dir = 1.0
+	_body.velocity.x = kb_dir * action_knockback_speed
 
 
 func _on_died(source: String) -> void:

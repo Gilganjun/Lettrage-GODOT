@@ -43,6 +43,8 @@ var _enemy: Enemy
 var _player_shield: PlayerShield
 var _player_combat: Node
 var _enemy_combat: Node
+var _player_shooter: LetterShooter
+var _player_action: Node
 var _player_spawn := Vector2(279.0, 231.0)
 
 
@@ -75,6 +77,8 @@ func _ready() -> void:
 		combat_hud.setup(_player_combat, _enemy_combat, damage_bridge)
 	if combat_hud.has_method("bind_words"):
 		combat_hud.bind_words(word_controller, _enemy)
+	if combat_hud.has_method("bind_combat_actions"):
+		combat_hud.bind_combat_actions(_player_shooter, _player_action)
 	if hud.has_method("set_word_display_on_combat_hud"):
 		hud.set_word_display_on_combat_hud(true)
 	if word_celebration.has_method("setup"):
@@ -127,6 +131,8 @@ func _spawn_player() -> void:
 	player.z_index = 100
 	var attached := PlayerAttach.attach(player, word_controller)
 	_player_shield = attached.get("shield")
+	_player_shooter = attached.get("shooter")
+	_player_action = attached.get("action")
 	_player_combat = PlayerAttach.attach_combat(player, "player", _player_spawn)
 	if level_root.has_method("collect_ladder_areas"):
 		for ladder in level_root.collect_ladder_areas():
@@ -250,10 +256,10 @@ func _process(_delta: float) -> void:
 		_debug_enabled = not _debug_enabled
 		collision_debug.set_debug_enabled(_debug_enabled)
 	if Input.is_action_just_pressed("submit_word"):
-		if _player_combat == null or not _player_combat.blocks_word_submit():
+		if not _blocks_word_submit():
 			word_controller.submit_word()
 	if Input.is_action_just_pressed("delete_letter"):
-		if _player_combat == null or not _player_combat.blocks_word_submit():
+		if not _blocks_word_submit():
 			word_controller.delete_last_letter()
 	if _debug_enabled:
 		collision_debug.queue_redraw()
@@ -263,6 +269,14 @@ func _process(_delta: float) -> void:
 		hud.refresh_combat_hud()
 	if combat_hud.has_method("refresh_debug"):
 		combat_hud.refresh_debug()
+
+
+func _blocks_word_submit() -> bool:
+	if _player_combat and _player_combat.blocks_word_submit():
+		return true
+	if _player_action and _player_action.has_method("blocks_word_submit") and _player_action.blocks_word_submit():
+		return true
+	return false
 
 
 func _apply_hud_chrome_visibility() -> void:
