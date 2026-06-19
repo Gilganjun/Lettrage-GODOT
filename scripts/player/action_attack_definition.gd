@@ -25,6 +25,10 @@ extends Resource
 ]
 @export var hit_vfx_kinds: Array[String] = ["kick", "fist", "fist"]
 @export var hit_damage: Array[int] = [4, 3, 3]
+## Per-hit player side relative to enemy: 1 = left of enemy, -1 = right of enemy.
+@export var hit_strike_sides: Array[int] = []
+## Override horizontal standoff from player to enemy (0 = use controller default).
+@export var strike_body_standoff: float = 0.0
 @export var enemy_contact_offset: Vector2 = Vector2(0.0, -36.0)
 @export var vfx_scale: float = 1.0
 @export var vfx_particle_amount_scale: float = 1.0

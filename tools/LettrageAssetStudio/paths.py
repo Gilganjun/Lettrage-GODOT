@@ -64,7 +64,32 @@ def save_lettrage_project(project_root: Path) -> None:
 
 
 def get_characters_dir(project_root: Path) -> Path:
-    return project_root / "Assets" / "Characters"
+    return project_root / "assets" / "Characters"
+
+
+def sanitize_folder_name(name: str) -> str:
+    name = name.strip()
+    if not name:
+        return "FontSet"
+    for char in '\\/:*?"<>|':
+        name = name.replace(char, "_")
+    return name
+
+
+def get_fonts_dir(project_root: Path | None = None) -> Path:
+    """Default Godot font export root: assets/fonts/"""
+    root = project_root or load_lettrage_project()
+    if root is None:
+        raise ValueError("Lettrage project is not linked.")
+    return root / "assets" / "fonts"
+
+
+def get_font_export_dir(font_name: str, project_root: Path | None = None) -> Path:
+    """assets/fonts/<FontName>/ — created automatically."""
+    safe_name = sanitize_folder_name(font_name)
+    export_dir = get_fonts_dir(project_root) / safe_name
+    export_dir.mkdir(parents=True, exist_ok=True)
+    return export_dir
 
 
 def timestamped_output_name(prefix: str) -> str:

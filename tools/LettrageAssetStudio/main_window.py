@@ -7,6 +7,7 @@ from pathlib import Path
 from tkinter import ttk
 
 from animation_tester_tab import AnimationTesterTab
+from auto_font_cutter_tab import AutoFontCutterTab
 from export_tab import ExportTab
 from green2alpha_tab import Green2AlphaTab
 from paths import load_lettrage_project
@@ -17,8 +18,8 @@ from video_extract_tab import VideoExtractTab
 
 class MainWindow:
     APP_TITLE = "LETTRAGE ASSET STUDIO v1.0"
-    TAB_ANIMATION_TESTER = 3
-    TAB_EXPORT = 4
+    TAB_ANIMATION_TESTER = 4
+    TAB_EXPORT = 5
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
@@ -68,6 +69,7 @@ class MainWindow:
             ("Video Extract", VideoExtractTab(self.notebook, self.theme, on_preset_complete=self._on_preset_complete)),
             ("Green2Alpha", Green2AlphaTab(self.notebook, self.theme)),
             ("Resize", ResizeTab(self.notebook, self.theme)),
+            ("Auto-Font Cutter", AutoFontCutterTab(self.notebook, self.theme)),
             ("Animation Tester", self.animation_tester_tab),
             ("Export", self.export_tab),
         ]

@@ -51,6 +51,11 @@ var _ambient_idle_deadline := 0.0
 var _air_jumps_remaining := 0
 var _letter_shooter: EnemyLetterShooter
 var _action_sequence_targeted := false
+var _action_strike_frozen := false
+var _action_freeze_position := Vector2.ZERO
+var _idle_stuck_timer := 0.0
+
+const IDLE_STUCK_RESUME_SECONDS := 1.75
 
 const FLOOR_SNAP := 4.0
 const MAX_AIR_JUMPS := 1
@@ -262,10 +267,26 @@ func debug_force_validation() -> void:
 
 func set_action_sequence_targeted(active: bool) -> void:
 	_action_sequence_targeted = active
+	if not active:
+		end_action_strike_freeze()
 
 
 func is_action_sequence_targeted() -> bool:
 	return _action_sequence_targeted
+
+
+func begin_action_strike_freeze() -> void:
+	_action_strike_frozen = true
+	_action_freeze_position = global_position
+	velocity = Vector2.ZERO
+
+
+func end_action_strike_freeze() -> void:
+	_action_strike_frozen = false
+
+
+func is_action_strike_frozen() -> bool:
+	return _action_strike_frozen
 
 
 func _physics_process(delta: float) -> void:
@@ -274,6 +295,13 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		floor_snap_length = FLOOR_SNAP
+		return
+	if _action_strike_frozen:
+		global_position = _action_freeze_position
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
 		return
 	if combat and combat.blocks_ai():
 		_process_combat_lock(delta)
@@ -293,6 +321,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	floor_snap_length = FLOOR_SNAP
 	_recover_if_out_of_bounds()
+	_tick_idle_resume_watchdog(delta)
 	_update_movement_state()
 
 
@@ -318,7 +347,7 @@ func _tick_word_systems(delta: float) -> void:
 func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
 	if _is_ambient_idle_active():
-		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
+		_stop_horizontal_on_floor(delta)
 		if not is_on_floor():
 			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 		return
@@ -347,8 +376,12 @@ func _process_platformer(delta: float) -> void:
 	elif not obstacle_busy:
 		movement_controller.clear_letter_chase()
 		desired = patrol_dir
-	if movement_controller and movement_controller.direction != 0 and chase_dir == 0:
-		desired = movement_controller.direction
+	if obstacle_response.call("is_paused"):
+		_stop_horizontal_on_floor(delta)
+		if not is_on_floor():
+			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
+		return
+	var motion_dir := _compute_horizontal_motion_dir(chase_dir, patrol_dir, obstacle_busy)
 	if (
 		not obstacle_busy
 		and chase_dir != 0
@@ -357,18 +390,13 @@ func _process_platformer(delta: float) -> void:
 		and movement_controller.request_chase_jump()
 	):
 		_chase_hop_impulse = CHASE_HOP_IMPULSE
-	if obstacle_response.call("is_paused"):
-		velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta)
-		if not is_on_floor():
-			velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
-		return
-	var motion_dir := desired
-	if movement_controller and movement_controller.direction != 0:
-		motion_dir = movement_controller.direction
-	facing = motion_dir if motion_dir != 0 else facing
-	var target_speed := float(motion_dir) * cfg.max_speed
-	var rate := cfg.acceleration if absf(target_speed) > absf(velocity.x) else cfg.deceleration
-	velocity.x = move_toward(velocity.x, target_speed, rate * delta)
+	if motion_dir == 0 and is_on_floor():
+		_stop_horizontal_on_floor(delta)
+	elif motion_dir != 0:
+		facing = motion_dir
+		var target_speed := float(motion_dir) * cfg.max_speed
+		var rate := cfg.acceleration if absf(target_speed) > absf(velocity.x) else cfg.deceleration
+		velocity.x = move_toward(velocity.x, target_speed, rate * delta)
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + cfg.gravity * delta, cfg.max_falling_speed)
 	else:
@@ -387,8 +415,54 @@ func _process_platformer(delta: float) -> void:
 		_jump_held = false
 	_try_intelligent_double_jump(cfg)
 	_try_mount_ladder()
-	if _action_sequence_targeted:
-		velocity.x *= 0.35
+
+
+func _compute_horizontal_motion_dir(chase_dir: int, patrol_dir: int, obstacle_busy: bool) -> int:
+	if _is_ambient_idle_active() or obstacle_response.call("is_paused"):
+		return 0
+	if chase_dir != 0 and not obstacle_busy:
+		return chase_dir
+	return patrol_dir
+
+
+func _stop_horizontal_on_floor(delta: float) -> void:
+	if not is_on_floor():
+		return
+	var cfg := _cfg()
+	velocity.x = move_toward(velocity.x, 0.0, cfg.deceleration * delta * 3.0)
+	if absf(velocity.x) < 2.0:
+		velocity.x = 0.0
+
+
+func _tick_idle_resume_watchdog(delta: float) -> void:
+	if not is_on_floor() or _is_ambient_idle_active():
+		_idle_stuck_timer = 0.0
+		return
+	if obstacle_response.call("is_paused") or obstacle_response.encounter_active:
+		_idle_stuck_timer = 0.0
+		return
+	var combat := get_node_or_null("CharacterCombat")
+	if combat and combat.blocks_ai():
+		_idle_stuck_timer = 0.0
+		return
+	if movement_state != EnemyAnimation.MovementState.IDLE:
+		_idle_stuck_timer = 0.0
+		return
+	if _compute_horizontal_motion_dir(
+		letter_targeting.get_chase_direction(global_position) if letter_targeting else 0,
+		movement_controller.get_desired_direction(global_position.x) if movement_controller else 0,
+		obstacle_response.encounter_active
+		or obstacle_response.is_paused()
+		or obstacle_response.is_jump_in_progress(),
+	) != 0:
+		_idle_stuck_timer = 0.0
+		return
+	_idle_stuck_timer += delta
+	if _idle_stuck_timer < IDLE_STUCK_RESUME_SECONDS:
+		return
+	_idle_stuck_timer = 0.0
+	if movement_controller:
+		movement_controller.force_resume_patrol(global_position.x)
 
 
 func _on_enemy_letter_collected(_letter: Letter, _character: String) -> void:
@@ -484,6 +558,14 @@ func _update_movement_state() -> void:
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.has_method("is_enemy_stun_active") and combat.is_enemy_stun_active():
 		return
+	var patrol_dir := movement_controller.get_desired_direction(global_position.x) if movement_controller else 0
+	var chase_dir := letter_targeting.get_chase_direction(global_position) if letter_targeting else 0
+	var obstacle_busy := (
+		obstacle_response.encounter_active
+		or obstacle_response.is_paused()
+		or obstacle_response.is_jump_in_progress()
+	)
+	var move_intent := _compute_horizontal_motion_dir(chase_dir, patrol_dir, obstacle_busy)
 	var new_state: EnemyAnimation.MovementState
 	if is_on_ladder:
 		new_state = EnemyAnimation.MovementState.CLIMB
@@ -493,9 +575,9 @@ func _update_movement_state() -> void:
 			if velocity.y < -40.0
 			else EnemyAnimation.MovementState.FALL
 		)
-	elif obstacle_response.call("is_paused") or _is_ambient_idle_active():
+	elif _is_ambient_idle_active() or obstacle_response.call("is_paused"):
 		new_state = EnemyAnimation.MovementState.IDLE
-	elif absf(velocity.x) > 8.0:
+	elif move_intent != 0 or absf(velocity.x) > 8.0:
 		new_state = EnemyAnimation.MovementState.RUN
 	else:
 		new_state = EnemyAnimation.MovementState.IDLE

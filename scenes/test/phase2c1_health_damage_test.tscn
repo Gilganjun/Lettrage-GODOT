@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://phase2c1_health_damage_test"]
+[gd_scene load_steps=20 format=3 uid="uid://phase2c1_health_damage_test"]
 
 [ext_resource type="Script" path="res://scripts/test/phase2c1_health_damage_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
 [ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
 [ext_resource type="PackedScene" path="res://scenes/visual/phase2c1_visual_pass.tscn" id="14_visual"]
+[ext_resource type="PackedScene" path="res://scenes/ui/keyboard_commands_panel.tscn" id="16_keyboard_help"]
 
 [ext_resource type="Script" path="res://scripts/collectibles/action_collectible_spawner.gd" id="15_action_spawner"]
 
@@ -96,6 +97,11 @@ script = ExtResource("9_celeb")
 layer = 21
 script = ExtResource("10_garble")
 
+[node name="KeyboardHelpLayer" type="CanvasLayer" parent="UI"]
+layer = 30
+
+[node name="KeyboardCommandsPanel" parent="UI/KeyboardHelpLayer" instance=ExtResource("16_keyboard_help")]
+
 [node name="TopBar" type="PanelContainer" parent="UI"]
 offset_left = 6.0
 offset_top = 6.0
@@ -107,4 +113,4 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_top")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "Phase 2C2 | Ammo + Roll(R) + ACTION(J) | Shift+F2 HUD | Alt+1-6 combat debug"
+text = "Phase 2C2 | ? bottom-left = keyboard help"

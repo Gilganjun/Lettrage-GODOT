@@ -38,7 +38,8 @@ The EXE can live here, on the Desktop, or anywhere — it never becomes part of 
 2. **Green2Alpha** — Green-screen removal
 3. **Resize** — Batch resize images
 4. **Animation Tester** — Preview and clean up frame sequences
-5. **Export** — Copy finished frames to `Assets/Characters/<Name>/<AnimationType>/`
+5. **Auto-Font Cutter** — Split A–Z grid sheets into letter PNGs
+6. **Export** — Copy finished frames to `Assets/Characters/<Name>/<AnimationType>/`
 
 ## Output folders
 
@@ -56,5 +57,14 @@ Outputs/
 ```
 
 Use **Run Preset Pipeline** on the Video Extract tab to chain extract → green screen → shrink in one step.
+
+## Auto-Font Cutter
+
+Import a generated A–Z alphabet grid (transparent or green-screen) and export 26 letter PNGs plus `metadata.json`.
+
+Default grid: **7×4** (A–G, H–N, O–U, V–Z, last two cells empty).  
+Default export size: **512×512** transparent PNG per letter.
+
+Export destination: `assets/fonts/<FontName>/` in your Lettrage Godot project (auto-created).
 
 Video Extract (manual mode) still saves next to the source MP4 as `<video_name>_frames/`.

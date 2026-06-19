@@ -159,6 +159,7 @@ func apply_action_damage(
 	amount: int,
 	source: String,
 	attacker_position: Vector2 = Vector2.INF,
+	skip_knockback: bool = false,
 ) -> int:
 	_ensure_initialized()
 	if _health().is_dead:
@@ -166,11 +167,12 @@ func apply_action_damage(
 	var dealt: int = (_health() as HealthComponent).apply_damage(amount, source)
 	if dealt <= 0:
 		return dealt
-	_hit_feedback().play_hit()
+	_hit_feedback().play_hit(true)
 	if _health().is_dead:
 		return dealt
 	_injury().start_injury(action_injury_duration)
-	_apply_action_knockback(attacker_position)
+	if not skip_knockback:
+		_apply_action_knockback(attacker_position)
 	return dealt
 
 

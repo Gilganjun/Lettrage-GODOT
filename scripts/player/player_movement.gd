@@ -417,7 +417,15 @@ func _process_action_sequence(delta: float) -> bool:
 	if action == null:
 		return false
 	if action.process_action(self, delta):
-		move_and_slide()
+		var kinematic: bool = (
+			action.has_method("uses_side_slide_strike") and action.uses_side_slide_strike()
+		)
+		if not kinematic:
+			move_and_slide()
+		else:
+			velocity = Vector2.ZERO
+			if action.has_method("finalize_strike_physics"):
+				action.finalize_strike_physics()
 		floor_snap_length = FLOOR_SNAP
 		_update_movement_state()
 		return true

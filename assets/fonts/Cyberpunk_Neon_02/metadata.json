@@ -1,0 +1,682 @@
+{
+  "type": "lettrage_font_set",
+  "font_set_name": "Cyberpunk_Neon_02",
+  "source_file": "ChatGPT Image Jun 19, 2026, 08_35_33 AM.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "grid": {
+    "columns": 7,
+    "rows": 4,
+    "letter_order": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  },
+  "background_processing": {
+    "mode": "green2alpha",
+    "requested_mode": "auto",
+    "green_delta": 60,
+    "alpha_threshold": 16
+  },
+  "export": {
+    "size": [
+      512,
+      512
+    ],
+    "padding_px": 32
+  },
+  "letters": {
+    "A": {
+      "status": "warning",
+      "export_file": "Cyberpunk_Neon_02_A.png",
+      "source_cell": [
+        0,
+        0
+      ],
+      "source_cell_rect": [
+        0,
+        0,
+        179,
+        314
+      ],
+      "bbox_in_cell": [
+        37,
+        156,
+        191,
+        307
+      ],
+      "visible_pixel_count": 14530,
+      "warnings": [
+        "Possible neighbor bleed"
+      ],
+      "notes": []
+    },
+    "B": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_B.png",
+      "source_cell": [
+        1,
+        0
+      ],
+      "source_cell_rect": [
+        179,
+        0,
+        358,
+        314
+      ],
+      "bbox_in_cell": [
+        74,
+        158,
+        205,
+        308
+      ],
+      "visible_pixel_count": 18432,
+      "warnings": [],
+      "notes": [
+        "Cleaned 2124 stray px"
+      ]
+    },
+    "C": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_C.png",
+      "source_cell": [
+        2,
+        0
+      ],
+      "source_cell_rect": [
+        358,
+        0,
+        537,
+        314
+      ],
+      "bbox_in_cell": [
+        75,
+        159,
+        196,
+        307
+      ],
+      "visible_pixel_count": 12742,
+      "warnings": [],
+      "notes": [
+        "Cleaned 2867 stray px"
+      ]
+    },
+    "D": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_D.png",
+      "source_cell": [
+        3,
+        0
+      ],
+      "source_cell_rect": [
+        537,
+        0,
+        717,
+        314
+      ],
+      "bbox_in_cell": [
+        65,
+        158,
+        192,
+        308
+      ],
+      "visible_pixel_count": 15998,
+      "warnings": [],
+      "notes": [
+        "Cleaned 1198 stray px"
+      ]
+    },
+    "E": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_E.png",
+      "source_cell": [
+        4,
+        0
+      ],
+      "source_cell_rect": [
+        717,
+        0,
+        896,
+        314
+      ],
+      "bbox_in_cell": [
+        59,
+        158,
+        182,
+        307
+      ],
+      "visible_pixel_count": 16268,
+      "warnings": [],
+      "notes": [
+        "Cleaned 1202 stray px"
+      ]
+    },
+    "F": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_F.png",
+      "source_cell": [
+        5,
+        0
+      ],
+      "source_cell_rect": [
+        896,
+        0,
+        1075,
+        314
+      ],
+      "bbox_in_cell": [
+        54,
+        158,
+        172,
+        307
+      ],
+      "visible_pixel_count": 12528,
+      "warnings": [],
+      "notes": [
+        "Cleaned 1589 stray px"
+      ]
+    },
+    "G": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_G.png",
+      "source_cell": [
+        6,
+        0
+      ],
+      "source_cell_rect": [
+        1075,
+        0,
+        1254,
+        314
+      ],
+      "bbox_in_cell": [
+        36,
+        158,
+        163,
+        307
+      ],
+      "visible_pixel_count": 16498,
+      "warnings": [],
+      "notes": []
+    },
+    "H": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_H.png",
+      "source_cell": [
+        0,
+        1
+      ],
+      "source_cell_rect": [
+        0,
+        314,
+        179,
+        627
+      ],
+      "bbox_in_cell": [
+        34,
+        140,
+        169,
+        294
+      ],
+      "visible_pixel_count": 16527,
+      "warnings": [],
+      "notes": [
+        "Cleaned 4273 stray px"
+      ]
+    },
+    "I": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_I.png",
+      "source_cell": [
+        1,
+        1
+      ],
+      "source_cell_rect": [
+        179,
+        314,
+        358,
+        627
+      ],
+      "bbox_in_cell": [
+        98,
+        141,
+        167,
+        294
+      ],
+      "visible_pixel_count": 8578,
+      "warnings": [],
+      "notes": [
+        "Cleaned 7797 stray px"
+      ]
+    },
+    "J": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_J.png",
+      "source_cell": [
+        2,
+        1
+      ],
+      "source_cell_rect": [
+        358,
+        314,
+        537,
+        627
+      ],
+      "bbox_in_cell": [
+        61,
+        140,
+        171,
+        293
+      ],
+      "visible_pixel_count": 9583,
+      "warnings": [],
+      "notes": [
+        "Cleaned 4492 stray px"
+      ]
+    },
+    "K": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_K.png",
+      "source_cell": [
+        3,
+        1
+      ],
+      "source_cell_rect": [
+        537,
+        314,
+        717,
+        627
+      ],
+      "bbox_in_cell": [
+        50,
+        140,
+        186,
+        293
+      ],
+      "visible_pixel_count": 15564,
+      "warnings": [],
+      "notes": [
+        "Cleaned 4653 stray px"
+      ]
+    },
+    "L": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_L.png",
+      "source_cell": [
+        4,
+        1
+      ],
+      "source_cell_rect": [
+        717,
+        314,
+        896,
+        627
+      ],
+      "bbox_in_cell": [
+        55,
+        140,
+        174,
+        293
+      ],
+      "visible_pixel_count": 10239,
+      "warnings": [],
+      "notes": [
+        "Cleaned 5993 stray px"
+      ]
+    },
+    "M": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_M.png",
+      "source_cell": [
+        5,
+        1
+      ],
+      "source_cell_rect": [
+        896,
+        314,
+        1075,
+        627
+      ],
+      "bbox_in_cell": [
+        38,
+        147,
+        185,
+        293
+      ],
+      "visible_pixel_count": 18047,
+      "warnings": [],
+      "notes": [
+        "Cleaned 2377 stray px"
+      ]
+    },
+    "N": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_N.png",
+      "source_cell": [
+        6,
+        1
+      ],
+      "source_cell_rect": [
+        1075,
+        314,
+        1254,
+        627
+      ],
+      "bbox_in_cell": [
+        46,
+        144,
+        175,
+        293
+      ],
+      "visible_pixel_count": 16724,
+      "warnings": [],
+      "notes": [
+        "Cleaned 4871 stray px"
+      ]
+    },
+    "O": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_O.png",
+      "source_cell": [
+        0,
+        2
+      ],
+      "source_cell_rect": [
+        0,
+        627,
+        179,
+        940
+      ],
+      "bbox_in_cell": [
+        35,
+        89,
+        167,
+        241
+      ],
+      "visible_pixel_count": 16186,
+      "warnings": [],
+      "notes": [
+        "Cleaned 5313 stray px"
+      ]
+    },
+    "P": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_P.png",
+      "source_cell": [
+        1,
+        2
+      ],
+      "source_cell_rect": [
+        179,
+        627,
+        358,
+        940
+      ],
+      "bbox_in_cell": [
+        66,
+        89,
+        192,
+        241
+      ],
+      "visible_pixel_count": 14408,
+      "warnings": [],
+      "notes": [
+        "Cleaned 9614 stray px"
+      ]
+    },
+    "Q": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_Q.png",
+      "source_cell": [
+        2,
+        2
+      ],
+      "source_cell_rect": [
+        358,
+        627,
+        537,
+        940
+      ],
+      "bbox_in_cell": [
+        55,
+        89,
+        195,
+        254
+      ],
+      "visible_pixel_count": 17520,
+      "warnings": [],
+      "notes": [
+        "Cleaned 8888 stray px"
+      ]
+    },
+    "R": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_R.png",
+      "source_cell": [
+        3,
+        2
+      ],
+      "source_cell_rect": [
+        537,
+        627,
+        717,
+        940
+      ],
+      "bbox_in_cell": [
+        60,
+        89,
+        191,
+        241
+      ],
+      "visible_pixel_count": 17288,
+      "warnings": [],
+      "notes": [
+        "Cleaned 9270 stray px"
+      ]
+    },
+    "S": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_S.png",
+      "source_cell": [
+        4,
+        2
+      ],
+      "source_cell_rect": [
+        717,
+        627,
+        896,
+        940
+      ],
+      "bbox_in_cell": [
+        56,
+        89,
+        184,
+        241
+      ],
+      "visible_pixel_count": 16892,
+      "warnings": [],
+      "notes": [
+        "Cleaned 9640 stray px"
+      ]
+    },
+    "T": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_T.png",
+      "source_cell": [
+        5,
+        2
+      ],
+      "source_cell_rect": [
+        896,
+        627,
+        1075,
+        940
+      ],
+      "bbox_in_cell": [
+        50,
+        89,
+        176,
+        242
+      ],
+      "visible_pixel_count": 10874,
+      "warnings": [],
+      "notes": [
+        "Cleaned 4109 stray px"
+      ]
+    },
+    "U": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_U.png",
+      "source_cell": [
+        6,
+        2
+      ],
+      "source_cell_rect": [
+        1075,
+        627,
+        1254,
+        940
+      ],
+      "bbox_in_cell": [
+        38,
+        89,
+        169,
+        241
+      ],
+      "visible_pixel_count": 15103,
+      "warnings": [],
+      "notes": []
+    },
+    "V": {
+      "status": "ok",
+      "export_file": "Cyberpunk_Neon_02_V.png",
+      "source_cell": [
+        0,
+        3
+      ],
+      "source_cell_rect": [
+        0,
+        940,
+        179,
+        1254
+      ],
+      "bbox_in_cell": [
+        30,
+        34,
+        178,
+        187
+      ],
+      "visible_pixel_count": 13732,
+      "warnings": [],
+      "notes": []
+    },
+    "W": {
+      "status": "warning",
+      "export_file": "Cyberpunk_Neon_02_W.png",
+      "source_cell": [
+        1,
+        3
+      ],
+      "source_cell_rect": [
+        179,
+        940,
+        358,
+        1254
+      ],
+      "bbox_in_cell": [
+        52,
+        34,
+        229,
+        187
+      ],
+      "visible_pixel_count": 21090,
+      "warnings": [
+        "Possible neighbor bleed",
+        "Possible clipping at cell edge"
+      ],
+      "notes": [
+        "Cleaned 1101 stray px"
+      ]
+    },
+    "X": {
+      "status": "warning",
+      "export_file": "Cyberpunk_Neon_02_X.png",
+      "source_cell": [
+        2,
+        3
+      ],
+      "source_cell_rect": [
+        358,
+        940,
+        537,
+        1254
+      ],
+      "bbox_in_cell": [
+        86,
+        34,
+        229,
+        187
+      ],
+      "visible_pixel_count": 15274,
+      "warnings": [
+        "Possible neighbor bleed"
+      ],
+      "notes": [
+        "Cleaned 6121 stray px"
+      ]
+    },
+    "Y": {
+      "status": "warning",
+      "export_file": "Cyberpunk_Neon_02_Y.png",
+      "source_cell": [
+        3,
+        3
+      ],
+      "source_cell_rect": [
+        537,
+        940,
+        717,
+        1254
+      ],
+      "bbox_in_cell": [
+        93,
+        34,
+        230,
+        187
+      ],
+      "visible_pixel_count": 11365,
+      "warnings": [
+        "Possible neighbor bleed"
+      ],
+      "notes": [
+        "Cleaned 6333 stray px"
+      ]
+    },
+    "Z": {
+      "status": "warning",
+      "export_file": "Cyberpunk_Neon_02_Z.png",
+      "source_cell": [
+        4,
+        3
+      ],
+      "source_cell_rect": [
+        717,
+        940,
+        896,
+        1254
+      ],
+      "bbox_in_cell": [
+        96,
+        34,
+        226,
+        187
+      ],
+      "visible_pixel_count": 15744,
+      "warnings": [
+        "Possible neighbor bleed"
+      ],
+      "notes": [
+        "Cleaned 4573 stray px"
+      ]
+    }
+  }
+}

@@ -13,6 +13,9 @@ const ATTACK1_FRAME_COUNT := 121
 const ATTACK1_PATH := "res://assets/Characters/Player/Attack1/Player_Attack1_%03d.png"
 const ATTACK2_FRAME_COUNT := 61
 const ATTACK2_PATH := "res://assets/Characters/Player/Attack2/Attack2_%03d.png"
+const ATTACK3_FRAME_COUNT := 61
+const ATTACK3_PATH := "res://assets/Characters/Player/Attack3/Attack3_%03d.png"
+const ATTACK3_ANIMATION_FPS := 16.8 ## 24 fps slowed by 30%.
 
 @export var max_action_charges: int = 1
 @export var debug_infinite_action: bool = true ## TEMP — remove before shipping.
@@ -27,10 +30,15 @@ const ATTACK2_PATH := "res://assets/Characters/Player/Attack2/Attack2_%03d.png"
 @export var pursuit_snap_speed: float = 28.0
 @export var pursuit_drift_speed: float = 10.0
 @export var pursuit_window_frames: int = 10
+@export var side_slide_snap_speed: float = 52.0
+@export var side_slide_window_frames: int = 14
+@export var side_strike_body_standoff: float = 34.0
+@export var side_hit_close_boost: float = 26.0
 ## Horizontal distance from player body origin to enemy origin during strikes.
 @export var strike_body_standoff: float = 50.0
 ## Extra X pull toward enemy on hit frames only (closes small air gaps).
 @export var hit_frame_close_boost: float = 18.0
+@export var action_zoom_boost_percent: float = 48.0
 
 var _charges := 0
 var _state := State.IDLE
@@ -41,6 +49,9 @@ var _sequence_time := 0.0
 var _hit_applied: Array[bool] = []
 var _player: PlayerMovement
 var _attack_anim_loaded := ""
+var _slide_segment_hit_idx := -1
+var _slide_from_x := 0.0
+var _kinematic_strike_position := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -64,6 +75,17 @@ func get_state() -> State:
 
 func locks_movement_animation() -> bool:
 	return _state == State.STRIKE or _state == State.RECOVER
+
+
+func uses_side_slide_strike() -> bool:
+	return _state == State.STRIKE and _uses_side_slides()
+
+
+func finalize_strike_physics() -> void:
+	if not uses_side_slide_strike() or _player == null:
+		return
+	_player.global_position = _kinematic_strike_position
+	_player.velocity = Vector2.ZERO
 
 
 func blocks_collection() -> bool:
@@ -120,7 +142,7 @@ func _begin_sequence() -> void:
 	if not debug_infinite_action:
 		_charges -= 1
 		action_charge_changed.emit(_charges, max_action_charges)
-	_attack = _build_attack2_definition()
+	_attack = _build_attack3_definition()
 	_state = State.APPROACH
 	_state_time = 0.0
 	_sequence_time = 0.0
@@ -131,7 +153,41 @@ func _begin_sequence() -> void:
 	_deactivate_player_shield(_player)
 	if _enemy.has_method("set_action_sequence_targeted"):
 		_enemy.set_action_sequence_targeted(true)
+	_begin_action_camera()
 	action_sequence_started.emit(_attack.attack_id)
+
+
+func _build_attack3_definition() -> ActionAttackDefinition:
+	var def := ActionAttackDefinition.new()
+	def.attack_id = "Attack3"
+	def.display_name = "Attack 3"
+	def.animation_name = "Attack3"
+	def.animation_fps = ATTACK3_ANIMATION_FPS
+	def.frame_count = ATTACK3_FRAME_COUNT
+	def.frame_path_pattern = ATTACK3_PATH
+	def.hit_frames = [13, 19, 24, 29, 33, 37, 41, 46, 52, 57]
+	def.hit_strike_sides = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1]
+	def.hit_vfx_pixels = [
+		Vector2(162.0, 108.0),
+		Vector2(104.0, 118.0),
+		Vector2(160.0, 111.0),
+		Vector2(104.0, 121.0),
+		Vector2(162.0, 110.0),
+		Vector2(104.0, 123.0),
+		Vector2(157.0, 121.0),
+		Vector2(163.0, 179.0),
+		Vector2(159.0, 112.0),
+		Vector2(104.0, 121.0),
+	]
+	def.hit_vfx_kinds = [
+		"fist", "fist", "fist", "fist", "fist", "fist", "fist", "foot", "fist", "fist",
+	]
+	def.hit_damage = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	def.strike_body_standoff = 34.0
+	def.vfx_scale = 0.5
+	def.vfx_particle_amount_scale = 0.2
+	def.damage = action_damage
+	return def
 
 
 func _build_attack2_definition() -> ActionAttackDefinition:
@@ -232,8 +288,9 @@ func _tick_super_jump(delta: float) -> void:
 func _begin_strike() -> void:
 	_state = State.STRIKE
 	_state_time = 0.0
+	_slide_segment_hit_idx = -1
 	_player.velocity = Vector2.ZERO
-	_update_facing_toward_enemy()
+	_update_facing_for_strike(1)
 	_ensure_attack_animation()
 	if _attack and _player.sprite and _player.sprite.sprite_frames:
 		if _player.sprite.sprite_frames.has_animation(_attack.animation_name):
@@ -241,6 +298,7 @@ func _begin_strike() -> void:
 				_attack.animation_name,
 				_attack.animation_fps,
 			)
+			_player.sprite.frame = 0
 			_player.sprite.play(_attack.animation_name)
 	_align_player_for_upcoming_hit()
 
@@ -250,8 +308,8 @@ func _tick_strike(delta: float) -> void:
 		_begin_recover()
 		return
 	_player.velocity = Vector2.ZERO
-	_update_facing_toward_enemy()
 	var frame_num := _current_attack_frame_number()
+	_update_facing_for_strike(frame_num)
 	_update_strike_pursuit(delta, frame_num)
 	_try_apply_frame_hits(frame_num)
 	if not _player.sprite.is_playing():
@@ -263,12 +321,22 @@ func _current_attack_frame_number() -> int:
 
 
 func _update_strike_pursuit(delta: float, frame_num: int) -> void:
-	var anchor := _strike_anchor_position()
+	var hit_idx := _hit_index_for_frame(frame_num)
+	var next_idx := _next_hit_index_after(frame_num - 1)
+	var target_idx := hit_idx if hit_idx >= 0 else next_idx
+	if target_idx < 0:
+		return
+	var side := _side_for_hit_index(target_idx)
+	_apply_strike_facing(side)
+	var anchor := _strike_anchor_for_side(side)
+	if _uses_side_slides():
+		_update_side_slide_pursuit(frame_num, hit_idx, target_idx, side, anchor)
+		return
 	var correction := anchor - _player.global_position
 	correction.y *= 0.15
-	var is_hit_frame := frame_num in _attack.hit_frames
+	var is_hit_frame := hit_idx >= 0
 	if is_hit_frame:
-		correction.x += float(_player.facing) * hit_frame_close_boost
+		correction.x += float(_player.facing) * _effective_hit_close_boost()
 	if is_hit_frame:
 		_player.global_position += correction
 		return
@@ -277,36 +345,146 @@ func _update_strike_pursuit(delta: float, frame_num: int) -> void:
 	_player.global_position += correction * blend
 
 
-func _strike_anchor_position() -> Vector2:
+func _update_side_slide_pursuit(
+	frame_num: int,
+	hit_idx: int,
+	target_idx: int,
+	side: int,
+	anchor: Vector2,
+) -> void:
+	if hit_idx >= 0:
+		var snap_x := anchor.x + float(side) * _effective_hit_close_boost()
+		_player.global_position = Vector2(snap_x, lerpf(_player.global_position.y, anchor.y, 0.4))
+		_kinematic_strike_position = _player.global_position
+		return
+	if target_idx != _slide_segment_hit_idx:
+		_slide_segment_hit_idx = target_idx
+		_slide_from_x = _player.global_position.x
+	var hit_frame := _attack.hit_frames[target_idx]
+	var start_frame := _slide_start_frame_for_hit(target_idx)
+	var span := maxf(hit_frame - start_frame, 1)
+	var t := clampf(float(frame_num - start_frame) / float(span), 0.0, 1.0)
+	t = _smoothstep(t)
+	if t > 0.82:
+		var tail := (t - 0.82) / 0.18
+		t = lerpf(t, 1.0, tail * 0.65)
+	_player.global_position.x = lerpf(_slide_from_x, anchor.x, t)
+	_player.global_position.y = lerpf(_player.global_position.y, anchor.y, 0.3)
+	_kinematic_strike_position = _player.global_position
+
+
+func _slide_start_frame_for_hit(hit_idx: int) -> int:
+	if hit_idx <= 0:
+		return 1
+	return _attack.hit_frames[hit_idx - 1] + 1
+
+
+func _smoothstep(t: float) -> float:
+	return t * t * (3.0 - 2.0 * t)
+
+
+func _effective_strike_standoff() -> float:
+	if _attack and _attack.strike_body_standoff > 0.0:
+		return _attack.strike_body_standoff
+	if _uses_side_slides():
+		return side_strike_body_standoff
+	return strike_body_standoff
+
+
+func _effective_hit_close_boost() -> float:
+	if _uses_side_slides():
+		return side_hit_close_boost
+	return hit_frame_close_boost
+
+
+func _strike_anchor_for_side(side: int) -> Vector2:
 	var enemy_pos := _enemy.global_position
-	var anchor_x := enemy_pos.x - float(_player.facing) * strike_body_standoff
+	var standoff := _effective_strike_standoff()
+	var anchor_x := enemy_pos.x - float(side) * standoff
 	return Vector2(anchor_x, enemy_pos.y)
 
 
+func _strike_anchor_position() -> Vector2:
+	return _strike_anchor_for_side(_player.facing)
+
+
 func _pursuit_urgency(frame_num: int) -> float:
-	var next_hit := _next_hit_frame_after(frame_num - 1)
-	if next_hit < 0:
+	var next_idx := _next_hit_index_after(frame_num - 1)
+	if next_idx < 0:
 		return pursuit_drift_speed
+	var next_hit := _attack.hit_frames[next_idx]
 	var frames_until := next_hit - frame_num
+	var snap_speed := pursuit_snap_speed
+	var window_frames := pursuit_window_frames
+	if _uses_side_slides():
+		var prev_side := _side_for_hit_index(maxi(next_idx - 1, 0))
+		var next_side := _side_for_hit_index(next_idx)
+		if next_idx > 0 and prev_side != next_side:
+			snap_speed = side_slide_snap_speed
+			window_frames = side_slide_window_frames
 	if frames_until <= 0:
-		return pursuit_snap_speed
-	if frames_until <= pursuit_window_frames:
-		var t := 1.0 - float(frames_until) / float(pursuit_window_frames)
-		return lerpf(pursuit_drift_speed, pursuit_snap_speed, t)
+		return snap_speed
+	if frames_until <= window_frames:
+		var t := 1.0 - float(frames_until) / float(window_frames)
+		return lerpf(pursuit_drift_speed, snap_speed, t)
 	return pursuit_drift_speed
 
 
-func _next_hit_frame_after(frame_num: int) -> int:
-	for hit_frame in _attack.hit_frames:
-		if hit_frame > frame_num:
-			return hit_frame
+func _next_hit_index_after(frame_num: int) -> int:
+	for i in _attack.hit_frames.size():
+		if _attack.hit_frames[i] > frame_num:
+			return i
 	return -1
 
 
+func _hit_index_for_frame(frame_num: int) -> int:
+	for i in _attack.hit_frames.size():
+		if _attack.hit_frames[i] == frame_num:
+			return i
+	return -1
+
+
+func _side_for_hit_index(hit_idx: int) -> int:
+	if _attack and hit_idx >= 0 and hit_idx < _attack.hit_strike_sides.size():
+		return _attack.hit_strike_sides[hit_idx]
+	if _enemy == null or _player == null:
+		return 1
+	return 1 if _enemy.global_position.x >= _player.global_position.x else -1
+
+
+func _uses_side_slides() -> bool:
+	return (
+		_attack != null
+		and _attack.hit_strike_sides.size() == _attack.hit_frames.size()
+	)
+
+
+func _update_facing_for_strike(frame_num: int) -> void:
+	if not _uses_side_slides():
+		_update_facing_toward_enemy()
+		return
+	var hit_idx := _hit_index_for_frame(frame_num)
+	if hit_idx < 0:
+		hit_idx = _next_hit_index_after(frame_num - 1)
+	if hit_idx < 0:
+		hit_idx = _attack.hit_frames.size() - 1
+	_apply_strike_facing(_side_for_hit_index(hit_idx))
+
+
+func _apply_strike_facing(side: int) -> void:
+	if _player == null or side == 0:
+		return
+	_player.facing = side
+	if _player.sprite:
+		_player.sprite.flip_h = side < 0
+
+
 func _align_player_for_upcoming_hit() -> void:
-	var anchor := _strike_anchor_position()
-	_player.global_position.x = anchor.x
-	_player.global_position.y = anchor.y
+	var side := _side_for_hit_index(0)
+	_apply_strike_facing(side)
+	var anchor := _strike_anchor_for_side(side)
+	_player.global_position = anchor
+	_kinematic_strike_position = anchor
 
 
 func _try_apply_frame_hits(frame_num: int) -> void:
@@ -323,13 +501,24 @@ func _try_apply_frame_hits(frame_num: int) -> void:
 func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	if _enemy == null or not is_instance_valid(_enemy):
 		return
+	var is_first := hit_idx == 0
+	var is_last := _attack != null and hit_idx == _attack.hit_frames.size() - 1
+	var use_combo_freeze := _uses_side_slides()
 	var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
 	if enemy_combat is CharacterCombat and not (enemy_combat as CharacterCombat).is_dead():
+		var source := "action_%s_hit%d" % [_attack.attack_id, hit_index]
+		if is_last and use_combo_freeze:
+			damage = maxi(damage, (enemy_combat as CharacterCombat).health.current_health)
 		(enemy_combat as CharacterCombat).apply_action_damage(
 			damage,
-			"action_%s_hit%d" % [_attack.attack_id, hit_index],
+			source,
 			_player.global_position,
+			use_combo_freeze,
 		)
+		if is_first and use_combo_freeze and _enemy.has_method("begin_action_strike_freeze"):
+			_enemy.begin_action_strike_freeze()
+		if is_last and use_combo_freeze and _enemy.has_method("end_action_strike_freeze"):
+			_enemy.end_action_strike_freeze()
 	var world := _find_world()
 	if world == null:
 		return
@@ -345,6 +534,57 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 		_attack.vfx_particle_amount_scale,
 	)
 	ActionPowEffect.spawn_at(world, strike_pos + Vector2(0.0, -6.0))
+	_trigger_action_hit_shake(hit_idx)
+
+
+func _begin_action_camera() -> void:
+	var cam := _get_player_camera()
+	if cam == null:
+		return
+	cam.begin_action_cinematic(_estimate_time_to_first_hit(), action_zoom_boost_percent)
+
+
+func _end_action_camera() -> void:
+	var cam := _get_player_camera()
+	if cam:
+		cam.end_action_cinematic()
+
+
+func _trigger_action_hit_shake(hit_idx: int) -> void:
+	var cam := _get_player_camera()
+	if cam == null or _attack == null:
+		return
+	var kind := "fist"
+	if hit_idx < _attack.hit_vfx_kinds.size():
+		kind = _attack.hit_vfx_kinds[hit_idx]
+	var strength := cam.hit_shake_fist_strength
+	if kind in ["kick", "foot", "tail"]:
+		strength = cam.hit_shake_heavy_strength
+	cam.trigger_hit_shake(strength)
+
+
+func _estimate_time_to_first_hit() -> float:
+	if _attack == null or _attack.hit_frames.is_empty() or _player == null or _enemy == null:
+		return 0.45
+	var strike_to_hit := float(_attack.hit_frames[0]) / maxf(_attack.animation_fps, 1.0)
+	var horiz_gap := absf(_enemy.global_position.x - _player.global_position.x) - connect_distance
+	horiz_gap = maxf(horiz_gap, 0.0)
+	var approach_time := 0.0
+	if horiz_gap > 0.0:
+		approach_time = horiz_gap / maxf(approach_run_speed, 1.0)
+	var vert_gap := _enemy.global_position.y - _player.global_position.y
+	if _player.is_on_floor() and vert_gap < -super_jump_y_threshold:
+		approach_time += 0.45
+	return approach_time + strike_to_hit
+
+
+func _get_player_camera() -> CameraZoomController:
+	if _player == null:
+		return null
+	var cam := _player.get_node_or_null("Camera2D")
+	if cam is CameraZoomController:
+		return cam as CameraZoomController
+	return null
 
 
 func _strike_vfx_world_for_hit(hit_idx: int) -> Vector2:
@@ -369,6 +609,7 @@ func _tick_recover(_delta: float) -> void:
 
 
 func _finish_sequence() -> void:
+	_end_action_camera()
 	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("set_action_sequence_targeted"):
 		_enemy.set_action_sequence_targeted(false)
 	_state = State.IDLE
@@ -377,6 +618,7 @@ func _finish_sequence() -> void:
 	_hit_applied.clear()
 	_attack = null
 	_enemy = null
+	_slide_segment_hit_idx = -1
 	if _player:
 		_player.velocity = Vector2.ZERO
 	if debug_infinite_action:

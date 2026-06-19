@@ -12,6 +12,7 @@ enum ColorMode {
 }
 
 @export var texture_dir := "res://images/Alphabet/"
+@export var legacy_naming := true
 @export var color_mode := ColorMode.PER_LETTER
 @export var vowel_modulate := Color(1.0, 0.71, 0.24, 1.0)
 @export var consonant_modulate_min := Color(0.5, 0.5, 0.5, 1.0)
@@ -24,12 +25,43 @@ enum ColorMode {
 ## Optional override — set 26 colors in the inspector to hand-tune each letter.
 @export var letter_colors: Array[Color] = []
 
+var _font_set_id := "original"
+var _export_files: Dictionary = {}
+var _use_tint_shader := true
+
+
+func apply_font_set(
+	p_texture_dir: String,
+	p_legacy_naming: bool,
+	p_export_files: Dictionary,
+	p_font_set_id: String,
+	p_use_tint_shader: bool = true,
+) -> void:
+	texture_dir = p_texture_dir
+	legacy_naming = p_legacy_naming
+	_export_files = p_export_files.duplicate()
+	_font_set_id = p_font_set_id
+	_use_tint_shader = p_use_tint_shader
+
+
+func get_font_set_id() -> String:
+	return _font_set_id
+
+
+func uses_tint_shader() -> bool:
+	return _use_tint_shader
+
 
 func get_texture_path(letter: String) -> String:
 	var ch := letter.to_upper()
-	if ch == "Q":
-		return texture_dir + "q.png"
-	return texture_dir + ch + ".png"
+	if legacy_naming:
+		if ch == "Q":
+			return texture_dir + "q.png"
+		return texture_dir + ch + ".png"
+	var filename := str(_export_files.get(ch, ""))
+	if filename.is_empty():
+		return ""
+	return texture_dir + filename
 
 
 func is_vowel(letter: String) -> bool:
@@ -57,6 +89,10 @@ func random_modulate(is_vowel_letter: bool, rng: RandomNumberGenerator) -> Color
 
 
 func all_letters() -> PackedStringArray:
+	return all_letters_static()
+
+
+static func all_letters_static() -> PackedStringArray:
 	return PackedStringArray([
 		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
 		"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",

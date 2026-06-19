@@ -26,6 +26,11 @@ static func apply(sprite: CanvasItem, color: Color) -> void:
 	sprite.modulate = Color.WHITE
 
 
+static func clear_tint(sprite: CanvasItem) -> void:
+	sprite.material = null
+	sprite.modulate = Color.WHITE
+
+
 static func apply_particles(particles: CPUParticles2D, color: Color) -> void:
 	particles.material = create_material(color)
 	particles.color = Color.WHITE

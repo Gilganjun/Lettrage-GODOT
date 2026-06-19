@@ -69,7 +69,17 @@ func get_desired_direction(current_x: float) -> int:
 		return 1
 	if current_x > target_x + target_deadband:
 		return -1
-	return direction
+	return 0
+
+
+func force_resume_patrol(current_x: float) -> void:
+	letter_chase_active = false
+	_chase_direction = 0
+	_pick_new_target(current_x)
+	if current_x < target_x - target_deadband:
+		set_direction(1)
+	elif current_x > target_x + target_deadband:
+		set_direction(-1)
 
 
 func set_direction(new_direction: int) -> void:

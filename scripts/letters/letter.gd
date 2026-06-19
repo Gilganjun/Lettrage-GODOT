@@ -84,16 +84,33 @@ func configure(
 	_base_modulate = p_modulate
 	if _sprite == null:
 		_sprite = $Sprite2D as Sprite2D
+	_apply_sprite_texture(p_scale_factor)
+
+
+func refresh_texture() -> void:
+	if catalog == null or _sprite == null:
+		return
+	_apply_sprite_texture(_sprite.scale.x)
+
+
+func _apply_sprite_texture(scale_factor: float) -> void:
 	var path := catalog.get_texture_path(character) if catalog else ""
 	if ResourceLoader.exists(path):
 		_sprite.texture = load(path)
-	LetterTint.apply(_sprite, tint_color)
-	_sprite.scale = Vector2.ONE * p_scale_factor
-	_sprite.modulate = _base_modulate
+	_apply_letter_visual()
+	_sprite.scale = Vector2.ONE * scale_factor
 	var shape := $CollisionShape2D.shape as RectangleShape2D
 	if shape and _sprite.texture:
 		var tex_size := _sprite.texture.get_size() * _sprite.scale
 		shape.size = tex_size * 0.55
+
+
+func _apply_letter_visual() -> void:
+	if catalog and not catalog.uses_tint_shader():
+		LetterTint.clear_tint(_sprite)
+		return
+	LetterTint.apply(_sprite, tint_color)
+	_sprite.modulate = _base_modulate
 
 
 func _physics_process(delta: float) -> void:
@@ -167,11 +184,14 @@ func _update_lifetime_fade() -> void:
 	if _sprite == null or lifetime_max <= 0.0:
 		return
 	if age < lifetime_fade_start:
-		_sprite.modulate = _base_modulate
+		_apply_letter_visual()
 		return
 	var t := inverse_lerp(lifetime_fade_start, lifetime_max, age)
 	t = clampf(t, 0.0, 1.0)
 	var pulse := 0.85 + 0.15 * sin(age * 12.0)
+	if catalog and not catalog.uses_tint_shader():
+		_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0 - t * pulse * 0.65)
+		return
 	_sprite.modulate = _base_modulate.lerp(Color(1.0, 0.35, 0.35, 0.35), t * pulse)
 
 

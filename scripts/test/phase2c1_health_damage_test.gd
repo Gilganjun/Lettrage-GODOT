@@ -10,6 +10,7 @@ const LETTER_SCENE := preload("res://scenes/letters/letter.tscn")
 const LayoutBuilder := preload("res://scripts/level/gdevelop_layout_builder.gd")
 const PlayerAttach := preload("res://scripts/test/player_gameplay_attach.gd")
 const WordGameFeatures := preload("res://scripts/word_game/word_game_features.gd")
+const FontSetRegistry := preload("res://scripts/resources/font_set_registry.gd")
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 
@@ -33,6 +34,7 @@ const POP_SOUNDS := [
 @onready var top_bar: Control = $UI/TopBar
 @onready var damage_bridge: Node = $WordDamageBridge
 @onready var visual_pass: Phase2C1VisualPass = $Phase2C1VisualPass
+@onready var keyboard_help: Control = $UI/KeyboardHelpLayer/KeyboardCommandsPanel
 
 var _collider_nodes: Array[Node] = []
 var _debug_enabled := false
@@ -46,6 +48,8 @@ var _enemy_combat: Node
 var _player_shooter: LetterShooter
 var _player_action: Node
 var _player_spawn := Vector2(279.0, 231.0)
+var _font_sets: FontSetRegistry
+var _font_set_label: Label
 
 
 func _ready() -> void:
@@ -58,6 +62,9 @@ func _ready() -> void:
 	letter_spawner.letter_scene = LETTER_SCENE
 	letter_spawner.word_controller = word_controller
 	letter_spawner.profile = LANE_PROFILE
+	_font_sets = FontSetRegistry.create()
+	_font_sets.apply_to_catalog(CATALOG)
+	_setup_font_set_label()
 	_load_transform_rows()
 	_spawn_player()
 	_spawn_enemy()
@@ -103,6 +110,24 @@ func _ready() -> void:
 			enemy_root,
 		)
 	call_deferred("_activate_player_camera")
+
+
+func _setup_font_set_label() -> void:
+	_font_set_label = Label.new()
+	_font_set_label.text = "Font: %s" % _font_sets.get_current_name()
+	_font_set_label.position = Vector2(8, 8)
+	_font_set_label.add_theme_font_size_override("font_size", 14)
+	_font_set_label.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0, 1.0))
+	_font_set_label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.75))
+	_font_set_label.add_theme_constant_override("shadow_offset_x", 1)
+	_font_set_label.add_theme_constant_override("shadow_offset_y", 1)
+	$UI.add_child(_font_set_label)
+
+
+func _cycle_font_set() -> void:
+	var font_name := letter_spawner.cycle_font_set(_font_sets)
+	if _font_set_label:
+		_font_set_label.text = "Font: %s" % font_name
 
 
 func _setup_combat() -> void:
@@ -198,8 +223,11 @@ func get_enemy() -> Enemy:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# New shortcuts: add to scripts/ui/game_keyboard_commands.gd
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
+			if keyboard_help and keyboard_help.is_open():
+				return
 			get_tree().quit()
 		elif event.keycode == KEY_F2 and event.shift_pressed:
 			_word_debug = not _word_debug
@@ -220,6 +248,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_F12:
 			if _enemy:
 				_enemy.debug_clear_word()
+		elif event.keycode == KEY_0 and not event.alt_pressed:
+			_cycle_font_set()
 		elif event.alt_pressed:
 			_handle_combat_debug_keys(event.keycode)
 

@@ -59,6 +59,21 @@ func get_active_count() -> int:
 	return _active.size()
 
 
+func refresh_active_letter_textures() -> void:
+	for letter in _active:
+		if letter != null and is_instance_valid(letter):
+			letter.refresh_texture()
+
+
+func cycle_font_set(registry: FontSetRegistry) -> String:
+	if registry == null or catalog == null:
+		return ""
+	registry.cycle_next()
+	registry.apply_to_catalog(catalog)
+	refresh_active_letter_textures()
+	return registry.get_current_name()
+
+
 func get_spawn_timer_remaining() -> float:
 	return maxf(0.0, _effective_spawn_interval() - _spawn_timer)
 
