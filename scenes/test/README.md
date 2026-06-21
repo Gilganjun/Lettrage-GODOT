@@ -1,16 +1,18 @@
 # Test scenes
 
-## Active playtest (F5)
+## Production gameplay (F5)
+
+**`scenes/main/lettrage_gameplay.tscn`**
+
+This is the project main scene. Best-of-3 rounds, countdown, win/loss overlays, level font config.
+
+## Debug harness
 
 **`phase2c1_health_damage_test.tscn`**
 
-This is the project main scene (`project.godot` → `run/main_scene`). Press **F5** to run it.
+Full combat tuning scene: collision debug, font cycling (0), Alt combat keys, keyboard help panel.
 
-Includes: Main2 level, player, enemy, letter rain, word game, combat HUD, health/damage, death animation.
-
-**Visual pass:** `Phase2C1VisualPass` applies readability treatment (see `VISUAL_STYLE.md`). Disable that node to compare before/after.
-
-**F6** runs whichever scene tab you have open (use only if you intentionally want a different scene).
+Open this scene directly and press **F6** to run it without changing the main scene.
 
 ## Level editing
 

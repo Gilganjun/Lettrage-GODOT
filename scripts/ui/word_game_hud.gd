@@ -31,10 +31,8 @@ func setup(controller: WordGameController, spawner: LetterSpawner) -> void:
 		_controller.word_state.validation_changed.connect(_on_validation)
 		_controller.debug_state_changed.connect(_refresh)
 	_refresh()
-	controls_label.text = (
-		"Enter/C submit | Backspace undo | LCtrl tap=latch / hold=block | F aim+fire | Stand still+hold F 1s precision aim | A/D move Space jump | F3/V collision debug"
-	)
-	controls_label.visible = true
+	controls_label.text = _get_controls_text()
+	_apply_primary_visibility()
 	refresh_combat_hud()
 
 
@@ -44,7 +42,7 @@ func set_word_display_on_combat_hud(enabled: bool) -> void:
 
 
 func _apply_primary_visibility() -> void:
-	var show_legacy_panel := not _words_on_combat_hud or _show_debug
+	var show_legacy_panel := not _words_on_combat_hud
 	if margin:
 		margin.visible = show_legacy_panel
 	word_label.visible = show_legacy_panel
@@ -113,20 +111,12 @@ func set_player_shield(shield: PlayerShield) -> void:
 
 func set_debug_visible(enabled: bool) -> void:
 	_show_debug = enabled
+	debug_label.visible = false
+	enemy_debug_label.visible = false
+	controls_label.visible = false
 	_apply_primary_visibility()
-	if not _words_on_combat_hud:
-		word_label.visible = true
-		enemy_word_label.visible = true
-	score_label.visible = enabled
-	enemy_score_label.visible = enabled
-	shield_label.visible = enabled
-	status_label.visible = enabled
-	controls_label.visible = enabled or not _words_on_combat_hud
-	debug_label.visible = enabled
-	enemy_debug_label.visible = enabled and _enemy != null
-	_refresh()
 	if enabled:
-		refresh_enemy_debug()
+		_refresh()
 
 
 func _refresh(_arg = null) -> void:
@@ -154,13 +144,36 @@ func _refresh(_arg = null) -> void:
 		)
 
 
-func refresh_enemy_debug() -> void:
-	if not _show_debug or _enemy == null:
-		return
+func get_word_debug_text() -> String:
+	if _controller == null or _spawner == null:
+		return ""
+	var ws := _controller.word_state
+	return (
+		"Dict: %s (%d words, %.1fms) | Active: %d | Spawn in: %.2fs | Last: %s\n"
+		+ "Spawned %d | Collected %d | Boundary del %d | Expired %d | Last val: %s"
+		% [
+			str(_controller.dictionary.loaded),
+			_controller.dictionary.word_count,
+			_controller.dictionary.load_time_ms,
+			_spawner.get_active_count(),
+			_spawner.get_spawn_timer_remaining(),
+			_spawner.last_spawned_letter,
+			_spawner.total_spawned,
+			_spawner.total_collected,
+			_spawner.total_deleted_boundary,
+			_spawner.total_expired,
+			ws.last_validation,
+		]
+	)
+
+
+func get_enemy_debug_text() -> String:
+	if _enemy == null:
+		return ""
 	var info: Dictionary = _enemy.get_debug_info()
 	var state_names := ["IDLE", "RUN", "JUMP", "FALL", "CLIMB"]
 	var state: int = int(info.get("state", 0))
-	enemy_debug_label.text = (
+	return (
 		"Enemy pos: (%.0f, %.0f) vel: (%.0f, %.0f) state: %s anim: %s\n"
 		% [info["position"].x, info["position"].y, info["velocity"].x, info["velocity"].y,
 			state_names[state], info.get("animation", "?")]
@@ -198,7 +211,7 @@ func refresh_enemy_debug() -> void:
 			float(info.get("stuck_timer", 0.0)),
 			str(info.get("last_escape_outcome", "none")),
 		]
-		+ "Shield reason: %s | target: %s dist: %.0f age: %.1f\n"
+		+ "Shield reason: %s | target: %s dist: %.0f age: %.1f"
 		% [
 			str(info.get("last_activation_reason", "")),
 			str(info.get("target_letter", "")),
@@ -206,6 +219,23 @@ func refresh_enemy_debug() -> void:
 			float(info.get("target_age", 0.0)),
 		]
 	)
+
+
+func get_controls_text() -> String:
+	return _get_controls_text()
+
+
+func _get_controls_text() -> String:
+	return (
+		"Enter/C submit | Backspace undo | LCtrl tap=latch / hold=block | F aim+fire | "
+		+ "Stand still+hold F 1s precision aim | A/D move Space jump | F3/V collision debug"
+	)
+
+
+func refresh_enemy_debug() -> void:
+	if not _show_debug or _enemy == null:
+		return
+	enemy_debug_label.text = get_enemy_debug_text()
 
 
 func _on_validation(status: String, message: String) -> void:

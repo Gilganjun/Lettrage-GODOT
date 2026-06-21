@@ -25,6 +25,7 @@ var _sequence_index: int = 1
 var _vowel_index: int = 0
 var _rng := RandomNumberGenerator.new()
 var _active: Array[Letter] = []
+var _spawning_paused := false
 
 
 func _ready() -> void:
@@ -37,6 +38,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _spawning_paused:
+		_tick_lifetime()
+		_cleanup_boundaries()
+		return
 	_spawn_timer += delta
 	_vowel_timer += delta
 	var interval := _effective_spawn_interval()
@@ -65,6 +70,20 @@ func refresh_active_letter_textures() -> void:
 			letter.refresh_texture()
 
 
+func set_spawning_paused(paused: bool) -> void:
+	_spawning_paused = paused
+
+
+func clear_all_letters() -> void:
+	for i in range(_active.size() - 1, -1, -1):
+		var letter := _active[i]
+		if letter != null and is_instance_valid(letter):
+			letter.queue_free()
+	_active.clear()
+	_spawn_timer = 0.0
+	_vowel_timer = 0.0
+
+
 func cycle_font_set(registry: FontSetRegistry) -> String:
 	if registry == null or catalog == null:
 		return ""
@@ -72,6 +91,21 @@ func cycle_font_set(registry: FontSetRegistry) -> String:
 	registry.apply_to_catalog(catalog)
 	refresh_active_letter_textures()
 	return registry.get_current_name()
+
+
+func cycle_letter_backdrop(registry: LetterBackdropRegistry) -> String:
+	if registry == null:
+		return ""
+	registry.cycle_next()
+	registry.apply_to_letters()
+	refresh_active_letter_backdrops()
+	return registry.get_current_name()
+
+
+func refresh_active_letter_backdrops() -> void:
+	for letter in _active:
+		if letter != null and is_instance_valid(letter):
+			letter.refresh_backdrop()
 
 
 func get_spawn_timer_remaining() -> float:
@@ -106,9 +140,8 @@ func spawn_letter_at(
 	if not ResourceLoader.exists(tex_path):
 		letter.queue_free()
 		return null
-	var ref_size := 100.0
 	var target := _rng.randf_range(profile.size_min, profile.size_max)
-	var scale_factor := target / ref_size
+	var scale_factor := catalog.compute_spawn_scale(target)
 	var spawn_modulate := catalog.get_letter_modulate(ch, _rng)
 	var fall := _rng.randf_range(profile.fall_speed_min, profile.fall_speed_max)
 	letter.catalog = catalog
@@ -122,6 +155,8 @@ func spawn_letter_at(
 		use_initial_velocity,
 		profile.letter_lifetime,
 		profile.letter_fade_start,
+		0.0,
+		target,
 	)
 	letter.resolved.connect(_on_letter_resolved)
 	_active.append(letter)

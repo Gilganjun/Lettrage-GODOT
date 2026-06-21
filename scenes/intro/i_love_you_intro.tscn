@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://i_love_you_intro_scene"]
+
+[ext_resource type="Script" path="res://scripts/intro/i_love_you_intro.gd" id="1_intro"]
+
+[node name="ILoveYouIntro" type="Node2D"]
+script = ExtResource("1_intro")
+
+[node name="Backdrop" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="Fill" type="ColorRect" parent="Backdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="LayerRoot" type="Node2D" parent="."]
+
+[node name="LetterRoot" type="Node2D" parent="."]
+z_index = 50
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(480, 270)
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="MainMusic" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"
+
+[node name="SecondaryMusic" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"
+
+[node name="Thunder" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"
+
+[node name="Wind" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"
+
+[node name="BabyCry" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"
+
+[node name="DoorHiss" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Master"

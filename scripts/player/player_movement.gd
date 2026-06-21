@@ -29,8 +29,23 @@ var _tap_armed_right := false
 var _tap_armed_left := false
 var _tap_elapsed_right := 0.0
 var _tap_elapsed_left := 0.0
+var movement_locked := false
+var round_intro_fall_active := false
+
+var _round_intro_land_position := Vector2.ZERO
+var _round_intro_drop_start_y := 0.0
+var _round_intro_fall_ease := 2.0
+var _round_intro_was_airborne := false
+var _round_intro_land_pose_active := false
+var _round_intro_land_pose_timer := 0.0
+var _action_sequence_targeted := false
+var _action_strike_frozen := false
+var _action_freeze_position := Vector2.ZERO
 
 const FLOOR_SNAP := 4.0
+const ROUND_INTRO_LAND_POSE_DURATION := 0.5
+## death_031_.png — collapsed-on-impact pose shown briefly after intro landing.
+const ROUND_INTRO_LAND_DEATH_FRAME := 30
 
 
 func _ready() -> void:
@@ -45,10 +60,14 @@ func _ready() -> void:
 
 
 func activate_follow_camera() -> void:
-	if camera_zoom and camera_zoom.has_method("reset_to_base"):
-		camera_zoom.reset_to_base()
-	else:
-		camera.zoom = Vector2(1.0, 1.0)
+	var preserve_intro := round_intro_fall_active
+	if camera_zoom and camera_zoom.has_method("is_round_intro_active"):
+		preserve_intro = preserve_intro or camera_zoom.is_round_intro_active()
+	if not preserve_intro:
+		if camera_zoom and camera_zoom.has_method("reset_to_base"):
+			camera_zoom.reset_to_base()
+		else:
+			camera.zoom = Vector2(1.0, 1.0)
 	camera.enabled = true
 	for fixed in get_tree().get_nodes_in_group("fixed_camera"):
 		if fixed is Camera2D:
@@ -66,7 +85,172 @@ func set_camera_follow_enabled(enabled: bool) -> void:
 		activate_follow_camera()
 
 
+func begin_round_intro_fall(
+	land_position: Vector2,
+	drop_height: float,
+	ease_power: float = 2.0,
+	drop_top_y: float = NAN,
+) -> void:
+	round_intro_fall_active = true
+	movement_locked = true
+	_round_intro_land_position = land_position
+	if is_nan(drop_top_y):
+		_round_intro_drop_start_y = land_position.y - maxf(drop_height, 0.0)
+	else:
+		_round_intro_drop_start_y = drop_top_y
+	_round_intro_fall_ease = maxf(ease_power, 0.1)
+	global_position = Vector2(land_position.x, _round_intro_drop_start_y)
+	velocity = Vector2.ZERO
+	_round_intro_was_airborne = false
+	_round_intro_land_pose_active = false
+	_round_intro_land_pose_timer = 0.0
+
+
+func cancel_round_intro_land_pose() -> void:
+	_round_intro_land_pose_active = false
+	_round_intro_land_pose_timer = 0.0
+	_round_intro_was_airborne = false
+	if sprite:
+		sprite.speed_scale = 1.0
+
+
+func tick_round_intro_fall(progress: float) -> void:
+	if not round_intro_fall_active:
+		return
+	var p := clampf(progress, 0.0, 1.0)
+	var t := 1.0 - pow(1.0 - p, _round_intro_fall_ease)
+	global_position = Vector2(
+		_round_intro_land_position.x,
+		lerpf(_round_intro_drop_start_y, _round_intro_land_position.y, t),
+	)
+	velocity = Vector2.ZERO
+
+
+func end_round_intro_fall() -> void:
+	if not round_intro_fall_active:
+		return
+	round_intro_fall_active = false
+	global_position = _round_intro_land_position
+	velocity = Vector2.ZERO
+	if _round_intro_was_airborne and not _round_intro_land_pose_active:
+		_begin_round_intro_land_pose()
+	elif not _round_intro_land_pose_active:
+		_restore_idle_after_intro_land()
+
+
+func _begin_round_intro_land_pose() -> void:
+	_round_intro_land_pose_active = true
+	_round_intro_land_pose_timer = ROUND_INTRO_LAND_POSE_DURATION
+	movement_state = PlayerAnimation.MovementState.IDLE
+	_apply_intro_land_death_frame()
+
+
+func _apply_intro_land_death_frame() -> void:
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	if not sprite.sprite_frames.has_animation("Death"):
+		return
+	var last_frame := sprite.sprite_frames.get_frame_count("Death") - 1
+	var frame := clampi(ROUND_INTRO_LAND_DEATH_FRAME, 0, last_frame)
+	sprite.play("Death")
+	sprite.frame = frame
+	sprite.pause()
+	sprite.speed_scale = 1.0
+
+
+func _tick_round_intro_land_pose(delta: float) -> void:
+	if not _round_intro_land_pose_active:
+		return
+	_round_intro_land_pose_timer -= delta
+	_apply_intro_land_death_frame()
+	if _round_intro_land_pose_timer <= 0.0:
+		_finish_round_intro_land_pose()
+
+
+func _finish_round_intro_land_pose() -> void:
+	_round_intro_land_pose_active = false
+	_round_intro_land_pose_timer = 0.0
+	if sprite:
+		sprite.speed_scale = 1.0
+	_restore_idle_after_intro_land()
+
+
+func _restore_idle_after_intro_land() -> void:
+	movement_state = PlayerAnimation.MovementState.IDLE
+	animation_controller.force_apply_state(movement_state, facing)
+
+
+func _apply_round_intro_animation() -> void:
+	if _round_intro_land_pose_active:
+		return
+	var airborne := global_position.y < _round_intro_land_position.y - 2.0
+	if airborne:
+		_round_intro_was_airborne = true
+		var fall_state := PlayerAnimation.MovementState.FALL
+		if fall_state != movement_state:
+			movement_state = fall_state
+			movement_state_changed.emit(movement_state)
+			animation_controller.apply_state(movement_state, facing)
+		return
+	if _round_intro_was_airborne:
+		_begin_round_intro_land_pose()
+		return
+	var idle_state := PlayerAnimation.MovementState.IDLE
+	if idle_state != movement_state:
+		movement_state = idle_state
+		movement_state_changed.emit(movement_state)
+		animation_controller.apply_state(movement_state, facing)
+
+
+func set_action_sequence_targeted(active: bool) -> void:
+	_action_sequence_targeted = active
+	if not active:
+		end_action_strike_freeze()
+
+
+func is_action_sequence_targeted() -> bool:
+	return _action_sequence_targeted
+
+
+func begin_action_strike_freeze() -> void:
+	_action_strike_frozen = true
+	_action_freeze_position = global_position
+	velocity = Vector2.ZERO
+
+
+func end_action_strike_freeze() -> void:
+	_action_strike_frozen = false
+
+
+func is_action_strike_frozen() -> bool:
+	return _action_strike_frozen
+
+
 func _physics_process(delta: float) -> void:
+	if round_intro_fall_active:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_apply_round_intro_animation()
+		return
+	if _round_intro_land_pose_active:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_tick_round_intro_land_pose(delta)
+		return
+	if movement_locked:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	if _action_strike_frozen:
+		global_position = _action_freeze_position
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return
 	if Input.is_action_just_pressed("ui_cancel"):
 		get_tree().quit()
 	if _process_action_sequence(delta):
@@ -391,6 +575,12 @@ func _cfg() -> PlayerMovementConfig:
 	if movement_config == null:
 		movement_config = load("res://resources/player/movement_config.tres")
 	return movement_config
+
+
+func get_action_pickup_point() -> Vector2:
+	if collision_shape:
+		return collision_shape.global_position
+	return global_position + Vector2(_display_size.x * 0.5, _display_size.y * 0.55)
 
 
 func _is_aiming_letter_shot() -> bool:

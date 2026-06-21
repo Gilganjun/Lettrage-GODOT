@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://player_phase2a"]
+[gd_scene load_steps=9 format=3 uid="uid://player_phase2a"]
 
 [ext_resource type="Script" path="res://scripts/player/player_movement.gd" id="1_move"]
 [ext_resource type="Script" path="res://scripts/player/player_animation.gd" id="2_anim"]
 [ext_resource type="Script" path="res://scripts/player/camera_zoom_controller.gd" id="3_zoom"]
 [ext_resource type="Script" path="res://scripts/player/player_death_frame_alignment.gd" id="4_align"]
+[ext_resource type="Script" path="res://scripts/player/intro_fall_fx.gd" id="5_fall_fx"]
 [ext_resource type="Resource" path="res://resources/characters/player_visual.tres" id="3_visual"]
 [ext_resource type="Resource" path="res://resources/player/movement_config.tres" id="4_cfg"]
 
@@ -21,6 +22,9 @@ movement_config = ExtResource("4_cfg")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 3)
 shape = SubResource("RectangleShape2D_body")
+
+[node name="IntroFallFx" type="Node2D" parent="."]
+script = ExtResource("5_fall_fx")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 8)

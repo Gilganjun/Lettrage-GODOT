@@ -15,6 +15,8 @@ class FontSet:
 	var legacy_naming: bool = false
 	var export_files: Dictionary = {}
 	var use_tint_shader: bool = true
+	var display_scale: float = 1.0
+	var spawn_ref_size: float = 100.0
 
 
 var _sets: Array[FontSet] = []
@@ -71,12 +73,33 @@ func apply_to_catalog(catalog: AlphabetCatalog) -> void:
 	if catalog == null or _sets.is_empty():
 		return
 	var font_set := _sets[_index]
+	_apply_font_set_to_catalog(catalog, font_set)
+
+
+func apply_to_catalog_by_id(catalog: AlphabetCatalog, font_set_id: String) -> bool:
+	if catalog == null or _sets.is_empty():
+		return false
+	for i in _sets.size():
+		if _sets[i].id == font_set_id:
+			_index = i
+			_apply_font_set_to_catalog(catalog, _sets[i])
+			return true
+	if font_set_id == ORIGINAL_ID:
+		_index = 0
+		_apply_font_set_to_catalog(catalog, _sets[0])
+		return true
+	return false
+
+
+func _apply_font_set_to_catalog(catalog: AlphabetCatalog, font_set: FontSet) -> void:
 	catalog.apply_font_set(
 		font_set.texture_dir,
 		font_set.legacy_naming,
 		font_set.export_files,
 		font_set.id,
 		font_set.use_tint_shader,
+		font_set.display_scale,
+		font_set.spawn_ref_size,
 	)
 
 
@@ -101,11 +124,17 @@ func _try_add_font_folder(folder_name: String) -> void:
 	if data.get("type", "") != "lettrage_font_set":
 		return
 	var font_set_name := str(data.get("font_set_name", folder_name))
+	var use_tint_shader := bool(data.get("use_tint_shader", true))
+	var display_scale := float(data.get("display_scale", 1.0))
+	var spawn_ref_size := float(data.get("spawn_ref_size", 100.0))
 	var font_set := FontSet.new()
 	font_set.id = folder_name
 	font_set.display_name = font_set_name
 	font_set.texture_dir = base
 	font_set.legacy_naming = false
+	font_set.use_tint_shader = use_tint_shader
+	font_set.display_scale = display_scale
+	font_set.spawn_ref_size = spawn_ref_size
 	var letters: Dictionary = data.get("letters", {})
 	for letter in AlphabetCatalog.all_letters_static():
 		var entry: Dictionary = letters.get(letter, {})
@@ -114,7 +143,8 @@ func _try_add_font_folder(folder_name: String) -> void:
 			export_file = "%s_%s.png" % [font_set_name, letter]
 		font_set.export_files[letter] = export_file
 	_sets.append(font_set)
-	_add_raw_variant(font_set, font_set_name)
+	if use_tint_shader:
+		_add_raw_variant(font_set, font_set_name)
 
 
 func _add_raw_variant(source: FontSet, font_set_name: String) -> void:
@@ -125,4 +155,6 @@ func _add_raw_variant(source: FontSet, font_set_name: String) -> void:
 	raw.legacy_naming = source.legacy_naming
 	raw.export_files = source.export_files.duplicate()
 	raw.use_tint_shader = false
+	raw.display_scale = source.display_scale
+	raw.spawn_ref_size = source.spawn_ref_size
 	_sets.append(raw)

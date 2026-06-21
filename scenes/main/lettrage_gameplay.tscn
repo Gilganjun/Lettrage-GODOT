@@ -1,0 +1,102 @@
+[gd_scene load_steps=20 format=3 uid="uid://lettrage_gameplay_main"]
+
+[ext_resource type="Script" path="res://scripts/main/lettrage_gameplay.gd" id="1_root"]
+[ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
+[ext_resource type="Script" path="res://scripts/test/phase2a_collision_debug_draw.gd" id="3_coldebug"]
+[ext_resource type="Script" path="res://scripts/letters/letter_spawner.gd" id="4_spawner"]
+[ext_resource type="Script" path="res://scripts/word_game/word_game_controller.gd" id="5_controller"]
+[ext_resource type="PackedScene" path="res://scenes/ui/word_game_hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/combat_hud.tscn" id="7_combat"]
+[ext_resource type="Script" path="res://scripts/combat/word_damage_bridge.gd" id="8_bridge"]
+[ext_resource type="Script" path="res://scripts/ui/word_celebration_player.gd" id="9_celeb"]
+[ext_resource type="Script" path="res://scripts/ui/word_garble_player.gd" id="10_garble"]
+[ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="10_backdrop"]
+[ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
+[ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
+[ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
+[ext_resource type="PackedScene" path="res://scenes/visual/phase2c1_visual_pass.tscn" id="14_visual"]
+[ext_resource type="Script" path="res://scripts/collectibles/action_collectible_spawner.gd" id="15_action_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/ui/match_overlay.tscn" id="16_match_overlay"]
+[ext_resource type="Script" path="res://scripts/gameplay/match_controller.gd" id="17_match"]
+[ext_resource type="Resource" path="res://resources/gameplay/level1_config.tres" id="18_level_cfg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/gameplay_debug_dock.tscn" id="19_debug_dock"]
+
+[node name="LettrageGameplay" type="Node2D"]
+script = ExtResource("1_root")
+level_config = ExtResource("18_level_cfg")
+
+[node name="Phase2C1VisualPass" parent="." instance=ExtResource("14_visual")]
+
+[node name="SceneAmbientAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_ambient")
+ambient_level = 0.2
+script = ExtResource("12_ambient")
+
+[node name="ViewportBackdropFill" parent="." instance=ExtResource("10_backdrop")]
+
+[node name="WordGameController" type="Node" parent="."]
+script = ExtResource("5_controller")
+
+[node name="WordDamageBridge" type="Node" parent="."]
+script = ExtResource("8_bridge")
+
+[node name="MatchController" type="Node" parent="."]
+script = ExtResource("17_match")
+config = ExtResource("18_level_cfg")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Level" parent="World" instance=ExtResource("2_level")]
+
+[node name="LetterSpawner" type="Node2D" parent="World"]
+script = ExtResource("4_spawner")
+
+[node name="CannonLeft" type="Node2D" parent="World"]
+position = Vector2(80, 320)
+script = ExtResource("13_cannon")
+director_path = NodePath("../LetterSpawner")
+fire_direction = 0
+fire_interval = 3.4
+burst_count = 2
+letter_speed = 150.0
+
+[node name="CannonRight" type="Node2D" parent="World"]
+position = Vector2(2020, 280)
+script = ExtResource("13_cannon")
+director_path = NodePath("../LetterSpawner")
+fire_direction = 1
+fire_interval = 3.8
+burst_count = 2
+letter_speed = 150.0
+
+[node name="PlayerRoot" type="Node2D" parent="World"]
+
+[node name="EnemyRoot" type="Node2D" parent="World"]
+
+[node name="ActionCollectibleSpawner" type="Node2D" parent="World"]
+script = ExtResource("15_action_spawner")
+spawn_interval = 25.0
+spawn_x_min = 120.0
+spawn_x_max = 840.0
+
+[node name="CollisionDebug" type="Node2D" parent="World"]
+z_index = 4096
+script = ExtResource("3_coldebug")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="WordGameHud" parent="UI" instance=ExtResource("6_hud")]
+
+[node name="CombatHud" parent="UI" instance=ExtResource("7_combat")]
+
+[node name="WordCelebrationPlayer" type="CanvasLayer" parent="UI"]
+layer = 20
+script = ExtResource("9_celeb")
+
+[node name="WordGarblePlayer" type="CanvasLayer" parent="UI"]
+layer = 21
+script = ExtResource("10_garble")
+
+[node name="MatchOverlay" parent="UI" instance=ExtResource("16_match_overlay")]
+
+[node name="GameplayDebugDock" parent="UI" instance=ExtResource("19_debug_dock")]

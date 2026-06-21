@@ -42,9 +42,23 @@ var resolution: Resolution = Resolution.NONE
 var resolution_source: String = ""
 var tint_color: Color = Color.WHITE
 
+const READABILITY_BACKDROP_PADDING := 2.05
+const READABILITY_BACKDROP_ALPHA := 0.62
+const READABILITY_BACKDROP_STATIC_CHANCE := 0.10
+const READABILITY_BACKDROP_ROTATION_SPEED_MIN := 0.5
+const READABILITY_BACKDROP_ROTATION_SPEED_MAX := 2.8
+const DEFAULT_READABILITY_BACKDROP_PATH := "res://assets/Letter_Circle_BG1.png"
+
+static var _readability_backdrop_path := DEFAULT_READABILITY_BACKDROP_PATH
+
 var _base_modulate: Color = Color.WHITE
 var _sprite: Sprite2D
+var _backdrop: Sprite2D
+var _backdrop_rotation_speed: float = 0.0
+var _backdrop_rotation_assigned := false
 var _pending_resolve_finish := false
+## Intended on-screen width (px) — used to recompute scale when the font set changes.
+var _target_world_size: float = 0.0
 
 
 func _ready() -> void:
@@ -66,6 +80,7 @@ func configure(
 	p_lifetime_max: float = -1.0,
 	p_lifetime_fade_start: float = 8.0,
 	p_motion_gravity: float = 0.0,
+	p_target_world_size: float = -1.0,
 ) -> void:
 	character = p_character.to_upper()
 	spawn_id = p_spawn_id
@@ -76,6 +91,12 @@ func configure(
 	lifetime_fade_start = p_lifetime_fade_start
 	age = 0.0
 	field_speed_multiplier = 1.0
+	if p_target_world_size > 0.0:
+		_target_world_size = p_target_world_size
+	elif catalog:
+		_target_world_size = (
+			p_scale_factor * catalog.get_spawn_ref_size() / catalog.get_display_scale()
+		)
 	if p_use_initial_velocity:
 		velocity = p_initial_velocity
 	else:
@@ -90,7 +111,28 @@ func configure(
 func refresh_texture() -> void:
 	if catalog == null or _sprite == null:
 		return
-	_apply_sprite_texture(_sprite.scale.x)
+	var scale_factor := _sprite.scale.x
+	if _target_world_size > 0.0:
+		scale_factor = catalog.compute_spawn_scale(_target_world_size)
+	_apply_sprite_texture(scale_factor)
+
+
+static func set_readability_backdrop_path(path: String) -> void:
+	if path.is_empty():
+		return
+	_readability_backdrop_path = path
+
+
+static func get_readability_backdrop_path() -> String:
+	return _readability_backdrop_path
+
+
+func refresh_backdrop() -> void:
+	if _sprite == null or _sprite.texture == null:
+		return
+	var backdrop := _ensure_backdrop()
+	backdrop.texture = _load_backdrop_texture()
+	_update_readability_backdrop()
 
 
 func _apply_sprite_texture(scale_factor: float) -> void:
@@ -103,14 +145,92 @@ func _apply_sprite_texture(scale_factor: float) -> void:
 	if shape and _sprite.texture:
 		var tex_size := _sprite.texture.get_size() * _sprite.scale
 		shape.size = tex_size * 0.55
+		_update_readability_backdrop()
+
+
+func _ensure_backdrop() -> Sprite2D:
+	if _backdrop != null:
+		return _backdrop
+	_backdrop = get_node_or_null("ReadabilityBackdrop") as Sprite2D
+	if _backdrop == null:
+		_backdrop = Sprite2D.new()
+		_backdrop.name = "ReadabilityBackdrop"
+		_backdrop.centered = true
+		_backdrop.texture = _load_backdrop_texture()
+		add_child(_backdrop)
+		move_child(_backdrop, 0)
+	return _backdrop
+
+
+func _load_backdrop_texture() -> Texture2D:
+	var path := _readability_backdrop_path
+	if ResourceLoader.exists(path):
+		var imported := load(path) as Texture2D
+		if imported != null:
+			return imported
+	var image := Image.new()
+	if image.load(path) == OK:
+		return ImageTexture.create_from_image(image)
+	return null
+
+
+func _get_letter_display_size() -> Vector2:
+	# Use spawn target width — not raw texture size — so padded export canvases
+	# (e.g. Cyberpunk 512×512) don't inflate the readability circle.
+	if _target_world_size > 0.0:
+		if _sprite != null and _sprite.texture != null:
+			var tex := _sprite.texture.get_size()
+			var aspect := tex.x / maxf(tex.y, 1.0)
+			if aspect >= 1.0:
+				return Vector2(_target_world_size, _target_world_size / aspect)
+			return Vector2(_target_world_size * aspect, _target_world_size)
+		return Vector2.ONE * _target_world_size
+	if _sprite != null and _sprite.texture != null:
+		return _sprite.texture.get_size() * _sprite.scale
+	return Vector2.ONE * 100.0
+
+
+func _update_readability_backdrop() -> void:
+	var backdrop := _ensure_backdrop()
+	if backdrop.texture == null:
+		backdrop.visible = false
+		return
+	backdrop.visible = true
+	var display_size := _get_letter_display_size()
+	var padded := display_size * READABILITY_BACKDROP_PADDING
+	var target := maxf(maxf(padded.x, padded.y), 8.0)
+	var tex_dims := backdrop.texture.get_size()
+	var ref := maxf(maxf(tex_dims.x, tex_dims.y), 1.0)
+	backdrop.scale = Vector2.ONE * (target / ref)
+	backdrop.modulate = Color(1.0, 1.0, 1.0, READABILITY_BACKDROP_ALPHA)
+	_assign_backdrop_rotation()
+
+
+func _assign_backdrop_rotation() -> void:
+	if _backdrop_rotation_assigned:
+		return
+	_backdrop_rotation_assigned = true
+	if randf() < READABILITY_BACKDROP_STATIC_CHANCE:
+		_backdrop_rotation_speed = 0.0
+		if _backdrop:
+			_backdrop.rotation = 0.0
+		return
+	var speed := randf_range(
+		READABILITY_BACKDROP_ROTATION_SPEED_MIN,
+		READABILITY_BACKDROP_ROTATION_SPEED_MAX,
+	)
+	var direction := -1.0 if randf() < 0.5 else 1.0
+	_backdrop_rotation_speed = speed * direction
 
 
 func _apply_letter_visual() -> void:
 	if catalog and not catalog.uses_tint_shader():
-		LetterTint.clear_tint(_sprite)
-		return
-	LetterTint.apply(_sprite, tint_color)
-	_sprite.modulate = _base_modulate
+		LetterTint.apply_readability_only(_sprite)
+	else:
+		LetterTint.apply(_sprite, tint_color)
+	# Shader path already bakes tint_color into the material — modulate must stay white
+	# or dark hues (purple J, etc.) get multiplied twice and disappear on dark backgrounds.
+	_sprite.modulate = Color.WHITE
 
 
 func _physics_process(delta: float) -> void:
@@ -121,7 +241,14 @@ func _physics_process(delta: float) -> void:
 	if motion_gravity != 0.0:
 		velocity.y += motion_gravity * scaled_delta
 	position += velocity * scaled_delta
+	_update_backdrop_rotation(scaled_delta)
 	_update_lifetime_fade()
+
+
+func _update_backdrop_rotation(delta: float) -> void:
+	if _backdrop == null or _backdrop_rotation_speed == 0.0:
+		return
+	_backdrop.rotation += _backdrop_rotation_speed * delta
 
 
 func is_resolved() -> bool:
@@ -185,14 +312,23 @@ func _update_lifetime_fade() -> void:
 		return
 	if age < lifetime_fade_start:
 		_apply_letter_visual()
+		_sync_backdrop_alpha(1.0)
 		return
 	var t := inverse_lerp(lifetime_fade_start, lifetime_max, age)
 	t = clampf(t, 0.0, 1.0)
 	var pulse := 0.85 + 0.15 * sin(age * 12.0)
 	if catalog and not catalog.uses_tint_shader():
 		_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0 - t * pulse * 0.65)
+		_sync_backdrop_alpha(1.0 - t * pulse * 0.65)
 		return
-	_sprite.modulate = _base_modulate.lerp(Color(1.0, 0.35, 0.35, 0.35), t * pulse)
+	_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.0, 0.35, 0.35, 0.35), t * pulse)
+	_sync_backdrop_alpha(1.0 - t * pulse * 0.65)
+
+
+func _sync_backdrop_alpha(sprite_alpha_factor: float) -> void:
+	if _backdrop == null:
+		return
+	_backdrop.modulate = Color(1.0, 1.0, 1.0, READABILITY_BACKDROP_ALPHA * sprite_alpha_factor)
 
 
 func _should_shatter(outcome: Resolution) -> bool:
@@ -215,6 +351,8 @@ func _play_resolve_vfx(outcome: Resolution, knockback_from: Vector2) -> void:
 	if _sprite == null or _sprite.texture == null:
 		return
 	_sprite.visible = false
+	if _backdrop:
+		_backdrop.visible = false
 	var parent := get_parent()
 	if parent == null:
 		parent = get_tree().current_scene

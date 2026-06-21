@@ -30,6 +30,7 @@ var is_hold_blocking := false
 var _hold_session := false
 var _hybrid_phase := _HybridPhase.IDLE
 var _press_start_msec := 0
+var _intro_input_blocked := false
 
 
 func _ready() -> void:
@@ -107,6 +108,13 @@ func set_active(active: bool) -> void:
 	else:
 		shield.deactivate("external")
 		_set_latched(false)
+
+
+func set_intro_input_blocked(blocked: bool) -> void:
+	_intro_input_blocked = blocked
+	if blocked:
+		_cancel_hybrid_gesture()
+		_end_hold_session()
 
 
 func blocks_letter_collection() -> bool:
@@ -235,6 +243,8 @@ func _set_latched(latched: bool) -> void:
 
 
 func _is_input_blocked() -> bool:
+	if _intro_input_blocked:
+		return true
 	var body := get_parent() as Node
 	if body:
 		var combat := body.get_node_or_null("CharacterCombat")

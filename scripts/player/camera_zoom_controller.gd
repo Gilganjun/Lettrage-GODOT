@@ -17,11 +17,16 @@ signal zoom_percent_changed(percent: float)
 @export var hit_shake_duration := 0.22
 @export var hit_shake_fist_strength := 11.0
 @export var hit_shake_heavy_strength := 17.0
+@export var intro_follow_smoothing_speed := 14.0
 
 var _zoom_percent := 100.0
 var _zoom_in_hold := -1.0
 var _zoom_out_hold := -1.0
 var _action_cinematic_active := false
+var _round_intro_active := false
+var _round_intro_start_zoom := 82.0
+var _round_intro_end_zoom := 82.0
+var _default_position_smoothing_speed := 9.5
 var _saved_zoom_percent := 82.0
 var _zoom_anim_elapsed := 0.0
 var _zoom_anim_duration := 0.5
@@ -34,10 +39,14 @@ var _shake_strength := 0.0
 
 
 func _ready() -> void:
+	_default_position_smoothing_speed = position_smoothing_speed
 	reset_to_base()
 
 
 func _process(delta: float) -> void:
+	if _round_intro_active:
+		offset = Vector2.ZERO
+		return
 	if _action_cinematic_active:
 		_tick_action_zoom(delta)
 		_tick_hit_shake(delta)
@@ -48,6 +57,9 @@ func _process(delta: float) -> void:
 
 
 func reset_to_base() -> void:
+	end_round_intro_cinematic()
+	Engine.time_scale = 1.0
+	offset = Vector2.ZERO
 	_zoom_percent = base_zoom_percent
 	_zoom_in_hold = -1.0
 	_zoom_out_hold = -1.0
@@ -61,6 +73,45 @@ func get_zoom_percent() -> float:
 
 func is_action_cinematic_active() -> bool:
 	return _action_cinematic_active
+
+
+func is_round_intro_active() -> bool:
+	return _round_intro_active
+
+
+func begin_round_intro_cinematic(start_zoom_percent: float, end_zoom_percent: float = -1.0) -> void:
+	if end_zoom_percent < 0.0:
+		end_zoom_percent = base_zoom_percent
+	_round_intro_active = true
+	_round_intro_start_zoom = clampf(start_zoom_percent, min_zoom_percent, max_zoom_percent)
+	_round_intro_end_zoom = clampf(end_zoom_percent, min_zoom_percent, max_zoom_percent)
+	_zoom_percent = _round_intro_start_zoom
+	_apply_zoom()
+	zoom_percent_changed.emit(_zoom_percent)
+	position_smoothing_enabled = true
+	position_smoothing_speed = intro_follow_smoothing_speed
+	offset = Vector2.ZERO
+
+
+func tick_round_intro_cinematic(progress: float) -> void:
+	if not _round_intro_active:
+		return
+	var t := clampf(progress, 0.0, 1.0)
+	t = t * t * (3.0 - 2.0 * t)
+	_zoom_percent = lerpf(_round_intro_start_zoom, _round_intro_end_zoom, t)
+	_apply_zoom()
+	zoom_percent_changed.emit(_zoom_percent)
+
+
+func end_round_intro_cinematic() -> void:
+	if not _round_intro_active:
+		return
+	_round_intro_active = false
+	_zoom_percent = base_zoom_percent
+	_apply_zoom()
+	zoom_percent_changed.emit(_zoom_percent)
+	position_smoothing_speed = _default_position_smoothing_speed
+	offset = Vector2.ZERO
 
 
 func begin_action_cinematic(duration: float, zoom_boost_percent: float) -> void:
@@ -95,6 +146,19 @@ func end_action_cinematic() -> void:
 	offset = Vector2.ZERO
 
 
+func set_zoom_percent(percent: float) -> void:
+	_zoom_percent = clampf(percent, min_zoom_percent, max_zoom_percent)
+	_apply_zoom()
+	zoom_percent_changed.emit(_zoom_percent)
+
+
+func reset_strike_presentation() -> void:
+	Engine.time_scale = 1.0
+	end_action_cinematic()
+	offset = Vector2.ZERO
+	reset_to_base()
+
+
 func _tick_action_zoom(delta: float) -> void:
 	if _zoom_anim_done:
 		return
@@ -122,7 +186,7 @@ func _tick_hit_shake(delta: float) -> void:
 
 
 func _change_zoom(delta_percent: float) -> void:
-	if _action_cinematic_active:
+	if _action_cinematic_active or _round_intro_active:
 		return
 	var next := clampf(_zoom_percent + delta_percent, min_zoom_percent, max_zoom_percent)
 	if is_equal_approx(next, _zoom_percent):

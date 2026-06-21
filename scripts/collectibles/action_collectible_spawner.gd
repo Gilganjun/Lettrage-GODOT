@@ -11,6 +11,11 @@ extends Node2D
 
 var _timer := 0.0
 var _scene: PackedScene
+var _paused := false
+
+
+func set_spawning_paused(paused: bool) -> void:
+	_paused = paused
 
 
 func _ready() -> void:
@@ -19,6 +24,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _paused:
+		return
 	_timer += delta
 	if _timer < spawn_interval:
 		return

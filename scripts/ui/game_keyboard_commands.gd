@@ -38,8 +38,9 @@ static func get_sections() -> Array[Dictionary]:
 			"title": "Debug & Test",
 			"entries": [
 				{"keys": "V / F3", "desc": "Toggle collision debug overlay"},
-				{"keys": "Shift + F2", "desc": "Toggle word / combat HUD debug"},
-				{"keys": "0", "desc": "Cycle font set: Original → Cyberpunk (tint) → Cyberpunk Original"},
+				{"keys": "Shift + F2", "desc": "Toggle debug mode (⚙ panel)"},
+				{"keys": "0", "desc": "Cycle font set (Original, Cyberpunk, Dinosaur1, …)"},
+				{"keys": "9", "desc": "Cycle letter circle backdrop (BG1–BG4)"},
 				{"keys": "F8", "desc": "Spawn test letter (Z)"},
 				{"keys": "F9", "desc": "Clear player word"},
 				{"keys": "F10", "desc": "Force enemy shield on"},
@@ -56,3 +57,15 @@ static func get_sections() -> Array[Dictionary]:
 			],
 		},
 	]
+
+
+static func format_as_text() -> String:
+	var lines: PackedStringArray = []
+	for section in get_sections():
+		lines.append(str(section.get("title", "")))
+		for entry in section.get("entries", []):
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			lines.append("  %s — %s" % [str(entry.get("keys", "")), str(entry.get("desc", ""))])
+		lines.append("")
+	return "\n".join(lines)

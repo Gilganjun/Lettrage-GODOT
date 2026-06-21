@@ -9,6 +9,9 @@ signal action_sequence_finished()
 
 enum State { IDLE, APPROACH, SUPER_JUMP, STRIKE, RECOVER }
 
+enum AttackPickMode { ROTATE, FIXED }
+
+const ATTACK_ROTATION_COUNT := 3
 const ATTACK1_FRAME_COUNT := 121
 const ATTACK1_PATH := "res://assets/Characters/Player/Attack1/Player_Attack1_%03d.png"
 const ATTACK2_FRAME_COUNT := 61
@@ -18,6 +21,9 @@ const ATTACK3_PATH := "res://assets/Characters/Player/Attack3/Attack3_%03d.png"
 const ATTACK3_ANIMATION_FPS := 16.8 ## 24 fps slowed by 30%.
 
 @export var max_action_charges: int = 1
+@export var attack_pick_mode: AttackPickMode = AttackPickMode.ROTATE
+## 0 = Attack1, 1 = Attack2, 2 = Attack3 — used when attack_pick_mode is FIXED.
+@export_range(0, 2, 1) var fixed_attack_index: int = 0
 @export var debug_infinite_action: bool = true ## TEMP — remove before shipping.
 @export var approach_run_speed: float = 380.0
 @export var super_jump_y_threshold: float = 48.0
@@ -39,6 +45,10 @@ const ATTACK3_ANIMATION_FPS := 16.8 ## 24 fps slowed by 30%.
 ## Extra X pull toward enemy on hit frames only (closes small air gaps).
 @export var hit_frame_close_boost: float = 18.0
 @export var action_zoom_boost_percent: float = 48.0
+@export_group("Strike camera experiment")
+@export_range(0.0, 1.0, 0.01) var dramatic_strike_camera_chance := 0.35
+@export_range(0.05, 1.0, 0.01) var dramatic_strike_slow_scale := 0.18
+@export_range(0.5, 1.0, 0.01) var dramatic_strike_screen_fill := 0.88
 
 var _charges := 0
 var _state := State.IDLE
@@ -52,6 +62,8 @@ var _attack_anim_loaded := ""
 var _slide_segment_hit_idx := -1
 var _slide_from_x := 0.0
 var _kinematic_strike_position := Vector2.ZERO
+var _rotate_attack_index := 0
+var _strike_camera := ActionStrikeCameraDirector.new()
 
 
 func _ready() -> void:
@@ -67,6 +79,10 @@ func get_charges() -> int:
 
 func is_active() -> bool:
 	return _state != State.IDLE
+
+
+func is_strike_active() -> bool:
+	return _state == State.STRIKE
 
 
 func get_state() -> State:
@@ -103,13 +119,29 @@ func add_charge(amount: int = 1) -> void:
 	action_charge_changed.emit(_charges, max_action_charges)
 
 
+func reset_for_round() -> void:
+	if is_active():
+		_finish_sequence()
+	_state = State.IDLE
+	_state_time = 0.0
+	_sequence_time = 0.0
+	_hit_applied.clear()
+	_attack = null
+	_enemy = null
+	_slide_segment_hit_idx = -1
+	_charges = max_action_charges if debug_infinite_action else 0
+	action_charge_changed.emit(_charges, max_action_charges)
+
+
 func process_action(player: PlayerMovement, delta: float) -> bool:
 	_player = player
 	if debug_infinite_action and _state == State.IDLE:
 		_charges = max_action_charges
 	if _state == State.IDLE:
 		if Input.is_action_just_pressed("player_action") and _charges > 0:
-			if _player_combat_blocks():
+			if _player_combat_blocks() or not _gameplay_allows_action():
+				return false
+			if _player.is_action_sequence_targeted():
 				return false
 			_begin_sequence()
 		return false
@@ -142,7 +174,7 @@ func _begin_sequence() -> void:
 	if not debug_infinite_action:
 		_charges -= 1
 		action_charge_changed.emit(_charges, max_action_charges)
-	_attack = _build_attack3_definition()
+	_attack = _pick_attack_for_sequence()
 	_state = State.APPROACH
 	_state_time = 0.0
 	_sequence_time = 0.0
@@ -153,8 +185,34 @@ func _begin_sequence() -> void:
 	_deactivate_player_shield(_player)
 	if _enemy.has_method("set_action_sequence_targeted"):
 		_enemy.set_action_sequence_targeted(true)
-	_begin_action_camera()
+	_configure_strike_camera()
+	_strike_camera.roll_for_sequence(
+		_get_player_camera(),
+		_player,
+		_enemy,
+		_attack,
+		_begin_action_camera,
+	)
 	action_sequence_started.emit(_attack.attack_id)
+
+
+func _pick_attack_for_sequence() -> ActionAttackDefinition:
+	var index := _rotate_attack_index
+	if attack_pick_mode == AttackPickMode.FIXED:
+		index = clampi(fixed_attack_index, 0, ATTACK_ROTATION_COUNT - 1)
+	else:
+		_rotate_attack_index = (_rotate_attack_index + 1) % ATTACK_ROTATION_COUNT
+	return _build_attack_by_index(index)
+
+
+func _build_attack_by_index(index: int) -> ActionAttackDefinition:
+	match clampi(index, 0, ATTACK_ROTATION_COUNT - 1):
+		0:
+			return _build_attack1_definition()
+		1:
+			return _build_attack2_definition()
+		_:
+			return _build_attack3_definition()
 
 
 func _build_attack3_definition() -> ActionAttackDefinition:
@@ -309,6 +367,7 @@ func _tick_strike(delta: float) -> void:
 		return
 	_player.velocity = Vector2.ZERO
 	var frame_num := _current_attack_frame_number()
+	_strike_camera.tick_strike_frame(frame_num)
 	_update_facing_for_strike(frame_num)
 	_update_strike_pursuit(delta, frame_num)
 	_try_apply_frame_hits(frame_num)
@@ -503,22 +562,28 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 		return
 	var is_first := hit_idx == 0
 	var is_last := _attack != null and hit_idx == _attack.hit_frames.size() - 1
-	var use_combo_freeze := _uses_side_slides()
+	var skip_knockback := _uses_side_slides()
 	var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
-	if enemy_combat is CharacterCombat and not (enemy_combat as CharacterCombat).is_dead():
+	var combat: CharacterCombat = enemy_combat as CharacterCombat if enemy_combat is CharacterCombat else null
+	if combat != null and not combat.is_dead():
 		var source := "action_%s_hit%d" % [_attack.attack_id, hit_index]
-		if is_last and use_combo_freeze:
-			damage = maxi(damage, (enemy_combat as CharacterCombat).health.current_health)
-		(enemy_combat as CharacterCombat).apply_action_damage(
+		combat.apply_action_damage(
 			damage,
 			source,
 			_player.global_position,
-			use_combo_freeze,
+			skip_knockback,
+			is_last,
 		)
-		if is_first and use_combo_freeze and _enemy.has_method("begin_action_strike_freeze"):
+		if is_first and _enemy.has_method("begin_action_strike_freeze"):
 			_enemy.begin_action_strike_freeze()
-		if is_last and use_combo_freeze and _enemy.has_method("end_action_strike_freeze"):
+	if is_last:
+		if _enemy.has_method("end_action_strike_freeze"):
 			_enemy.end_action_strike_freeze()
+		if combat != null:
+			if combat.has_pending_action_death():
+				combat.commit_deferred_action_death()
+			elif not combat.is_dead():
+				combat.apply_action_finisher_reaction(_player.global_position)
 	var world := _find_world()
 	if world == null:
 		return
@@ -535,6 +600,14 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	)
 	ActionPowEffect.spawn_at(world, strike_pos + Vector2(0.0, -6.0))
 	_trigger_action_hit_shake(hit_idx)
+
+
+func _configure_strike_camera() -> void:
+	_strike_camera.configure(
+		dramatic_strike_camera_chance,
+		dramatic_strike_slow_scale,
+		dramatic_strike_screen_fill,
+	)
 
 
 func _begin_action_camera() -> void:
@@ -560,7 +633,7 @@ func _trigger_action_hit_shake(hit_idx: int) -> void:
 	var strength := cam.hit_shake_fist_strength
 	if kind in ["kick", "foot", "tail"]:
 		strength = cam.hit_shake_heavy_strength
-	cam.trigger_hit_shake(strength)
+	_strike_camera.trigger_hit_shake(strength)
 
 
 func _estimate_time_to_first_hit() -> float:
@@ -609,9 +682,13 @@ func _tick_recover(_delta: float) -> void:
 
 
 func _finish_sequence() -> void:
-	_end_action_camera()
-	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("set_action_sequence_targeted"):
-		_enemy.set_action_sequence_targeted(false)
+	_strike_camera.end_sequence()
+	if _enemy and is_instance_valid(_enemy):
+		var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
+		if enemy_combat is CharacterCombat and (enemy_combat as CharacterCombat).has_pending_action_death():
+			(enemy_combat as CharacterCombat).commit_deferred_action_death()
+		if _enemy.has_method("set_action_sequence_targeted"):
+			_enemy.set_action_sequence_targeted(false)
 	_state = State.IDLE
 	_state_time = 0.0
 	_sequence_time = 0.0
@@ -704,3 +781,10 @@ func _player_combat_blocks() -> bool:
 	if combat and combat.has_method("blocks_movement") and combat.blocks_movement():
 		return true
 	return false
+
+
+func _gameplay_allows_action() -> bool:
+	for node in get_tree().get_nodes_in_group("match_controller"):
+		if node.has_method("allows_action_start") and not node.call("allows_action_start"):
+			return false
+	return true

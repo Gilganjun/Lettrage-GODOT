@@ -11,6 +11,7 @@ const LayoutBuilder := preload("res://scripts/level/gdevelop_layout_builder.gd")
 const PlayerAttach := preload("res://scripts/test/player_gameplay_attach.gd")
 const WordGameFeatures := preload("res://scripts/word_game/word_game_features.gd")
 const FontSetRegistry := preload("res://scripts/resources/font_set_registry.gd")
+const LetterBackdropRegistry := preload("res://scripts/letters/letter_backdrop_registry.gd")
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 
@@ -50,6 +51,8 @@ var _player_action: Node
 var _player_spawn := Vector2(279.0, 231.0)
 var _font_sets: FontSetRegistry
 var _font_set_label: Label
+var _letter_backdrops: LetterBackdropRegistry
+var _backdrop_label: Label
 
 
 func _ready() -> void:
@@ -64,7 +67,10 @@ func _ready() -> void:
 	letter_spawner.profile = LANE_PROFILE
 	_font_sets = FontSetRegistry.create()
 	_font_sets.apply_to_catalog(CATALOG)
+	_letter_backdrops = LetterBackdropRegistry.create()
+	_letter_backdrops.apply_to_letters()
 	_setup_font_set_label()
+	_setup_backdrop_label()
 	_load_transform_rows()
 	_spawn_player()
 	_spawn_enemy()
@@ -86,6 +92,8 @@ func _ready() -> void:
 		combat_hud.bind_words(word_controller, _enemy)
 	if combat_hud.has_method("bind_combat_actions"):
 		combat_hud.bind_combat_actions(_player_shooter, _player_action)
+	if combat_hud.has_method("bind_enemy_action") and _enemy:
+		combat_hud.bind_enemy_action(_enemy.get_action_controller())
 	if hud.has_method("set_word_display_on_combat_hud"):
 		hud.set_word_display_on_combat_hud(true)
 	if word_celebration.has_method("setup"):
@@ -124,10 +132,28 @@ func _setup_font_set_label() -> void:
 	$UI.add_child(_font_set_label)
 
 
+func _setup_backdrop_label() -> void:
+	_backdrop_label = Label.new()
+	_backdrop_label.text = "Backdrop: %s" % _letter_backdrops.get_current_name()
+	_backdrop_label.position = Vector2(8, 26)
+	_backdrop_label.add_theme_font_size_override("font_size", 14)
+	_backdrop_label.add_theme_color_override("font_color", Color(0.95, 0.88, 1.0, 1.0))
+	_backdrop_label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.75))
+	_backdrop_label.add_theme_constant_override("shadow_offset_x", 1)
+	_backdrop_label.add_theme_constant_override("shadow_offset_y", 1)
+	$UI.add_child(_backdrop_label)
+
+
 func _cycle_font_set() -> void:
 	var font_name := letter_spawner.cycle_font_set(_font_sets)
 	if _font_set_label:
 		_font_set_label.text = "Font: %s" % font_name
+
+
+func _cycle_letter_backdrop() -> void:
+	var backdrop_name := letter_spawner.cycle_letter_backdrop(_letter_backdrops)
+	if _backdrop_label:
+		_backdrop_label.text = "Backdrop: %s" % backdrop_name
 
 
 func _setup_combat() -> void:
@@ -250,6 +276,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				_enemy.debug_clear_word()
 		elif event.keycode == KEY_0 and not event.alt_pressed:
 			_cycle_font_set()
+		elif event.keycode == KEY_9 and not event.alt_pressed:
+			_cycle_letter_backdrop()
 		elif event.alt_pressed:
 			_handle_combat_debug_keys(event.keycode)
 

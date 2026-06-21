@@ -14,6 +14,7 @@ const WORD_PANEL_PAD_Y := 12.0
 @onready var enemy_word_label: Label = $TopRow/EnemySide/EnemyWordPanel/EnemyWordLabel
 @onready var player_ammo_label: Label = $PlayerAmmoLabel
 @onready var action_charge_icon: Label = $ActionChargeIcon
+@onready var enemy_action_charge_icon: Label = $TopRow/EnemySide/EnemyActionChargeIcon
 @onready var status_label: Label = $StatusLabel
 @onready var debug_label: Label = $CombatDebugLabel
 
@@ -25,6 +26,7 @@ var _enemy: Enemy
 var _framed_word_ui := false
 var _shooter: LetterShooter
 var _action_controller: Node
+var _enemy_action_controller: Node
 
 
 func setup(
@@ -95,6 +97,16 @@ func bind_combat_actions(shooter: LetterShooter, action_controller: Node) -> voi
 		_on_action_charge_changed(_action_controller.get_charges(), _action_controller.max_action_charges)
 
 
+func bind_enemy_action(action_controller: Node) -> void:
+	_enemy_action_controller = action_controller
+	if _enemy_action_controller:
+		_enemy_action_controller.action_charge_changed.connect(_on_enemy_action_charge_changed)
+		_on_enemy_action_charge_changed(
+			_enemy_action_controller.get_charges(),
+			_enemy_action_controller.max_action_charges,
+		)
+
+
 func _on_ammo_changed(current: int, maximum: int) -> void:
 	if player_ammo_label == null:
 		return
@@ -106,6 +118,12 @@ func _on_action_charge_changed(charges: int, _max_charges: int) -> void:
 	if action_charge_icon == null:
 		return
 	action_charge_icon.visible = charges > 0
+
+
+func _on_enemy_action_charge_changed(charges: int, _max_charges: int) -> void:
+	if enemy_action_charge_icon == null:
+		return
+	enemy_action_charge_icon.visible = charges > 0
 
 
 func _on_validation(status: String, message: String) -> void:
@@ -261,12 +279,48 @@ func set_side_word_visible(for_player: bool, visible: bool) -> void:
 
 
 func set_debug_visible(enabled: bool) -> void:
-	debug_label.visible = enabled
+	debug_label.visible = false
 	if player_bar.has_method("set_debug_numeric_visible"):
-		player_bar.set_debug_numeric_visible(enabled)
+		player_bar.set_debug_numeric_visible(false)
 	if enemy_bar.has_method("set_debug_numeric_visible"):
-		enemy_bar.set_debug_numeric_visible(enabled)
-	refresh_debug()
+		enemy_bar.set_debug_numeric_visible(false)
+	if enabled:
+		refresh_debug()
+
+
+func get_debug_text() -> String:
+	var lines: PackedStringArray = []
+	if _player_combat:
+		lines.append(
+			"Player HP %d/%d | injured %s | dead %s"
+			% [
+				_player_combat.health.current_health,
+				_player_combat.health.max_health,
+				str(_player_combat.injury.is_injured),
+				str(_player_combat.health.is_dead),
+			]
+		)
+		if _player_combat.injury.is_injured:
+			lines.append("  injury timer %.2fs" % _player_combat.injury.time_remaining)
+	if _enemy_combat:
+		lines.append(
+			"Enemy HP %d/%d | injured %s | dead %s"
+			% [
+				_enemy_combat.health.current_health,
+				_enemy_combat.health.max_health,
+				str(_enemy_combat.injury.is_injured),
+				str(_enemy_combat.health.is_dead),
+			]
+		)
+		if _enemy_combat.injury.is_injured:
+			lines.append("  injury timer %.2fs" % _enemy_combat.injury.time_remaining)
+	if _damage_bridge and not _damage_bridge.last_damage_event.is_empty():
+		var e: Dictionary = _damage_bridge.last_damage_event
+		lines.append(
+			"Last dmg: %s -> %s word=%s len=%s dmg=%s"
+			% [e.get("attacker", "?"), e.get("defender", "?"), e.get("word", ""), e.get("word_length", 0), e.get("damage", 0)]
+		)
+	return "\n".join(lines)
 
 
 func refresh_debug() -> void:

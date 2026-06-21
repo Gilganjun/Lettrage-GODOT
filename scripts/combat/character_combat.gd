@@ -7,6 +7,7 @@ signal death_started(source: String)
 signal respawn_completed
 
 @export var owner_kind := "player"
+@export var auto_respawn_on_death: bool = true
 @export var death_respawn_delay := 2.5
 @export var injury_knock_rotation := 90.0
 @export var enemy_stun_idle_after_death := 2.0
@@ -39,6 +40,7 @@ var _stun_horizontal_done := false
 var _stun_locked_x := 0.0
 var _stun_watchdog_deadline := 0.0
 var _last_word_hit_attacker_position := Vector2.INF
+var _pending_action_death_source := ""
 
 
 func _health() -> Node:
@@ -109,7 +111,11 @@ func blocks_word_submit() -> bool:
 
 func blocks_ai() -> bool:
 	_ensure_initialized()
-	return _health().is_dead or _injury().blocks_actions()
+	if _health().is_dead or _injury().blocks_actions():
+		return true
+	if owner_kind == "enemy" and _word_stun_active:
+		return true
+	return false
 
 
 func is_dead() -> bool:
@@ -120,6 +126,11 @@ func is_dead() -> bool:
 func is_word_stun_active() -> bool:
 	_ensure_initialized()
 	return _word_stun_active
+
+
+func has_pending_action_death() -> bool:
+	_ensure_initialized()
+	return not _pending_action_death_source.is_empty()
 
 
 func is_enemy_stun_active() -> bool:
@@ -160,20 +171,33 @@ func apply_action_damage(
 	source: String,
 	attacker_position: Vector2 = Vector2.INF,
 	skip_knockback: bool = false,
+	is_finisher_hit: bool = false,
 ) -> int:
 	_ensure_initialized()
-	if _health().is_dead:
+	if _health().is_dead and not has_pending_action_death():
 		return 0
 	var dealt: int = (_health() as HealthComponent).apply_damage(amount, source)
 	if dealt <= 0:
 		return dealt
 	_hit_feedback().play_hit(true)
-	if _health().is_dead:
+	if has_pending_action_death() or _health().is_dead:
+		return dealt
+	if is_finisher_hit:
 		return dealt
 	_injury().start_injury(action_injury_duration)
 	if not skip_knockback:
 		_apply_action_knockback(attacker_position)
 	return dealt
+
+
+## Last ACTION strike — Death anim + word-stun slide when HP remains (not a kill).
+func apply_action_finisher_reaction(attacker_position: Vector2) -> void:
+	_ensure_initialized()
+	if _health().is_dead or is_word_stun_active():
+		return
+	if owner_kind != "enemy":
+		return
+	_begin_word_stun(attacker_position)
 
 
 func force_death(source: String = "debug") -> void:
@@ -194,10 +218,30 @@ func debug_heal_full() -> void:
 	_health().heal_full()
 
 
+func debug_set_health(remaining: int) -> void:
+	_ensure_initialized()
+	if _health().is_dead:
+		return
+	var hc := _health() as HealthComponent
+	remaining = clampi(remaining, 1, hc.max_health)
+	hc.current_health = remaining
+	hc.health_changed.emit(hc.current_health, hc.max_health)
+
+
+func commit_deferred_action_death() -> void:
+	_ensure_initialized()
+	if _pending_action_death_source.is_empty():
+		return
+	var source := _pending_action_death_source
+	_pending_action_death_source = ""
+	_execute_death_presentation(source)
+
+
 func reset_combat() -> void:
 	_ensure_initialized()
 	_pending_respawn = false
 	_death_timer = 0.0
+	_pending_action_death_source = ""
 	_word_stun_active = false
 	_word_stun_idle_timer = 0.0
 	_stun_death_anim_active = false
@@ -212,7 +256,12 @@ func reset_combat() -> void:
 	_injury().end_injury()
 	_health().reset_health()
 	if _sprite:
+		if _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
+			_sprite.animation_finished.disconnect(_on_sprite_animation_finished)
 		_restore_upright_pose()
+		_sprite.speed_scale = 1.0
+		if _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
+			_sprite.play("Idle")
 		_sprite.modulate = Color.WHITE
 	respawn_completed.emit()
 
@@ -440,8 +489,7 @@ func _finish_word_stun() -> void:
 		return
 	_release_shield_after_stun()
 	_injury().end_injury()
-	if _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
-		_sprite.play("Idle")
+	_restore_enemy_locomotion_animation()
 
 
 func _apply_action_knockback(attacker_position: Vector2) -> void:
@@ -454,6 +502,47 @@ func _apply_action_knockback(attacker_position: Vector2) -> void:
 
 
 func _on_died(source: String) -> void:
+	if _should_present_action_death_later(source):
+		_pending_action_death_source = source
+		return
+	_execute_death_presentation(source)
+
+
+func _should_present_action_death_later(source: String) -> bool:
+	if not source.begins_with("action_") and not source.begins_with("enemy_action_"):
+		return false
+	if owner_kind == "enemy" and source.begins_with("action_"):
+		if not _is_enemy_in_active_action_sequence():
+			return false
+		for node in get_tree().get_nodes_in_group("player_action_controller"):
+			if node.has_method("is_strike_active") and node.call("is_strike_active"):
+				return true
+		return false
+	if owner_kind == "player" and source.begins_with("enemy_action_"):
+		if not _is_player_in_enemy_action_sequence():
+			return false
+		for node in get_tree().get_nodes_in_group("enemy_action_controller"):
+			if node.has_method("is_strike_active") and node.call("is_strike_active"):
+				return true
+		return false
+	return false
+
+
+func _is_player_in_enemy_action_sequence() -> bool:
+	if _body is PlayerMovement:
+		var player := _body as PlayerMovement
+		return player.is_action_sequence_targeted() or player.is_action_strike_frozen()
+	return false
+
+
+func _is_enemy_in_active_action_sequence() -> bool:
+	if _body is Enemy:
+		var enemy := _body as Enemy
+		return enemy.is_action_sequence_targeted() or enemy.is_action_strike_frozen()
+	return false
+
+
+func _execute_death_presentation(source: String) -> void:
 	_stun_watchdog_deadline = 0.0
 	_word_stun_active = false
 	_word_stun_idle_timer = 0.0
@@ -469,6 +558,8 @@ func _on_died(source: String) -> void:
 	_disable_combat_actions()
 	death_started.emit(source)
 	_play_death_animation()
+	if not auto_respawn_on_death:
+		return
 	_pending_respawn = true
 	_death_timer = death_respawn_delay
 
@@ -534,6 +625,17 @@ func _deactivate_shield_for_stun() -> void:
 		var shield_comp := _body.get_node_or_null("ShieldComponent")
 		if shield_comp and shield_comp.has_method("deactivate"):
 			shield_comp.deactivate("word_stun")
+
+
+func _restore_enemy_locomotion_animation() -> void:
+	if _body == null or owner_kind != "enemy":
+		return
+	if _sprite:
+		_sprite.speed_scale = 1.0
+	if _body.has_method("refresh_movement_animation"):
+		_body.call("refresh_movement_animation")
+	elif _sprite and _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
+		_sprite.play("Idle")
 
 
 func _release_shield_after_stun() -> void:

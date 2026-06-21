@@ -1,0 +1,204 @@
+{
+  "source_layout": "Intro_1",
+  "viewport": {
+    "width": 960,
+    "height": 540
+  },
+  "layer_visibility": {
+    "": true,
+    "Passenger2": false,
+    "Passenger1": false,
+    "JetFlyByAlien": false,
+    "RedBGFlyBy": true
+  },
+  "variables": {
+    "CamZoomAlien": 0
+  },
+  "instances": [
+    {
+      "id": "Passenger1::black",
+      "name": "black",
+      "layer": "Passenger1",
+      "x": -69,
+      "y": -84,
+      "width": 1087,
+      "height": 706,
+      "angle": 0,
+      "z_order": -3,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/NewSprite-1-1.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "Passenger2::BG2",
+      "name": "BG2",
+      "layer": "Passenger2",
+      "x": -47,
+      "y": -24,
+      "width": 1054,
+      "height": 695,
+      "angle": 0,
+      "z_order": 0,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/LzuXdtGBRiMFdDQbxOYf--2--b1kh0.jpg",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "Passenger1::Sky",
+      "name": "Sky",
+      "layer": "Passenger1",
+      "x": -29,
+      "y": -8,
+      "width": 999,
+      "height": 566,
+      "angle": 0,
+      "z_order": 1,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/Kd8TFVR4pZ0i8CqJFK2Y--4--kq6jm.jpg",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "Passenger1::Passengers1",
+      "name": "Passengers1",
+      "layer": "Passenger1",
+      "x": -29,
+      "y": -30,
+      "width": 1021,
+      "height": 601,
+      "angle": 0,
+      "z_order": 3,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/airshippassengers1.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "Passenger2::Passenger2",
+      "name": "Passenger2",
+      "layer": "Passenger2",
+      "x": -26,
+      "y": -27,
+      "width": 1003,
+      "height": 605,
+      "angle": 0,
+      "z_order": 3,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/airshippassengers2.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "JetFlyByAlien::JetFlyByAlien",
+      "name": "JetFlyByAlien",
+      "layer": "JetFlyByAlien",
+      "x": -1,
+      "y": -13,
+      "width": 966,
+      "height": 565,
+      "angle": 0,
+      "z_order": 7,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/dramatic-sunset-by-ridley-scott-and-tony-sart-hd-photorealistic-8k-689628231.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "JetFlyByAlien::Alien1",
+      "name": "Alien1",
+      "layer": "JetFlyByAlien",
+      "x": -6,
+      "y": -1,
+      "width": 976,
+      "height": 557,
+      "angle": 0,
+      "z_order": 9,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/jetflyby1.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "RedBGFlyBy::RedBGFlyBy_2",
+      "name": "RedBGFlyBy",
+      "layer": "RedBGFlyBy",
+      "x": 647,
+      "y": -1870,
+      "width": 3020,
+      "height": 2018,
+      "angle": 180,
+      "z_order": 9,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/stunning-alien-landscape.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "RedBGFlyBy::RedBGFlyBy",
+      "name": "RedBGFlyBy",
+      "layer": "RedBGFlyBy",
+      "x": -38,
+      "y": -31,
+      "width": 1045,
+      "height": 611,
+      "angle": 0,
+      "z_order": 11,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/stunning-alien-landscape.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    },
+    {
+      "id": "RedBGFlyBy::RedBGFlyBy2",
+      "name": "RedBGFlyBy2",
+      "layer": "RedBGFlyBy",
+      "x": -1083,
+      "y": -31,
+      "width": 1045,
+      "height": 611,
+      "angle": 0,
+      "z_order": 11,
+      "custom_size": true,
+      "texture": "res://assets/intro/airship/images/stunning-alien-landscape.png",
+      "origin_x": 0.0,
+      "origin_y": 0.0
+    }
+  ],
+  "jet": {
+    "animation_textures": [
+      "res://assets/intro/airship/images/alienpassengerjet1.png",
+      "res://assets/intro/airship/images/alienpassengerjet2.png",
+      "res://assets/intro/airship/images/alienpassengerjet4.png"
+    ],
+    "origins": [
+      {
+        "x": 3.4117647058823533,
+        "y": 4.118106617647059
+      },
+      {
+        "x": 102.3529411764706,
+        "y": 38.9420955882353
+      },
+      {
+        "x": 134.76470588235296,
+        "y": 173.70680147058826
+      }
+    ],
+    "start_markers": {
+      "jet_start_1": {
+        "x": 899,
+        "y": 113
+      },
+      "jet_start_2": {
+        "x": 825,
+        "y": 26
+      }
+    }
+  },
+  "audio": {
+    "music_main": "res://assets/intro/airship/audio/Adventures in the Clockwork Lands.mp3",
+    "sfx_convoy": "res://assets/intro/airship/audio/160357__qubodup__humvee-truck-driving-inside-convoy-assault-ops-p1u5o3hkt1o.mp3"
+  }
+}

@@ -17,13 +17,15 @@ Snatch Word conversion from GDevelop (`SnatchWord1/GAME25.json`) to Godot 4.6.
 | Phase 2B1 — Player letters, spelling, dictionary, score | **Implemented** |
 | Phase 2B2A — Enemy movement, obstacle escape | **Implemented** |
 | Phase 2B2B — Shields, enemy word AI, HUD | **Implemented** — manual F5 sign-off pending |
-| Phase 2C+ — Health, damage, death, production scene | **In progress** — `phase2c1` active playtest |
+| Phase 2C2 — Combat actions (ammo, roll, ACTION) | **Implemented** |
+| Phase 2C3 — Production playable loop | **Implemented** — `lettrage_gameplay` main scene |
 
 ## Scenes
 
 | Purpose | Scene |
 |---------|-------|
-| **F5 — active playtest** | `scenes/test/phase2c1_health_damage_test.tscn` |
+| **F5 — production gameplay** | `scenes/main/lettrage_gameplay.tscn` |
+| **Debug / tuning harness** | `scenes/test/phase2c1_health_damage_test.tscn` |
 | **Edit level in Godot 2D** | `scenes/levels/main2_heallthbartest_level.tscn` |
 | Older phase tests (archived) | `scenes/test/archive/` |
 

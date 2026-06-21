@@ -134,6 +134,18 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_health")
 [node name="EnemyHealthBar" parent="TopRow/EnemySide/EnemyHealthPanel" instance=ExtResource("2")]
 layout_mode = 2
 
+[node name="EnemyActionChargeIcon" type="Label" parent="TopRow/EnemySide"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(1, 0.72, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+text = "👊"
+
 [node name="EnemyWordPanel" type="PanelContainer" parent="TopRow/EnemySide"]
 visible = false
 layout_mode = 2

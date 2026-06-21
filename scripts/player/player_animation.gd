@@ -22,12 +22,19 @@ func apply_state(state: MovementState, facing: int) -> void:
 		return
 	sprite.flip_h = facing < 0
 	var target := _anim_for_state(state)
-	if target.is_empty() or target == _current_anim:
+	if target.is_empty():
 		return
 	if not sprite.sprite_frames.has_animation(target):
 		return
+	if target == _current_anim and sprite.animation == target and sprite.is_playing():
+		return
 	_current_anim = target
 	sprite.play(target)
+
+
+func force_apply_state(state: MovementState, facing: int) -> void:
+	_current_anim = ""
+	apply_state(state, facing)
 
 
 func _anim_for_state(state: MovementState) -> String:
