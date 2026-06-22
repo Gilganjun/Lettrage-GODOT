@@ -37,6 +37,8 @@ func _apply_modulate_recursive(node: Node, modulate: Color) -> void:
 
 
 func _add_play_band_overlay(level_root: Node2D) -> void:
+	if play_band_color.a <= 0.0:
+		return
 	if level_root.get_node_or_null("PlayBandOverlay"):
 		return
 	var overlay := Polygon2D.new()

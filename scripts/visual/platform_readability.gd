@@ -1,6 +1,8 @@
 class_name PlatformReadability
 extends Node
 
+@export var enabled := true
+
 ## Adds rim highlights and underside shadows to platform collision bodies.
 
 const RIM_COLOR := Color(0.91, 0.78, 0.47, 0.92)
@@ -8,7 +10,7 @@ const SHADOW_COLOR := Color(0.05, 0.06, 0.08, 0.55)
 
 
 func apply_to_level(level_root: Node2D) -> void:
-	if level_root == null:
+	if not enabled or level_root == null:
 		return
 	var platforms := level_root.get_node_or_null("Platforms")
 	if platforms == null:

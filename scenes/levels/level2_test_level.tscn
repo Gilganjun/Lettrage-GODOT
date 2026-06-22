@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://dptbv8pshh6tm"]
+
+[ext_resource type="Script" uid="uid://cipns0aa5wnwx" path="res://scripts/level/level2_test_level.gd" id="1_level"]
+[ext_resource type="Texture2D" uid="uid://3t6oactfwcai" path="res://assets/Level 2 Assets/Level2_BG1.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://dudtn3uue4ws1" path="res://assets/Level 2 Assets/Level2_Foreground1.png" id="3_fg"]
+[ext_resource type="Texture2D" uid="uid://c06o5ccddmbrf" path="res://assets/Level 2 Assets/Level2_Platform1.png" id="4_platform"]
+[ext_resource type="Script" uid="uid://bfjk7o5bkw6cl" path="res://scripts/level/level2_parallax_layer.gd" id="5_parallax"]
+[ext_resource type="Script" uid="uid://cvqgf4fw8ftc0" path="res://scripts/level/level2_scroll_controller.gd" id="6_scroll"]
+[ext_resource type="Script" uid="uid://brgshxmcfyitd" path="res://scripts/level/level2_main_platform.gd" id="7_platform"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1920, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 360)
+
+[node name="Level2TestLevel" type="Node2D" unique_id=980516082]
+script = ExtResource("1_level")
+
+[node name="Backgrounds" type="Node2D" parent="." unique_id=2130886399]
+
+[node name="Level2BG" type="Node2D" parent="Backgrounds" unique_id=225552488]
+z_index = -2
+
+[node name="Sprite2D" type="Sprite2D" parent="Backgrounds/Level2BG" unique_id=1274652503]
+position = Vector2(-37, -850.00006)
+scale = Vector2(0.574013, 0.7970245)
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="Platforms" type="Node2D" parent="." unique_id=326955612]
+
+[node name="MainPlatform" type="Node2D" parent="Platforms" unique_id=1857877647]
+z_index = 3
+position = Vector2(0, 389.97)
+script = ExtResource("7_platform")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/MainPlatform" unique_id=376347969]
+scale = Vector2(0.442081, 0.442081)
+texture = ExtResource("4_platform")
+centered = false
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Platforms/MainPlatform" unique_id=1862775773]
+position = Vector2(960.19995, 30.588673)
+collision_mask = 4
+metadata/collision_type = "floor"
+metadata/platform_type = "NormalPlatform"
+metadata/walk_surface_y = 404.55867436528206
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/MainPlatform/StaticBody2D" unique_id=54380712]
+position = Vector2(19.800049, 39.441315)
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Foreground" type="Node2D" parent="." unique_id=1805692896]
+z_index = 85
+position = Vector2(0, 181)
+script = ExtResource("5_parallax")
+
+[node name="Sprite2D" type="Sprite2D" parent="Foreground" unique_id=249675310]
+position = Vector2(-16, 55)
+scale = Vector2(0.574013, 0.3846971)
+texture = ExtResource("3_fg")
+centered = false
+
+[node name="Boundaries" type="Node2D" parent="." unique_id=1202334075]
+
+[node name="LeftBoundary" type="Node2D" parent="Boundaries" unique_id=186461867]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Boundaries/LeftBoundary" unique_id=2132046287]
+position = Vector2(16, 370)
+collision_mask = 4
+metadata/collision_type = "wall"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/LeftBoundary/StaticBody2D" unique_id=1766608098]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightBoundary" type="Node2D" parent="Boundaries" unique_id=1954315009]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Boundaries/RightBoundary" unique_id=507572557]
+position = Vector2(1904, 370)
+collision_mask = 4
+metadata/collision_type = "wall"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/RightBoundary/StaticBody2D" unique_id=540218520]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="SpawnPoints" type="Node2D" parent="." unique_id=482623696]
+
+[node name="PlayerSpawn" type="Marker2D" parent="SpawnPoints" unique_id=569729796]
+position = Vector2(520, 320)
+
+[node name="EnemySpawn" type="Marker2D" parent="SpawnPoints" unique_id=2031341533]
+position = Vector2(1400, 320)
+
+[node name="ScrollController" type="Node" parent="." unique_id=1144692610]
+script = ExtResource("6_scroll")

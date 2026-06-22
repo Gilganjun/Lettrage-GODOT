@@ -24,6 +24,7 @@ const POP_SOUNDS := [
 ]
 
 @export var level_config: LevelGameplayConfig
+@export var level_scene: PackedScene
 @export var debug_mode: bool = false
 
 @onready var world: Node2D = $World
@@ -65,6 +66,7 @@ var _enemy_spawn := Vector2(740.0, 406.0)
 
 
 func _ready() -> void:
+	_ensure_level_mounted()
 	if level_config == null:
 		level_config = DEFAULT_LEVEL_CONFIG
 	for stream in POP_SOUNDS:
@@ -96,10 +98,25 @@ func _ready() -> void:
 		)
 	_apply_debug_visibility()
 	match_controller.config = level_config
-	match_controller.setup(match_overlay, _round_reset_context())
-	call_deferred("_resolve_player_platform_landing")
+	call_deferred("_begin_match_after_level_ready")
 	# Player._ready() already enables the follow camera — do not call activate_follow_camera
 	# again after the match intro starts or it resets zoom to base immediately.
+
+
+func _ensure_level_mounted() -> void:
+	if level_scene == null:
+		return
+	var existing := world.get_node_or_null("Level") as Node2D
+	if existing != null and existing.get_scene_file_path() == level_scene.resource_path:
+		level_root = existing
+		return
+	if existing != null:
+		existing.queue_free()
+	var level := level_scene.instantiate() as Node2D
+	level.name = "Level"
+	world.add_child(level)
+	world.move_child(level, 0)
+	level_root = level
 
 
 func _setup_debug_tools() -> void:
@@ -315,6 +332,22 @@ func _refresh_debug_dock() -> void:
 	debug_dock.set_body_text("\n\n".join(sections))
 
 
+func _begin_match_after_level_ready() -> void:
+	_resolve_player_platform_landing()
+	if level_root.has_method("reset_scroll_presentation"):
+		level_root.reset_scroll_presentation()
+	match_controller.setup(match_overlay, _round_reset_context())
+	if level_root.has_method("reset_scroll_presentation"):
+		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
+			match_controller.round_started.connect(_on_round_started_refresh_scroll)
+	_start_match()
+
+
+func _on_round_started_refresh_scroll(_round_number: int) -> void:
+	if level_root.has_method("reset_scroll_presentation"):
+		level_root.reset_scroll_presentation()
+
+
 func _resolve_player_platform_landing() -> void:
 	if level_root.has_method("get_player_platform_landing_position"):
 		_player_platform_landing = level_root.get_player_platform_landing_position(_player)
@@ -326,7 +359,6 @@ func _resolve_player_platform_landing() -> void:
 		_player_combat.configure_spawn(_player_platform_landing)
 	if collision_debug and _player:
 		collision_debug.set_player(_player)
-	_start_match()
 
 
 func _load_transform_rows() -> void:
