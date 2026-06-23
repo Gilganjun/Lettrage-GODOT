@@ -345,6 +345,7 @@ func _begin_match_after_level_ready() -> void:
 	if _enemy and _enemy.has_method("get_action_controller"):
 		enemy_action = _enemy.get_action_controller()
 	match_controller.wire_round_ledger(damage_bridge, _player_action, enemy_action)
+	match_controller.wire_action_exchanges(combat_hud, _player_action, enemy_action)
 	if level_root.has_method("reset_scroll_presentation"):
 		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
 			match_controller.round_started.connect(_on_round_started_refresh_scroll)

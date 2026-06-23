@@ -28,7 +28,8 @@ static func get_sections() -> Array[Dictionary]:
 				{"keys": "Backspace", "desc": "Delete last letter"},
 				{"keys": "Ctrl", "desc": "Shield (tap latch / hold block)"},
 				{"keys": "F", "desc": "Aim and fire letter bullet (release to shoot)"},
-				{"keys": "J", "desc": "Action attack"},
+				{"keys": "J", "desc": "Action attack (with charge)"},
+				{"keys": "J (while targeted)", "desc": "Spend ACTION charge to block further combo hits"},
 			],
 		},
 		{

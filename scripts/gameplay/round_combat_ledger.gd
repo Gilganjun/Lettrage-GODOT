@@ -5,14 +5,14 @@ extends RefCounted
 
 var _word_entries: Array[Dictionary] = []
 var _attack_entries: Array[Dictionary] = []
-var _pending_action: Dictionary = {}
+var _pending_by_attacker: Dictionary = {}
 var _word_seq := 0
 
 
 func reset() -> void:
 	_word_entries.clear()
 	_attack_entries.clear()
-	_pending_action.clear()
+	_pending_by_attacker.clear()
 	_word_seq = 0
 
 
@@ -30,7 +30,7 @@ func record_word(attacker: String, word: String, damage: int) -> void:
 
 func begin_action(attacker: String, attack_id: String, display_name: String) -> void:
 	finalize_action(attacker)
-	_pending_action = {
+	_pending_by_attacker[attacker] = {
 		"attacker": attacker,
 		"attack_id": attack_id,
 		"label": display_name,
@@ -41,25 +41,25 @@ func begin_action(attacker: String, attack_id: String, display_name: String) -> 
 func record_action_hit(attacker: String, damage: int) -> void:
 	if damage <= 0:
 		return
-	if _pending_action.is_empty() or _pending_action.get("attacker", "") != attacker:
+	if not _pending_by_attacker.has(attacker):
 		return
-	_pending_action["damage"] = int(_pending_action.get("damage", 0)) + damage
+	var pending: Dictionary = _pending_by_attacker[attacker]
+	pending["damage"] = int(pending.get("damage", 0)) + damage
 
 
 func finalize_action(attacker: String) -> void:
-	if _pending_action.is_empty():
+	if not _pending_by_attacker.has(attacker):
 		return
-	if _pending_action.get("attacker", "") != attacker:
-		return
-	var total := int(_pending_action.get("damage", 0))
+	var pending: Dictionary = _pending_by_attacker[attacker]
+	var total := int(pending.get("damage", 0))
 	if total > 0:
 		_attack_entries.append({
 			"attacker": attacker,
-			"label": str(_pending_action.get("label", "Attack")),
-			"attack_id": str(_pending_action.get("attack_id", "")),
+			"label": str(pending.get("label", "Attack")),
+			"attack_id": str(pending.get("attack_id", "")),
 			"damage": total,
 		})
-	_pending_action.clear()
+	_pending_by_attacker.erase(attacker)
 
 
 func build_report_for(attacker: String) -> Dictionary:

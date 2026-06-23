@@ -244,6 +244,7 @@ func _physics_process(delta: float) -> void:
 		floor_snap_length = FLOOR_SNAP
 		return
 	if _action_strike_frozen:
+		_poll_action_defender_block()
 		global_position = _action_freeze_position
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -667,6 +668,12 @@ func _get_action_controller() -> Node:
 		if child.has_method("process_action"):
 			return child
 	return null
+
+
+func _poll_action_defender_block() -> void:
+	var action := _get_action_controller()
+	if action and action.has_method("process_defender_block_input"):
+		action.process_defender_block_input(self)
 
 
 func _get_roll() -> Node:

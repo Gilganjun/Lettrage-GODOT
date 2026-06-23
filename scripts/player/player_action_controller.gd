@@ -65,6 +65,9 @@ var _kinematic_strike_position := Vector2.ZERO
 var _rotate_attack_index := 0
 var _strike_camera := ActionStrikeCameraDirector.new()
 var _round_ledger: RoundCombatLedger
+var _exchange_registry: ActionExchangeRegistry
+var _active_exchange: ActionExchange
+var _block_feedback: Node
 
 
 func _ready() -> void:
@@ -80,6 +83,14 @@ func get_charges() -> int:
 
 func set_round_ledger(ledger: RoundCombatLedger) -> void:
 	_round_ledger = ledger
+
+
+func set_exchange_registry(registry: ActionExchangeRegistry) -> void:
+	_exchange_registry = registry
+
+
+func set_block_feedback(node: Node) -> void:
+	_block_feedback = node
 
 
 func is_active() -> bool:
@@ -143,12 +154,7 @@ func process_action(player: PlayerMovement, delta: float) -> bool:
 	if debug_infinite_action and _state == State.IDLE:
 		_charges = max_action_charges
 	if _state == State.IDLE:
-		if Input.is_action_just_pressed("player_action") and _charges > 0:
-			if _player_combat_blocks() or not _gameplay_allows_action():
-				return false
-			if _player.is_action_sequence_targeted():
-				return false
-			_begin_sequence()
+		_handle_idle_action_press()
 		return false
 	_sequence_time += delta
 	_state_time += delta
@@ -201,6 +207,11 @@ func _begin_sequence() -> void:
 	action_sequence_started.emit(_attack.attack_id)
 	if _round_ledger and _attack:
 		_round_ledger.begin_action("player", _attack.attack_id, _attack.display_name)
+	if _exchange_registry:
+		_active_exchange = _exchange_registry.begin_exchange("player", "enemy")
+		_connect_exchange_block_signal(_active_exchange)
+	else:
+		_active_exchange = null
 
 
 func _pick_attack_for_sequence() -> ActionAttackDefinition:
@@ -572,27 +583,52 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	var skip_knockback := _uses_side_slides()
 	var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
 	var combat: CharacterCombat = enemy_combat as CharacterCombat if enemy_combat is CharacterCombat else null
-	if combat != null and _can_apply_action_hit(combat):
-		var source := "action_%s_hit%d" % [_attack.attack_id, hit_index]
-		var dealt := combat.apply_action_damage(
+	var source := "action_%s_hit%d" % [_attack.attack_id, hit_index]
+	var dealt := 0
+	var was_blocked := false
+	if combat != null:
+		var result := ActionCombatBridge.resolve_action_hit(
+			_active_exchange,
+			hit_idx,
 			damage,
-			source,
-			_player.global_position,
-			skip_knockback,
-			is_last,
+			combat,
+			func() -> int:
+				return combat.apply_action_damage(
+					damage,
+					source,
+					_player.global_position,
+					skip_knockback,
+					is_last,
+				),
 		)
+		was_blocked = bool(result.get("blocked", false))
+		dealt = int(result.get("dealt", 0))
 		if dealt > 0 and _round_ledger:
 			_round_ledger.record_action_hit("player", dealt)
-		if is_first and _enemy.has_method("begin_action_strike_freeze"):
-			_enemy.begin_action_strike_freeze()
+		if is_first and dealt > 0:
+			if _enemy.has_method("begin_action_strike_freeze"):
+				_enemy.begin_action_strike_freeze()
+			_try_enemy_auto_block()
+	if was_blocked:
+		if is_last:
+			_finalize_action_hit_tail(combat)
+		return
 	if is_last:
-		if _enemy.has_method("end_action_strike_freeze"):
-			_enemy.end_action_strike_freeze()
-		if combat != null:
-			if combat.has_pending_action_death():
-				combat.commit_deferred_action_death()
-			elif not combat.is_dead():
-				combat.apply_action_finisher_reaction(_player.global_position)
+		_finalize_action_hit_tail(combat)
+	_spawn_strike_hit_vfx(hit_idx)
+
+
+func _finalize_action_hit_tail(combat: CharacterCombat) -> void:
+	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("end_action_strike_freeze"):
+		_enemy.end_action_strike_freeze()
+	if combat != null:
+		if combat.has_pending_action_death():
+			combat.commit_deferred_action_death()
+		elif not combat.is_dead():
+			combat.apply_action_finisher_reaction(_player.global_position)
+
+
+func _spawn_strike_hit_vfx(hit_idx: int) -> void:
 	var world := _find_world()
 	if world == null:
 		return
@@ -712,6 +748,9 @@ func _finish_sequence() -> void:
 		_emit_charge()
 	if _round_ledger:
 		_round_ledger.finalize_action("player")
+	if _exchange_registry:
+		_exchange_registry.finalize_exchange("player")
+	_active_exchange = null
 	action_sequence_finished.emit()
 
 
@@ -807,3 +846,64 @@ func _can_apply_action_hit(combat: CharacterCombat) -> bool:
 	if combat.has_pending_action_death():
 		return true
 	return not combat.is_dead()
+
+
+func process_defender_block_input(player: PlayerMovement) -> bool:
+	_player = player
+	if debug_infinite_action and _state == State.IDLE:
+		_charges = max_action_charges
+	if not Input.is_action_just_pressed("player_action") or _charges <= 0:
+		return false
+	if not _gameplay_allows_action():
+		return false
+	return _try_manual_defender_block()
+
+
+func _handle_idle_action_press() -> void:
+	if not Input.is_action_just_pressed("player_action") or _charges <= 0:
+		return
+	if not _gameplay_allows_action():
+		return
+	if _try_manual_defender_block():
+		return
+	if _player_combat_blocks():
+		return
+	if _player.is_action_sequence_targeted():
+		return
+	_begin_sequence()
+
+
+func _try_manual_defender_block() -> bool:
+	if _player == null or _exchange_registry == null:
+		return false
+	if not _player.is_action_sequence_targeted():
+		return false
+	var exchange := _exchange_registry.get_incoming_exchange_for_defender("player")
+	if exchange == null or not exchange.can_offer_block() or _charges <= 0:
+		return false
+	if not exchange.try_activate_defender_block():
+		return false
+	if not debug_infinite_action:
+		_charges -= 1
+	action_charge_changed.emit(_charges, max_action_charges)
+	return true
+
+
+func _try_enemy_auto_block() -> void:
+	if _enemy == null or _active_exchange == null:
+		return
+	var enemy_action := _enemy.get_action_controller()
+	if enemy_action and enemy_action.has_method("try_auto_defender_block"):
+		enemy_action.try_auto_defender_block(_active_exchange)
+
+
+func _connect_exchange_block_signal(exchange: ActionExchange) -> void:
+	if exchange == null or _block_feedback == null:
+		return
+	if not exchange.strike_blocked.is_connected(_on_exchange_strike_blocked):
+		exchange.strike_blocked.connect(_on_exchange_strike_blocked)
+
+
+func _on_exchange_strike_blocked(defender: String, _hit_idx: int) -> void:
+	if _block_feedback and _block_feedback.has_method("show_action_block_flash"):
+		_block_feedback.show_action_block_flash(defender == "player")

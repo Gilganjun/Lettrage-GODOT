@@ -36,6 +36,7 @@ var _player_damage_slot := 0
 var _enemy_damage_slot := 0
 var _last_player_word_len := 0
 var _player_word_pop_tween: Tween
+var _block_flash: ActionBlockFlash
 
 
 func setup(
@@ -119,6 +120,17 @@ func bind_enemy_action(action_controller: Node) -> void:
 			_enemy_action_controller.get_charges(),
 			_enemy_action_controller.max_action_charges,
 		)
+
+
+func ensure_action_block_flash() -> void:
+	if _block_flash == null:
+		_block_flash = ActionBlockFlash.ensure_on(self)
+
+
+func show_action_block_flash(defender_is_player: bool) -> void:
+	ensure_action_block_flash()
+	if _block_flash:
+		_block_flash.play_block_flash(defender_is_player)
 
 
 func _on_ammo_changed(current: int, maximum: int) -> void:

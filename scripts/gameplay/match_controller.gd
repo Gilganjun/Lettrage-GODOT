@@ -33,6 +33,7 @@ var _round_end_delay_timer := 0.0
 var _waiting_for_action_finish := false
 var _round_splash_started := false
 var _ledger := RoundCombatLedger.new()
+var _action_exchanges := ActionExchangeRegistry.new()
 var _manual_continue_input_lockout := 0.0
 var _round_end_wait_player_action := false
 
@@ -59,6 +60,22 @@ func wire_round_ledger(damage_bridge: Node, player_action: Node, enemy_action: N
 		enemy_action.set_round_ledger(_ledger)
 
 
+func wire_action_exchanges(combat_hud: Node, player_action: Node, enemy_action: Node) -> void:
+	_action_exchanges.reset()
+	if combat_hud and combat_hud.has_method("ensure_action_block_flash"):
+		combat_hud.ensure_action_block_flash()
+	if player_action:
+		if player_action.has_method("set_exchange_registry"):
+			player_action.set_exchange_registry(_action_exchanges)
+		if combat_hud and player_action.has_method("set_block_feedback"):
+			player_action.set_block_feedback(combat_hud)
+	if enemy_action:
+		if enemy_action.has_method("set_exchange_registry"):
+			enemy_action.set_exchange_registry(_action_exchanges)
+		if combat_hud and enemy_action.has_method("set_block_feedback"):
+			enemy_action.set_block_feedback(combat_hud)
+
+
 func is_round_active() -> bool:
 	return _phase == Phase.ROUND_ACTIVE
 
@@ -82,6 +99,7 @@ func _begin_next_round() -> void:
 	_current_round += 1
 	_round_splash_started = false
 	_ledger.reset()
+	_action_exchanges.reset()
 	_clear_pending_round_end()
 	GameplayRoundReset.reset_round(_ctx)
 	_phase = Phase.COUNTDOWN
