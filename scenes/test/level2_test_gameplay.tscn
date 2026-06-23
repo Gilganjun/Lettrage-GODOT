@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://lettrage_gameplay_level2_test"]
+[gd_scene load_steps=21 format=3 uid="uid://lettrage_gameplay_level2_test"]
 
 [ext_resource type="Script" path="res://scripts/main/lettrage_gameplay_level2_test.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/level2_test_level.tscn" id="2_level"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://scripts/gameplay/match_controller.gd" id="17_match"]
 [ext_resource type="Resource" path="res://resources/gameplay/level2_test_config.tres" id="18_level_cfg"]
 [ext_resource type="PackedScene" path="res://scenes/ui/gameplay_debug_dock.tscn" id="19_debug_dock"]
+[ext_resource type="PackedScene" path="res://scenes/ui/round_intro_backdrop.tscn" id="20_round_intro"]
 
 [node name="LettrageGameplayLevel2Test" type="Node2D"]
 script = ExtResource("1_root")
@@ -99,5 +100,7 @@ layer = 21
 script = ExtResource("10_garble")
 
 [node name="MatchOverlay" parent="UI" instance=ExtResource("16_match_overlay")]
+
+[node name="RoundIntroBackdrop" parent="UI" instance=ExtResource("20_round_intro")]
 
 [node name="GameplayDebugDock" parent="UI" instance=ExtResource("19_debug_dock")]

@@ -8,6 +8,7 @@ const DICTIONARY_PATH := "res://dictionary/EnglishWords5.txt"
 
 var _words: Dictionary = {}
 var _prefixes: Dictionary = {}
+var _word_list: PackedStringArray = PackedStringArray()
 var word_count: int = 0
 var load_time_ms: float = 0.0
 var loaded: bool = false
@@ -31,6 +32,7 @@ func load_dictionary() -> bool:
 			continue
 		var word := line.to_upper()
 		_words[word] = true
+		_word_list.append(word)
 		for i in range(1, word.length() + 1):
 			_prefixes[word.substr(0, i)] = true
 	file.close()
@@ -57,3 +59,9 @@ func has_dictionary_prefix(prefix: String) -> bool:
 	if normalized.is_empty():
 		return false
 	return _prefixes.has(normalized)
+
+
+func pick_random_word(rng: RandomNumberGenerator) -> String:
+	if not loaded or _word_list.is_empty():
+		return ""
+	return _word_list[rng.randi_range(0, _word_list.size() - 1)]

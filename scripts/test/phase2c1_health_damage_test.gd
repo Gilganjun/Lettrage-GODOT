@@ -288,8 +288,8 @@ func _handle_combat_debug_keys(keycode: Key) -> void:
 			if _player_combat:
 				_player_combat.debug_damage(10)
 		KEY_2:
-			if _enemy_combat:
-				_enemy_combat.debug_damage(10)
+			if damage_bridge and damage_bridge.has_method("debug_apply_random_word_to_enemy"):
+				damage_bridge.debug_apply_random_word_to_enemy(word_controller.dictionary)
 		KEY_3:
 			if _player_combat:
 				_player_combat.debug_heal_full()

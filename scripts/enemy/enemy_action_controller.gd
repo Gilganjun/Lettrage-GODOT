@@ -49,6 +49,7 @@ var _slide_from_x := 0.0
 var _kinematic_strike_position := Vector2.ZERO
 var _auto_attack_timer := 0.0
 var _strike_camera := ActionStrikeCameraDirector.new()
+var _round_ledger: RoundCombatLedger
 
 
 func _ready() -> void:
@@ -57,6 +58,10 @@ func _ready() -> void:
 
 func get_charges() -> int:
 	return _charges
+
+
+func set_round_ledger(ledger: RoundCombatLedger) -> void:
+	_round_ledger = ledger
 
 
 func is_active() -> bool:
@@ -238,6 +243,8 @@ func _begin_sequence() -> void:
 		func() -> void: pass,
 	)
 	action_sequence_started.emit(_attack.attack_id)
+	if _round_ledger and _attack:
+		_round_ledger.begin_action("enemy", _attack.attack_id, _attack.display_name)
 
 
 func _build_attack_definition() -> ActionAttackDefinition:
@@ -454,15 +461,17 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	var is_last := hit_idx == _attack.hit_frames.size() - 1
 	var player_combat := _player.get_node_or_null("CharacterCombat")
 	var combat: CharacterCombat = player_combat as CharacterCombat if player_combat is CharacterCombat else null
-	if combat != null and not combat.is_dead():
+	if combat != null and _can_apply_action_hit(combat):
 		var source := "enemy_action_%s_hit%d" % [_attack.attack_id, hit_index]
-		combat.apply_action_damage(
+		var dealt := combat.apply_action_damage(
 			damage,
 			source,
 			_enemy.global_position,
 			true,
 			is_last,
 		)
+		if dealt > 0 and _round_ledger:
+			_round_ledger.record_action_hit("enemy", dealt)
 		if is_first and _player.has_method("begin_action_strike_freeze"):
 			_player.begin_action_strike_freeze()
 	if is_last:
@@ -526,6 +535,8 @@ func _finish_sequence() -> void:
 	_slide_segment_hit_idx = -1
 	if _enemy:
 		_enemy.velocity = Vector2.ZERO
+	if _round_ledger:
+		_round_ledger.finalize_action("enemy")
 	action_sequence_finished.emit()
 
 
@@ -582,3 +593,11 @@ func _find_world() -> Node:
 			return n
 		n = n.get_parent()
 	return get_tree().current_scene
+
+
+func _can_apply_action_hit(combat: CharacterCombat) -> bool:
+	if combat == null:
+		return false
+	if combat.has_pending_action_death():
+		return true
+	return not combat.is_dead()

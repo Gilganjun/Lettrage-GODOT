@@ -42,6 +42,7 @@ const POP_SOUNDS := [
 @onready var damage_bridge: Node = $WordDamageBridge
 @onready var visual_pass: Phase2C1VisualPass = $Phase2C1VisualPass
 @onready var match_overlay: MatchOverlay = $UI/MatchOverlay
+@onready var round_intro_backdrop: RoundIntroBackdrop = $UI/RoundIntroBackdrop
 @onready var match_controller: MatchController = $MatchController
 @onready var action_spawner: Node = $World/ActionCollectibleSpawner
 
@@ -175,6 +176,9 @@ func _round_reset_context() -> Dictionary:
 		"player_platform_landing": _player_platform_landing,
 		"enemy_spawn": _enemy_spawn,
 		"scene_tree": get_tree(),
+		"level_root": level_root,
+		"enemy_root": enemy_root,
+		"round_intro_backdrop": round_intro_backdrop,
 	}
 
 
@@ -337,6 +341,10 @@ func _begin_match_after_level_ready() -> void:
 	if level_root.has_method("reset_scroll_presentation"):
 		level_root.reset_scroll_presentation()
 	match_controller.setup(match_overlay, _round_reset_context())
+	var enemy_action: Node = null
+	if _enemy and _enemy.has_method("get_action_controller"):
+		enemy_action = _enemy.get_action_controller()
+	match_controller.wire_round_ledger(damage_bridge, _player_action, enemy_action)
 	if level_root.has_method("reset_scroll_presentation"):
 		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
 			match_controller.round_started.connect(_on_round_started_refresh_scroll)
@@ -444,8 +452,8 @@ func _handle_combat_debug_keys(keycode: Key) -> void:
 			if _player_combat:
 				_player_combat.debug_damage(10)
 		KEY_2:
-			if _enemy_combat:
-				_enemy_combat.debug_damage(10)
+			if damage_bridge and damage_bridge.has_method("debug_apply_random_word_to_enemy"):
+				damage_bridge.debug_apply_random_word_to_enemy(word_controller.dictionary)
 		KEY_3:
 			if _player_combat:
 				_player_combat.debug_heal_full()

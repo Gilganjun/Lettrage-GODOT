@@ -12,6 +12,10 @@ extends Resource
 @export var intro_drop_top_y: float = -320.0
 @export var intro_close_zoom_percent: float = 175.0
 @export var intro_fall_ease_power: float = 1.35
+@export var round_splash_lead_before_land: float = 2.0
+@export var round_splash_duration: float = 2.0
 @export var inter_round_countdown_seconds: float = 10.0
+## Single-player: wait for Continue. Set true for multiplayer / 2-player timed advance.
+@export var use_inter_round_countdown: bool = false
 @export var post_action_round_result_delay: float = 1.0
 @export var match_result_hold_seconds: float = 4.0

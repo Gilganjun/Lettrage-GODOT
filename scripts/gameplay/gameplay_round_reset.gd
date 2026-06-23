@@ -71,6 +71,9 @@ static func begin_round_intro(ctx: Dictionary, level_config: LevelGameplayConfig
 	var player_shield: PlayerShield = ctx.get("player_shield")
 	var enemy: Enemy = ctx.get("enemy")
 	var landing: Vector2 = ctx.get("player_platform_landing", ctx.get("player_spawn", Vector2.ZERO))
+	var backdrop: RoundIntroBackdrop = ctx.get("round_intro_backdrop")
+	if backdrop:
+		backdrop.begin(ctx.get("level_root"), ctx.get("enemy_root"))
 	if player_shield:
 		player_shield.set_intro_input_blocked(true)
 		player_shield.set_active(true)
@@ -107,6 +110,9 @@ static func tick_round_intro(
 	var cam := _get_player_camera(player)
 	if cam and cam.has_method("tick_round_intro_cinematic"):
 		cam.tick_round_intro_cinematic(progress)
+	var backdrop: RoundIntroBackdrop = ctx.get("round_intro_backdrop")
+	if backdrop:
+		backdrop.tick(progress)
 	var fall_fx := _get_intro_fall_fx(player)
 	if fall_fx:
 		fall_fx.tick(progress)
@@ -124,6 +130,9 @@ static func end_round_intro(ctx: Dictionary) -> void:
 	var fall_fx := _get_intro_fall_fx(player)
 	if fall_fx:
 		fall_fx.end()
+	var backdrop: RoundIntroBackdrop = ctx.get("round_intro_backdrop")
+	if backdrop:
+		backdrop.end()
 	if player_shield:
 		player_shield.set_intro_input_blocked(false)
 		player_shield.set_active(false)
@@ -144,6 +153,34 @@ static func begin_round_play(ctx: Dictionary) -> void:
 		letter_spawner.set_spawning_paused(false)
 	if action_spawner and action_spawner.has_method("set_spawning_paused"):
 		action_spawner.set_spawning_paused(false)
+
+
+static func pause_after_round_end(ctx: Dictionary) -> void:
+	var letter_spawner: LetterSpawnDirector = ctx.get("letter_spawner")
+	var player: PlayerMovement = ctx.get("player")
+	var enemy: Enemy = ctx.get("enemy")
+	var action_spawner: Node = ctx.get("action_spawner")
+	var player_shooter: LetterShooter = ctx.get("player_shooter")
+	if letter_spawner:
+		letter_spawner.set_spawning_paused(true)
+	if action_spawner and action_spawner.has_method("set_spawning_paused"):
+		action_spawner.set_spawning_paused(true)
+	if player:
+		player.movement_locked = true
+		player.velocity = Vector2.ZERO
+	if enemy:
+		enemy.movement_locked = true
+		enemy.velocity = Vector2.ZERO
+	if player_shooter and player_shooter.has_method("cancel_aim"):
+		player_shooter.cancel_aim()
+	var enemy_action: Node = null
+	if enemy and enemy.has_method("get_action_controller"):
+		enemy_action = enemy.get_action_controller()
+	if enemy_action and enemy_action.has_method("is_active") and enemy_action.call("is_active"):
+		var enemy_combat: Node = enemy.get_node_or_null("CharacterCombat") if enemy else null
+		if enemy_combat and enemy_combat.has_method("is_dead") and enemy_combat.call("is_dead"):
+			if enemy_action.has_method("reset_for_round"):
+				enemy_action.reset_for_round()
 
 
 static func _get_player_camera(player: PlayerMovement) -> Camera2D:

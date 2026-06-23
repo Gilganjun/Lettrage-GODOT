@@ -23,12 +23,11 @@ var _jump_held: bool = false
 var _display_size := Vector2(64, 97)
 var _sprint_active := false
 var _sprint_direction := 0
-var _tap_tracking_right := false
-var _tap_tracking_left := false
-var _tap_armed_right := false
-var _tap_armed_left := false
-var _tap_elapsed_right := 0.0
-var _tap_elapsed_left := 0.0
+var _tap_clock := 0.0
+var _last_press_time_left := -1.0
+var _last_press_time_right := -1.0
+var _pending_sprint_direction := 0
+var _shift_sprint_hold := false
 var movement_locked := false
 var round_intro_fall_active := false
 
@@ -272,6 +271,8 @@ func _physics_process(delta: float) -> void:
 		_process_platformer(delta)
 	move_and_slide()
 	floor_snap_length = FLOOR_SNAP
+	if not is_on_ladder and not movement_locked and not _action_strike_frozen:
+		_try_apply_pending_sprint()
 	_update_movement_state()
 
 
@@ -319,6 +320,7 @@ func get_debug_info() -> Dictionary:
 		"on_ladder": is_on_ladder,
 		"facing": facing,
 		"sprint": _sprint_active,
+		"pending_sprint": _pending_sprint_direction,
 		"camera_zoom_percent": camera_zoom.call("get_zoom_percent") if camera_zoom and camera_zoom.has_method("get_zoom_percent") else 100.0,
 	}
 
@@ -346,6 +348,7 @@ func _process_platformer(delta: float) -> void:
 	var cfg := _cfg()
 	var aim_mode := _is_aiming_letter_shot()
 	_update_double_tap_sprint(delta)
+	_update_shift_sprint()
 	var input_x := 0.0 if aim_mode else Input.get_axis("move_left", "move_right")
 	var air_fast_fall := not is_on_floor() and Input.is_action_pressed("climb_down")
 	if not air_fast_fall:
@@ -493,53 +496,80 @@ func _update_double_tap_sprint(delta: float) -> void:
 		return
 	var cfg := _cfg()
 	var window := cfg.double_tap_window
-	_update_direction_double_tap(1, "move_right", delta, window)
-	_update_direction_double_tap(-1, "move_left", delta, window)
+	_tap_clock += delta
+	_update_direction_double_tap(1, "move_right", window)
+	_update_direction_double_tap(-1, "move_left", window)
 	if _sprint_active and not is_on_floor():
 		_end_sprint()
 
 
-func _update_direction_double_tap(direction: int, action: String, delta: float, window: float) -> void:
+func _update_direction_double_tap(direction: int, action: String, window: float) -> void:
 	var is_sprint_dir := _sprint_active and _sprint_direction == direction
-	var tracking := _tap_tracking_right if direction > 0 else _tap_tracking_left
-	var armed := _tap_armed_right if direction > 0 else _tap_armed_left
 
 	if Input.is_action_just_pressed(action):
 		if is_sprint_dir:
 			return
-		if armed and (_tap_elapsed_right if direction > 0 else _tap_elapsed_left) <= window and is_on_floor():
-			_start_sprint(direction)
-			return
-		if direction > 0:
-			_tap_tracking_right = true
-			_tap_elapsed_right = 0.0
-			_tap_armed_right = false
+		if _pending_sprint_direction != 0 and _pending_sprint_direction != direction:
+			_pending_sprint_direction = 0
+		var last_time := _last_press_time_right if direction > 0 else _last_press_time_left
+		if last_time >= 0.0 and (_tap_clock - last_time) <= window:
+			_set_last_press_time(direction, -1.0)
+			_request_sprint(direction)
 		else:
-			_tap_tracking_left = true
-			_tap_elapsed_left = 0.0
-			_tap_armed_left = false
+			_set_last_press_time(direction, _tap_clock)
 
 	if Input.is_action_just_released(action):
-		if is_sprint_dir:
+		if is_sprint_dir and not Input.is_physical_key_pressed(KEY_SHIFT):
 			_end_sprint()
-			return
-		if tracking and not armed:
-			if direction > 0:
-				_tap_armed_right = true
-			else:
-				_tap_armed_left = true
 
-	if tracking and not _sprint_active:
-		if direction > 0:
-			_tap_elapsed_right += delta
-			if _tap_elapsed_right > window:
-				_tap_tracking_right = false
-				_tap_armed_right = false
+
+func _update_shift_sprint() -> void:
+	if _is_aiming_letter_shot():
+		return
+	var shift_held := Input.is_physical_key_pressed(KEY_SHIFT)
+	var input_x := Input.get_axis("move_left", "move_right")
+	if shift_held and absf(input_x) > 0.1:
+		var direction := 1 if input_x > 0.0 else -1
+		_shift_sprint_hold = true
+		if _pending_sprint_direction != 0 and _pending_sprint_direction != direction:
+			_pending_sprint_direction = 0
+		if is_on_floor():
+			if not _sprint_active or _sprint_direction != direction:
+				_start_sprint(direction)
 		else:
-			_tap_elapsed_left += delta
-			if _tap_elapsed_left > window:
-				_tap_tracking_left = false
-				_tap_armed_left = false
+			_pending_sprint_direction = direction
+	elif _shift_sprint_hold:
+		_shift_sprint_hold = false
+		if not is_on_floor():
+			_pending_sprint_direction = 0
+		if _sprint_active:
+			_end_sprint()
+
+
+func _request_sprint(direction: int) -> void:
+	if is_on_floor():
+		_start_sprint(direction)
+	else:
+		_pending_sprint_direction = direction
+
+
+func _try_apply_pending_sprint() -> void:
+	if _pending_sprint_direction == 0 or not is_on_floor():
+		return
+	var direction := _pending_sprint_direction
+	_pending_sprint_direction = 0
+	_start_sprint(direction)
+	if _is_aiming_letter_shot():
+		return
+	var cfg := _cfg()
+	velocity.x = float(direction) * cfg.sprint_max_speed
+
+
+func _set_last_press_time(direction: int, time: float) -> void:
+	if direction > 0:
+		_last_press_time_right = time
+	else:
+		_last_press_time_left = time
 
 
 func _start_sprint(direction: int) -> void:
@@ -548,7 +578,8 @@ func _start_sprint(direction: int) -> void:
 	_sprint_active = true
 	_sprint_direction = direction
 	facing = direction
-	_reset_tap_state()
+	_pending_sprint_direction = 0
+	_clear_tap_press_times()
 	movement_state = PlayerAnimation.MovementState.SPRINT
 	movement_state_changed.emit(movement_state)
 	animation_controller.apply_state(movement_state, facing)
@@ -559,16 +590,13 @@ func _end_sprint() -> void:
 		return
 	_sprint_active = false
 	_sprint_direction = 0
-	_reset_tap_state()
+	_shift_sprint_hold = false
+	_clear_tap_press_times()
 
 
-func _reset_tap_state() -> void:
-	_tap_tracking_right = false
-	_tap_tracking_left = false
-	_tap_armed_right = false
-	_tap_armed_left = false
-	_tap_elapsed_right = 0.0
-	_tap_elapsed_left = 0.0
+func _clear_tap_press_times() -> void:
+	_last_press_time_left = -1.0
+	_last_press_time_right = -1.0
 
 
 func _cfg() -> PlayerMovementConfig:

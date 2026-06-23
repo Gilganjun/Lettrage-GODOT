@@ -5,6 +5,10 @@ extends Control
 const WORD_FONT_SIZE := 28
 const WORD_PANEL_PAD_X := 22.0
 const WORD_PANEL_PAD_Y := 12.0
+const WORD_COLLECT_POP_SCALE := 1.22
+const WORD_COLLECT_POP_RISE_SEC := 0.14
+const WORD_COLLECT_POP_FALL_SEC := 0.55
+const WORD_COLLECT_SHAKE_ROT := 0.065
 
 @onready var player_bar: Control = $TopRow/PlayerSide/PlayerHealthPanel/PlayerHealthBar
 @onready var enemy_bar: Control = $TopRow/EnemySide/EnemyHealthPanel/EnemyHealthBar
@@ -17,6 +21,7 @@ const WORD_PANEL_PAD_Y := 12.0
 @onready var enemy_action_charge_icon: Label = $TopRow/EnemySide/EnemyActionChargeIcon
 @onready var status_label: Label = $StatusLabel
 @onready var debug_label: Label = $CombatDebugLabel
+@onready var _damage_number_layer: Control = $DamageNumberLayer
 
 var _player_combat: Node
 var _enemy_combat: Node
@@ -27,6 +32,10 @@ var _framed_word_ui := false
 var _shooter: LetterShooter
 var _action_controller: Node
 var _enemy_action_controller: Node
+var _player_damage_slot := 0
+var _enemy_damage_slot := 0
+var _last_player_word_len := 0
+var _player_word_pop_tween: Tween
 
 
 func setup(
@@ -54,6 +63,7 @@ func setup(
 	if player_combat:
 		player_combat.health.health_changed.connect(func(_a, _b): refresh_debug())
 		player_combat.health.damaged.connect(func(_a, _b): refresh_debug())
+		player_combat.health.damaged.connect(_on_player_damaged)
 		player_combat.injury.injury_started.connect(func(_d): refresh_debug())
 		player_combat.injury.injury_ended.connect(refresh_debug)
 		player_combat.health.died.connect(func(_s): refresh_debug())
@@ -61,6 +71,7 @@ func setup(
 	if enemy_combat:
 		enemy_combat.health.health_changed.connect(func(_a, _b): refresh_debug())
 		enemy_combat.health.damaged.connect(func(_a, _b): refresh_debug())
+		enemy_combat.health.damaged.connect(_on_enemy_damaged)
 		enemy_combat.injury.injury_started.connect(func(_d): refresh_debug())
 		enemy_combat.injury.injury_ended.connect(refresh_debug)
 		enemy_combat.health.died.connect(func(_s): refresh_debug())
@@ -83,6 +94,9 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 		wc.word_state.word_changed.connect(func(_a, _b): refresh_words())
 		wc.word_state.score_changed.connect(func(_s): refresh_words())
 		wc.word_state.validation_changed.connect(func(_a, _b): refresh_words())
+	_last_player_word_len = 0
+	if _word_controller:
+		_last_player_word_len = _word_controller.word_state.current_word.length()
 	refresh_words()
 
 
@@ -158,7 +172,11 @@ func refresh_words() -> void:
 	if _enemy:
 		var info := _enemy.get_debug_info()
 		enemy_word = str(info.get("enemy_word", ""))
+	var grew := player_word.length() > _last_player_word_len
 	_update_letter_hub(player_word_panel, player_word_label, player_word, _player_word_hidden)
+	if grew and not player_word.is_empty():
+		_play_player_word_collect_pop()
+	_last_player_word_len = player_word.length()
 	_update_letter_hub(enemy_word_panel, enemy_word_label, enemy_word, _enemy_word_hidden)
 
 
@@ -179,6 +197,49 @@ func _update_letter_hub(panel: PanelContainer, label: Label, word: String, force
 	var text_w := _measure_word_width(label, word)
 	var text_h := _measure_word_height(label)
 	panel.custom_minimum_size = Vector2(text_w + WORD_PANEL_PAD_X, text_h + WORD_PANEL_PAD_Y)
+
+
+func _play_player_word_collect_pop() -> void:
+	call_deferred("_run_player_word_collect_pop")
+
+
+func _run_player_word_collect_pop() -> void:
+	if player_word_panel == null or not player_word_panel.visible:
+		return
+	var panel := player_word_panel
+	if _player_word_pop_tween and _player_word_pop_tween.is_valid():
+		_player_word_pop_tween.kill()
+	panel.scale = Vector2.ONE
+	panel.rotation = 0.0
+	panel.pivot_offset = panel.size * 0.5
+	_player_word_pop_tween = create_tween()
+	_player_word_pop_tween.tween_property(
+		panel,
+		"scale",
+		Vector2.ONE * WORD_COLLECT_POP_SCALE,
+		WORD_COLLECT_POP_RISE_SEC,
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_player_word_pop_tween.chain().set_parallel(true)
+	_player_word_pop_tween.tween_property(
+		panel,
+		"scale",
+		Vector2.ONE,
+		WORD_COLLECT_POP_FALL_SEC,
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_player_word_pop_tween.tween_method(
+		_apply_player_word_collect_shake.bind(panel),
+		0.0,
+		1.0,
+		WORD_COLLECT_POP_FALL_SEC,
+	)
+	_player_word_pop_tween.chain().tween_property(panel, "rotation", 0.0, 0.08)
+
+
+func _apply_player_word_collect_shake(panel: PanelContainer, progress: float) -> void:
+	if panel == null or not is_instance_valid(panel):
+		return
+	var falloff := 1.0 - progress
+	panel.rotation = sin(progress * TAU * 4.2) * WORD_COLLECT_SHAKE_ROT * falloff
 
 
 func _measure_word_width(label: Label, word: String) -> float:
@@ -248,6 +309,17 @@ func get_garble_message_anchor() -> Vector2:
 func show_garble_message(_message: String) -> void:
 	# Garble quips render under the letter hub via WordGarblePurgeEffect.
 	pass
+
+
+func get_health_bar_damage_target(for_player: bool) -> Vector2:
+	var bar := player_bar if for_player else enemy_bar
+	if bar == null:
+		var viewport := get_viewport().get_visible_rect()
+		if for_player:
+			return Vector2(viewport.position.x + 72.0, viewport.position.y + 28.0)
+		return Vector2(viewport.end.x - 72.0, viewport.position.y + 28.0)
+	var rect := bar.get_global_rect()
+	return Vector2(rect.get_center().x, rect.position.y + rect.size.y * 0.58)
 
 
 func get_word_anchor_center(for_player: bool) -> Vector2:
@@ -326,35 +398,52 @@ func get_debug_text() -> String:
 func refresh_debug() -> void:
 	if not debug_label.visible:
 		return
-	var lines: PackedStringArray = []
-	if _player_combat:
-		lines.append(
-			"Player HP %d/%d | injured %s | dead %s"
-			% [
-				_player_combat.health.current_health,
-				_player_combat.health.max_health,
-				str(_player_combat.injury.is_injured),
-				str(_player_combat.health.is_dead),
-			]
-		)
-		if _player_combat.injury.is_injured:
-			lines.append("  injury timer %.2fs" % _player_combat.injury.time_remaining)
-	if _enemy_combat:
-		lines.append(
-			"Enemy HP %d/%d | injured %s | dead %s"
-			% [
-				_enemy_combat.health.current_health,
-				_enemy_combat.health.max_health,
-				str(_enemy_combat.injury.is_injured),
-				str(_enemy_combat.health.is_dead),
-			]
-		)
-		if _enemy_combat.injury.is_injured:
-			lines.append("  injury timer %.2fs" % _enemy_combat.injury.time_remaining)
-	if _damage_bridge and not _damage_bridge.last_damage_event.is_empty():
-		var e: Dictionary = _damage_bridge.last_damage_event
-		lines.append(
-			"Last dmg: %s -> %s word=%s len=%s dmg=%s"
-			% [e.get("attacker", "?"), e.get("defender", "?"), e.get("word", ""), e.get("word_length", 0), e.get("damage", 0)]
-		)
-	debug_label.text = "\n".join(lines)
+	debug_label.text = get_debug_text()
+
+
+func _on_player_damaged(amount: int, _source: String) -> void:
+	_spawn_damage_number(amount, true)
+
+
+func _on_enemy_damaged(amount: int, _source: String) -> void:
+	_spawn_damage_number(amount, false)
+
+
+func _spawn_damage_number(amount: int, for_player: bool) -> void:
+	if amount <= 0 or _damage_number_layer == null:
+		return
+	var combat: Node = _player_combat if for_player else _enemy_combat
+	if combat == null:
+		return
+	var body := combat.get_parent() as Node2D
+	if body == null:
+		return
+	var start_screen := _world_to_screen(_resolve_damage_origin(body))
+	var target_screen := get_health_bar_damage_target(for_player)
+	var color := Color(1.0, 0.4, 0.34, 1.0) if for_player else Color(1.0, 0.78, 0.28, 1.0)
+	var slot_index := _next_damage_slot(for_player)
+	DamageNumberPopup.spawn(_damage_number_layer, amount, start_screen, target_screen, color, slot_index)
+
+
+func _next_damage_slot(for_player: bool) -> int:
+	var slot_count := DamageNumberPopup.slot_count()
+	if for_player:
+		var slot := _player_damage_slot
+		_player_damage_slot = (_player_damage_slot + 1) % slot_count
+		return slot
+	var slot := _enemy_damage_slot
+	_enemy_damage_slot = (_enemy_damage_slot + 1) % slot_count
+	return slot
+
+
+func _resolve_damage_origin(body: Node2D) -> Vector2:
+	if body.has_method("get_action_pickup_point"):
+		return body.call("get_action_pickup_point") as Vector2
+	return body.global_position + Vector2(0.0, -36.0)
+
+
+func _world_to_screen(world_pos: Vector2) -> Vector2:
+	var viewport := get_viewport()
+	if viewport == null:
+		return world_pos
+	return viewport.get_canvas_transform() * world_pos

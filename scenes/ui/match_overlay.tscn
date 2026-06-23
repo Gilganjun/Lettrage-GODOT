@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://match_overlay_ui"]
+[gd_scene load_steps=10 format=3 uid="uid://match_overlay_ui"]
 
 [ext_resource type="Script" path="res://scripts/ui/match_overlay.gd" id="1_overlay"]
 [ext_resource type="Script" path="res://scripts/audio/you_win_voice_player.gd" id="2_you_win_voice"]
 [ext_resource type="Script" path="res://scripts/ui/you_win_splash_fx.gd" id="3_you_win_splash"]
 [ext_resource type="Script" path="res://scripts/ui/fight_announcement_fx.gd" id="4_fight_announce"]
 [ext_resource type="Script" path="res://scripts/audio/fight_start_voice_player.gd" id="5_fight_start_voice"]
+[ext_resource type="Script" path="res://scripts/ui/round_start_splash_fx.gd" id="6_round_start_splash"]
+[ext_resource type="Script" path="res://scripts/audio/round_start_voice_player.gd" id="7_round_start_voice"]
+[ext_resource type="PackedScene" path="res://scenes/ui/round_win_declaration_panel.tscn" id="8_declaration"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.05, 0.08, 0.14, 0.88)
@@ -16,6 +19,22 @@ content_margin_left = 28.0
 content_margin_top = 20.0
 content_margin_right = 28.0
 content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_continue"]
+bg_color = Color(0.12, 0.22, 0.38, 0.95)
+border_color = Color(0.92, 0.76, 0.28, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 28.0
+content_margin_top = 10.0
+content_margin_right = 28.0
+content_margin_bottom = 10.0
 
 [node name="MatchOverlay" type="CanvasLayer"]
 layer = 60
@@ -29,6 +48,54 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.45)
+
+[node name="RoundSplashCenter" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RoundStartSplashFx" type="Control" parent="RoundSplashCenter"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+z_index = 5
+script = ExtResource("6_round_start_splash")
+
+[node name="Pivot" type="Control" parent="RoundSplashCenter/RoundStartSplashFx"]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="RoundSplashCenter/RoundStartSplashFx/Pivot"]
+layout_mode = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="YouWinSplashLayer" type="Control" parent="."]
+z_index = 16
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="YouWinSplashFx" type="Control" parent="YouWinSplashLayer"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("3_you_win_splash")
+
+[node name="Pivot" type="Control" parent="YouWinSplashLayer/YouWinSplashFx"]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="YouWinSplashLayer/YouWinSplashFx/Pivot"]
+layout_mode = 0
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Center" type="CenterContainer" parent="."]
 anchors_preset = 15
@@ -54,21 +121,6 @@ layout_mode = 0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="Center/ContentVBox/FightAnnouncementFx/Pivot"]
-layout_mode = 0
-expand_mode = 1
-stretch_mode = 5
-
-[node name="YouWinSplashFx" type="Control" parent="Center/ContentVBox"]
-visible = false
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("3_you_win_splash")
-
-[node name="Pivot" type="Control" parent="Center/ContentVBox/YouWinSplashFx"]
-layout_mode = 0
-mouse_filter = 2
-
-[node name="TextureRect" type="TextureRect" parent="Center/ContentVBox/YouWinSplashFx/Pivot"]
 layout_mode = 0
 expand_mode = 1
 stretch_mode = 5
@@ -120,3 +172,53 @@ script = ExtResource("5_fight_start_voice")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="FightStartVoicePlayer"]
 
 [node name="DelayTimer" type="Timer" parent="FightStartVoicePlayer"]
+
+[node name="RoundStartVoicePlayer" type="Node" parent="."]
+script = ExtResource("7_round_start_voice")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="RoundStartVoicePlayer"]
+
+[node name="RoundWinDeclaration" parent="." instance=ExtResource("8_declaration")]
+z_index = 6
+
+[node name="RoundContinueBar" type="VBoxContainer" parent="."]
+visible = false
+z_index = 30
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -88.0
+offset_right = 150.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ContinueSubtitle" type="Label" parent="RoundContinueBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+text = "Round 1 complete"
+
+[node name="ContinueScore" type="Label" parent="RoundContinueBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+text = "Match: 0 - 0"
+
+[node name="ContinueButton" type="Button" parent="RoundContinueBar"]
+custom_minimum_size = Vector2(300, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_continue")
+theme_override_styles/hover = SubResource("StyleBoxFlat_continue")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_continue")
+theme_override_colors/font_color = Color(1, 0.95, 0.55, 1)
+text = "Continue  —  Enter / J"

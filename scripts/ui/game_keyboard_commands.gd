@@ -9,8 +9,12 @@ static func get_sections() -> Array[Dictionary]:
 		{
 			"title": "Movement",
 			"entries": [
-				{"keys": "A / Left", "desc": "Move left"},
-				{"keys": "D / Right", "desc": "Move right"},
+				{"keys": "Shift + A / Left", "desc": "Run left (hold)"},
+				{"keys": "Shift + D / Right", "desc": "Run right (hold)"},
+				{"keys": "A / Left (x2)", "desc": "Run left (double-tap)"},
+				{"keys": "D / Right (x2)", "desc": "Run right (double-tap)"},
+				{"keys": "A / Left", "desc": "Walk left"},
+				{"keys": "D / Right", "desc": "Walk right"},
 				{"keys": "W / Up", "desc": "Climb up / ladder"},
 				{"keys": "S / Down", "desc": "Climb down / fast fall (air)"},
 				{"keys": "Space", "desc": "Jump"},
@@ -22,15 +26,21 @@ static func get_sections() -> Array[Dictionary]:
 			"entries": [
 				{"keys": "C / Enter", "desc": "Submit word"},
 				{"keys": "Backspace", "desc": "Delete last letter"},
-				{"keys": "Left Shift", "desc": "Shield (tap latch / hold block)"},
+				{"keys": "Ctrl", "desc": "Shield (tap latch / hold block)"},
 				{"keys": "F", "desc": "Aim and fire letter bullet (release to shoot)"},
 				{"keys": "J", "desc": "Action attack"},
 			],
 		},
 		{
+			"title": "Match Flow",
+			"entries": [
+				{"keys": "Enter / J / Space", "desc": "Continue after winning a round"},
+			],
+		},
+		{
 			"title": "Camera",
 			"entries": [
-				{"keys": "+ / Numpad +", "desc": "Zoom in (hold)"},
+				{"keys": "Shift + + / Numpad +", "desc": "Zoom in (hold)"},
 				{"keys": "- / Numpad -", "desc": "Zoom out (hold)"},
 			],
 		},
@@ -47,7 +57,7 @@ static func get_sections() -> Array[Dictionary]:
 				{"keys": "F11", "desc": "Force enemy word validation"},
 				{"keys": "F12", "desc": "Clear enemy word"},
 				{"keys": "Alt + 1", "desc": "Damage player (10 HP)"},
-				{"keys": "Alt + 2", "desc": "Damage enemy (10 HP)"},
+				{"keys": "Alt + 2", "desc": "Cast random dictionary word at enemy (word damage + round log)"},
 				{"keys": "Alt + 3", "desc": "Heal player fully"},
 				{"keys": "Alt + 4", "desc": "Heal enemy fully"},
 				{"keys": "Alt + 5", "desc": "Kill player"},

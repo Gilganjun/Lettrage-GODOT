@@ -64,6 +64,7 @@ var _slide_from_x := 0.0
 var _kinematic_strike_position := Vector2.ZERO
 var _rotate_attack_index := 0
 var _strike_camera := ActionStrikeCameraDirector.new()
+var _round_ledger: RoundCombatLedger
 
 
 func _ready() -> void:
@@ -75,6 +76,10 @@ func _ready() -> void:
 
 func get_charges() -> int:
 	return _charges
+
+
+func set_round_ledger(ledger: RoundCombatLedger) -> void:
+	_round_ledger = ledger
 
 
 func is_active() -> bool:
@@ -194,6 +199,8 @@ func _begin_sequence() -> void:
 		_begin_action_camera,
 	)
 	action_sequence_started.emit(_attack.attack_id)
+	if _round_ledger and _attack:
+		_round_ledger.begin_action("player", _attack.attack_id, _attack.display_name)
 
 
 func _pick_attack_for_sequence() -> ActionAttackDefinition:
@@ -565,15 +572,17 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 	var skip_knockback := _uses_side_slides()
 	var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
 	var combat: CharacterCombat = enemy_combat as CharacterCombat if enemy_combat is CharacterCombat else null
-	if combat != null and not combat.is_dead():
+	if combat != null and _can_apply_action_hit(combat):
 		var source := "action_%s_hit%d" % [_attack.attack_id, hit_index]
-		combat.apply_action_damage(
+		var dealt := combat.apply_action_damage(
 			damage,
 			source,
 			_player.global_position,
 			skip_knockback,
 			is_last,
 		)
+		if dealt > 0 and _round_ledger:
+			_round_ledger.record_action_hit("player", dealt)
 		if is_first and _enemy.has_method("begin_action_strike_freeze"):
 			_enemy.begin_action_strike_freeze()
 	if is_last:
@@ -701,6 +710,8 @@ func _finish_sequence() -> void:
 	if debug_infinite_action:
 		_charges = max_action_charges
 		_emit_charge()
+	if _round_ledger:
+		_round_ledger.finalize_action("player")
 	action_sequence_finished.emit()
 
 
@@ -788,3 +799,11 @@ func _gameplay_allows_action() -> bool:
 		if node.has_method("allows_action_start") and not node.call("allows_action_start"):
 			return false
 	return true
+
+
+func _can_apply_action_hit(combat: CharacterCombat) -> bool:
+	if combat == null:
+		return false
+	if combat.has_pending_action_death():
+		return true
+	return not combat.is_dead()
