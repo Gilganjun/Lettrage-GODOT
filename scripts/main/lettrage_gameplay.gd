@@ -291,6 +291,7 @@ func _wire_hud() -> void:
 	if word_garble_player and word_garble_player.has_method("setup"):
 		word_garble_player.setup(combat_hud, word_controller)
 	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
+	WordGameFeatures.attach_definition_popups($UI, word_controller)
 	combat_hud.set_debug_visible(debug_mode)
 
 

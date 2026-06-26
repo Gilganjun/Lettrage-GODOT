@@ -54,6 +54,7 @@ func _ready() -> void:
 	if hud.has_method("set_debug_visible"):
 		hud.set_debug_visible(_word_debug)
 	WordGameFeatures.attach_profanity_reactions($UI, word_controller)
+	WordGameFeatures.attach_definition_popups($UI, word_controller)
 	_apply_hud_chrome_visibility()
 	call_deferred("_activate_player_camera")
 
