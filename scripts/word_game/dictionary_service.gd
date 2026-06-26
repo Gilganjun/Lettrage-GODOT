@@ -2,7 +2,7 @@ class_name DictionaryService
 extends RefCounted
 
 ## Loads EnglishWords5.txt once for newline-wrapped word lookup (GDevelop StrFind style).
-## Built from EnglishWords4.txt minus dictionary/OmissionList.txt (abbreviations/codes).
+## Built from EnglishWords4.txt minus dictionary/OmissionList.txt, plus Oxford additions.
 
 const DICTIONARY_PATH := "res://dictionary/EnglishWords5.txt"
 

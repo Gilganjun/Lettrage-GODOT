@@ -2,16 +2,21 @@
 """Build EnglishWords5.txt by removing non-words from EnglishWords4.txt.
 
 Removes: Tier-1 abbreviations/codes, obscure 3-letter tokens, Welsh vocabulary.
+Merges: normalized Oxford headwords (hyphens/spaces stripped) from Dictionary_New.
 """
 
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
-import analyze_dictionary as ad
-
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+
+import analyze_dictionary as ad
+import oxford_dictionary as oxford
+
 SOURCE = ROOT / "dictionary" / "EnglishWords4.txt"
 OMISSION_PATH = ROOT / "dictionary" / "OmissionList.txt"
 OUTPUT = ROOT / "dictionary" / "EnglishWords5.txt"
@@ -144,6 +149,10 @@ def main() -> None:
     word_set = set(words)
     omit = all_omissions(word_set)
     kept_set = {w for w in words if w not in omit} | (EXTRA_INCLUSIONS - omit)
+
+    oxford_additions = oxford.collect_oxford_additions(kept_set)
+    kept_set |= oxford_additions
+    oxford.write_additions_manifest(oxford_additions)
     kept = sorted(kept_set)
 
     OMISSION_PATH.write_text("\n".join(sorted(omit)) + "\n", encoding="utf-8")
@@ -156,6 +165,7 @@ def main() -> None:
     print(f"Omitted: {len(omit):,} -> {OMISSION_PATH.relative_to(ROOT)}")
     print(f"  Tier 1 abbrev/codes: {len(t1):,}")
     print(f"  Welsh + obscure 3-letter: {len(welsh):,}")
+    print(f"Oxford:  +{len(oxford_additions):,} -> {oxford.OXFORD_ADDITIONS_PATH.relative_to(ROOT)}")
     print(f"Output:  {len(kept):,} -> {OUTPUT.relative_to(ROOT)}")
     print()
     print("Note: BHS is not in the source dictionary; BSC is removed.")
