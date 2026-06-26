@@ -23,7 +23,7 @@ static func arm(
 		slow_scale = level_config.finisher_kill_cam_slow_scale
 		screen_fill = level_config.finisher_kill_cam_screen_fill
 	var zoom_percent := compute_zoom_percent(victim, survivor, cam, screen_fill)
-	cam.call_deferred("begin_finisher_kill_cam", victim, survivor, zoom_percent, slow_scale)
+	cam.begin_finisher_kill_cam(victim, survivor, zoom_percent, slow_scale)
 	FinisherSurvivorPose.arm(ctx, victim)
 
 
@@ -61,7 +61,10 @@ static func compute_zoom_percent(
 		max_y - min_y + _estimate_frame_height(victim) * 0.55,
 		_estimate_frame_height(victim),
 	)
-	var zoom_factor := maxf(vp.y / (frame_h * fill), vp.x / (frame_w * fill))
+	var zoom_factor := minf(
+		fill * vp.x / frame_w,
+		fill * vp.y / frame_h,
+	)
 	return clampf(zoom_factor * 100.0, cam.min_zoom_percent, cam.max_zoom_percent)
 
 

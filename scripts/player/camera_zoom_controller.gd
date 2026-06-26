@@ -42,13 +42,7 @@ var _finisher_partner: Node2D = null
 var _finisher_saved_time_scale := 1.0
 var _finisher_saved_zoom_percent := 82.0
 var _finisher_focus_lift := 36.0
-var _finisher_saved_top_level := false
-var _finisher_saved_local_position := Vector2.ZERO
-var _finisher_saved_limit_left := 0
-var _finisher_saved_limit_top := 0
-var _finisher_saved_limit_right := 0
-var _finisher_saved_limit_bottom := 0
-var _finisher_limits_saved := false
+var _finisher_saved_position_smoothing := false
 
 
 func _ready() -> void:
@@ -198,21 +192,17 @@ func begin_finisher_kill_cam(
 	_finisher_partner = partner if partner != null and is_instance_valid(partner) else null
 	_finisher_saved_time_scale = Engine.time_scale
 	_finisher_saved_zoom_percent = _zoom_percent
-	_finisher_saved_top_level = top_level
-	_finisher_saved_local_position = position
+	_finisher_saved_position_smoothing = position_smoothing_enabled
 	_action_cinematic_active = false
 	_shake_time_left = 0.0
-	offset = Vector2.ZERO
 	Engine.time_scale = clampf(slow_scale, 0.05, 1.0)
 	SlowMotionNotifier.notify()
 	_zoom_percent = clampf(zoom_percent, min_zoom_percent, max_zoom_percent)
 	_apply_zoom()
 	zoom_percent_changed.emit(_zoom_percent)
 	position_smoothing_enabled = false
-	_save_camera_limits()
-	_disable_camera_limits()
-	top_level = true
-	position = Vector2.ZERO
+	enabled = true
+	make_current()
 	_snap_finisher_focus()
 
 
@@ -226,10 +216,8 @@ func end_finisher_kill_cam() -> void:
 	_zoom_percent = _finisher_saved_zoom_percent
 	_apply_zoom()
 	zoom_percent_changed.emit(_zoom_percent)
-	top_level = _finisher_saved_top_level
-	position = _finisher_saved_local_position
 	offset = Vector2.ZERO
-	_restore_camera_limits()
+	position_smoothing_enabled = _finisher_saved_position_smoothing
 	position_smoothing_speed = _default_position_smoothing_speed
 
 
@@ -246,8 +234,11 @@ func _snap_finisher_focus() -> void:
 			_fighter_visual_center(_finisher_focus) + _fighter_visual_center(_finisher_partner)
 		) * 0.5
 	focus_pos.y -= _finisher_focus_lift
-	global_position = focus_pos
-	offset = Vector2.ZERO
+	var anchor := get_parent()
+	if anchor is Node2D:
+		offset = focus_pos - (anchor as Node2D).global_position
+	else:
+		offset = focus_pos - global_position
 
 
 func _fighter_visual_center(body: Node2D) -> Vector2:
@@ -263,31 +254,6 @@ func _fighter_visual_center(body: Node2D) -> Vector2:
 	return body.global_position + local_visual
 
 
-func _save_camera_limits() -> void:
-	_finisher_saved_limit_left = limit_left
-	_finisher_saved_limit_top = limit_top
-	_finisher_saved_limit_right = limit_right
-	_finisher_saved_limit_bottom = limit_bottom
-	_finisher_limits_saved = true
-
-
-func _disable_camera_limits() -> void:
-	limit_left = -100000000
-	limit_top = -100000000
-	limit_right = 100000000
-	limit_bottom = 100000000
-
-
-func _restore_camera_limits() -> void:
-	if not _finisher_limits_saved:
-		return
-	limit_left = _finisher_saved_limit_left
-	limit_top = _finisher_saved_limit_top
-	limit_right = _finisher_saved_limit_right
-	limit_bottom = _finisher_saved_limit_bottom
-	_finisher_limits_saved = false
-
-
 func _tick_action_zoom(delta: float) -> void:
 	if _zoom_anim_done:
 		return
@@ -301,9 +267,6 @@ func _tick_action_zoom(delta: float) -> void:
 
 
 func _tick_hit_shake(delta: float) -> void:
-	if _finisher_kill_cam_active:
-		offset = Vector2.ZERO
-		return
 	if _shake_time_left <= 0.0:
 		offset = Vector2.ZERO
 		return

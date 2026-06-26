@@ -1,0 +1,125 @@
+==============================================================================
+DICTIONARY COMPARISON REPORT
+==============================================================================
+Live dictionary:     EnglishWords5.txt (194,049 words)
+Oxford dictionary:   Oxford-Word-List-With-Definition.txt
+Source (unfiltered):  EnglishWords4.txt (194,252 words)
+Omission list:        OmissionList.txt (204 words)
+
+OXFORD FILE FORMAT
+------------------------------------------------------------------------------
+Non-empty lines parsed:     32,878
+Unique headwords (normalized): 26,751
+Total headword entries (incl. senses Punt1/Punt2): 32,878
+Headwords with multiple entries: 3,156
+Lines skipped by parser (sample): 30 shown below
+
+  ? A
+  ? A-  prefix (also an- before a vowel sound) not, without (amoral). [greek]
+  ? Ab-  prefix off, away, from (abduct). [latin]
+  ? Abbé  n. (in france) abbot or priest. [french from latin: related to *abbot]
+  ? -ability  suffix forming nouns of quality from, or corresponding to, adjectives 
+  ? -able  suffix forming adjectives meaning: 1 that may or must be (eatable; payabl
+  ? Able-bodied  adj. Fit, healthy.
+  ? Able-bodied seaman  n. Ordinary trained seaman.
+  ? -ably  suffix forming adverbs corresponding to adjectives in -able.
+  ? A-bomb  n. = *atomic bomb. [a for *atomic]
+  ? About-face  n. & int. = *about-turn, about turn.
+  ? About-turn  —n. 1 turn made so as to face the opposite direction. 2 change of op
+  ? Above-board  adj. & adv. Without concealment; open or openly.
+  ? Absent-minded  adj. Forgetful or inattentive.  absent-mindedly adv. Absent-mind
+  ? A/c  abbr. Account. [account current]
+
+SUMMARY
+------------------------------------------------------------------------------
+Words in BOTH dictionaries:              26,007
+In LIVE only (not in Oxford):             168,042
+In OXFORD only (not in LIVE):            744
+Oxford coverage of live dictionary:      13.40%
+Live coverage of Oxford headwords:       97.22%
+
+LIVE vs SOURCE (EnglishWords4)
+------------------------------------------------------------------------------
+Live words also in EW4:                  194,048
+Live words NOT in EW4 (extra inclusions): 1  ['EID']
+EW4 words removed to create live:        204
+
+OMISSION LIST vs OXFORD
+------------------------------------------------------------------------------
+Omitted words still present in Oxford:   74
+Omitted words absent from Oxford:        130
+
+ABBREVIATION ENTRIES IN OXFORD
+------------------------------------------------------------------------------
+Oxford lines containing 'abbr.':         480 unique headwords
+Those abbr. headwords in LIVE:           115
+Those abbr. headwords NOT in LIVE:       365
+
+LIVE-ONLY BREAKDOWN (not in Oxford)
+------------------------------------------------------------------------------
+  Were intentionally omitted from EW4 but kept... n/a (omit means removed FROM live)
+  In live, not in Oxford, and on omission list: 0 (should be 0)
+  In live, not in Oxford, not on omission list: 168,042
+
+WORD LENGTH DISTRIBUTION (top differences)
+------------------------------------------------------------------------------
+ Len      Live    Oxford     Delta
+   1         2        26       -24
+   2        95       258      -163
+   3     1,316       854      +462
+   4     5,323     2,082    +3,241
+   5    11,400     2,994    +8,406
+   6    18,730     3,988   +14,742
+   7    26,039     4,142   +21,897
+   8    29,439     3,884   +25,555
+   9    28,594     3,385   +25,209
+  10    24,871     2,386   +22,485
+  11    18,560     1,395   +17,165
+  12    12,752       728   +12,024
+  13     8,075       369    +7,706
+  14     4,634       148    +4,486
+  15     2,455        58    +2,397
+  16     1,004        34      +970
+  17       456        13      +443
+  18       176         4      +172
+  19        74         1       +73
+  20        31         1       +30
+  ...
+  24         2         0        +2
+  25         1         0        +1
+  28         1         0        +1
+  29         1         0        +1
+  31         1         0        +1
+
+SAMPLE: In LIVE only (first 80)
+------------------------------------------------------------------------------
+Count: 168,042
+AACHEN, AARDVARKS, AARDWOLF, AARDWOLVES, AARHUS, AARON, AARONIC, AARONICAL, AASVOGEL, AASVOGELS, ABABA, ABACA, ABACAS, ABACI, ABACTINAL, ABACTINALLY, ABACTOR, ABACTORS, ABACUSES, ABADAN, ABADDON, ABALONE, ABALONES, ABAMPERE, ABAMPERES, ABAND, ABANDONEDLY, ABANDONEE, ABANDONEES, ABANDONING, ABANDONMENT, ABANDONMENTS, ABANDONS, ABAS, ABASED, ABASEMENT, ABASEMENTS, ABASES, ABASH, ABASHEDLY, ABASHES, ABASHING, ABASHLESS, ABASHMENT, ABASHMENTS, ABASIN, ABASING, ABASK, ABATABLE, ABATED, ABATEMENT, ABATEMENTS, ABATES, ABATING, ABATIS, ABATOR, ABATORS, ABATTIS, ABATTISES, ABATTOIRS, ABATURE, ABATURES, ABAXIAL, ABAYA, ABAYAS, ABB, ABBA, ABBACIES, ABBADO, ABBAS, ABBASID, ABBASIDS, ABBATIAL, ABBESSES, ABBEYS, ABBOTS, ABBOTSBURY, ABBOTSHIP, ABBOTSHIPS, ABBOTT
+... and 167,962 more
+
+SAMPLE: In OXFORD only (first 80)
+------------------------------------------------------------------------------
+Count: 744
+AA, ABC, ABM, ABTA, AC, ACAS, ACEOUS, AF, AG, AGM, AIRBASE, AIRGUN, ALEHOUSE, ALMSHOUSE, ANC, ANTIMATTER, ANTINOVEL, ANTITETANUS, AOB, APR, AR, ARCHEAN, ASCII, ASHCAN, AST, AU, AUTOIMMUNE, AV, AWOL, AZT, B, BACKSTREET, BAFTA, BALLBOY, BALLOCKING, BALLPARK, BANDBOX, BATTLEAXE, BATTLEBUS, BB, BBC, BC, BCG, BD, BIRDLIME, BK, BL, BLADDERWRACK, BM, BMA, BMX, BOGYMAN, BOTTLENOSE, BOWERBIRD, BP, BQ, BR, BREADCRUMB, BS, BSE, BSI, BST, BT, BULLETPROOF, BULLRING, BUPA, BYPLAY, C, CA, CAA, CAL, CAMRA, CANDLEPOWER, CANDYFLOSS, CANDYSTRIPE, CASTEISM, CATLICK, CB, CBE, CC
+... and 664 more
+
+SAMPLE: Omitted from live but IN Oxford (first 80)
+------------------------------------------------------------------------------
+Count: 74
+AWOL, BBC, BC, BMX, BST, BT, CB, CC, CD, CE, CH, CM, CMG, CO, CS, CWM, CWT, DDT, DFC, DFM, DL, DNA, DR, DSC, DSM, EISTEDDFOD, FO, FRS, FT, GB, GC, GE, GHYLL, GI, GM, GMT, ISBN, JP, KC, KG, KM, KO, KU, LP, MB, MCC, MD, MG, ML, MP, MR, MS, NATO, NW, NY, PC, PLC, PM, PPS, PS, PYX, RA, RH, STD, TB, TE, TNT, TV, UFO, UK, VC, WC, WNW, WSW
+
+SAMPLE: Oxford abbr. entries NOT in live (first 80)
+------------------------------------------------------------------------------
+Count: 365
+AA, ABM, ABTA, AC, ACAS, AF, AGM, ANC, AOB, APR, ASCII, AST, AV, AWOL, AZT, B, BAFTA, BB, BBC, BC, BCG, BD, BL, BM, BMA, BP, BQ, BR, BS, BSE, BSI, BST, BT, BUPA, C, CAA, CAL, CAMRA, CB, CBE, CC, CD, CD-ROM, CDT, CERN, CFC, CFE, CG, CH, CIA, CL, CM, CMG, CND, CO, CPS, CPU, CRT, CSE, CTC, CWT, DB, DBS, DC, DD, DDT, DFC, DFM, DIY, DJ, DL, DM, DNA, DPP, DR, DSC, DSM, DSS, DT, DTI
+... and 285 more
+
+NOTES
+------------------------------------------------------------------------------
+- Oxford headwords are Title Case with definitions; compared as UPPERCASE ASCII.
+- Sense numbers stripped for matching (Punt1 -> PUNT).
+- Oxford includes prefixes (A-, Ab-), abbreviations (Aa abbr.), and duplicates.
+- Live dictionary is word-list only; Oxford adds part-of-speech and definitions.
+- Accented forms (Abbé) normalize to ABbe -> AB? need check
+
+END OF REPORT

@@ -619,8 +619,16 @@ func _sync_selected_index_to_pin() -> bool:
 
 
 func _pin_selected_letter() -> void:
-	var letter := _get_selected_letter()
-	_selected_letter_id = letter.get_instance_id() if letter != null else -1
+	if _targets.is_empty():
+		_selected_letter_id = -1
+		_selected_grace_until = 0.0
+		return
+	_selected_index = clampi(_selected_index, 0, _targets.size() - 1)
+	var letter := _targets[_selected_index]
+	if letter != null and is_instance_valid(letter):
+		_selected_letter_id = letter.get_instance_id()
+	else:
+		_selected_letter_id = -1
 	_selected_grace_until = 0.0
 
 
