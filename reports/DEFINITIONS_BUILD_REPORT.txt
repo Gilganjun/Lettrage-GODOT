@@ -1,0 +1,34 @@
+========================================================================
+DEFINITIONS BUILD REPORT
+========================================================================
+Live words:        196,375
+Defined:           182,788 (93.08%)
+Missing:           13,587
+Output:            dictionary\Definitions.txt
+Missing list:      dictionary\DefinitionsMissing.txt
+Output size:       9.99 MB
+
+Added by source:
+  kaikki: 122,215
+  oewn: 32,182
+  oxford: 27,675
+  gcide: 716
+
+Sample definitions:
+  A: (also an- before a vowel sound) not, without (amoral). [oxford]
+  AARDVARK: Mammal with a tubular snout and a long tongue, feeding on termites. [oxford]
+  AARDVARKS: plural of aardvark [kaikki]
+  AARDWOLF: striped hyena of southeast Africa that feeds chiefly on insects [oewn]
+  AARDWOLVES: plural of aardwolf [kaikki]
+  AARON: The leader of a group of thieves. [kaikki]
+  AARONIC: Pertaining to Aaron (elder brother of Moses). [kaikki]
+  AARONICAL: Alternative form of Aaronic [kaikki]
+  AASVOGEL: Vulture. [kaikki]
+  AASVOGELS: plural of aasvogel [kaikki]
+  AB: off, away, from (abduct). [oxford]
+  ABACA: a kind of hemp obtained from the abaca plant in the Philippines [oewn]
+
+Missing sample: AACHEN, AARHUS, ABABA, ABADAN, ABASIN, ABBADO, ABBOTSBURY, ABBOTT, ABBREVIATUR, ABDOMENAL, ABDULLAH, ABEARANCES, ABEDNEGO, ABEDS, ABEIGH, ABEL, ABELARD, ABERDEENSHIRE, ABIB, ABIDJAN, ABIESES, ABINGDON, ABLUTOMANE, ABLUTOMANES, ABREGE, ABROMA, ABRUS, ABSALOM, ABSCISSE, ABSENTE, ABYDOS, ACALEPHA, ACALEPHAE, ACALEPHAS, ACALEPHES, ACANTHACEAE, ACANTHOCEPHALA, ACAPULCO, ACARIDA, ACARIDOMATIA
+... and 13,547 more
+
+END OF REPORT
