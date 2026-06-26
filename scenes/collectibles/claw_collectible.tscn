@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://claw_collectible_phase2d"]
+
+[ext_resource type="Script" path="res://scripts/collectibles/claw_collectible.gd" id="1"]
+
+[node name="ClawCollectible" type="Node2D"]
+script = ExtResource("1")

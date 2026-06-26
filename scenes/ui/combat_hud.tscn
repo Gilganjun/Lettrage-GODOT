@@ -82,16 +82,13 @@ theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 text = ""
 
-[node name="PlayerAmmoLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -52.0
-offset_right = 140.0
-offset_bottom = -32.0
-grow_vertical = 0
+[node name="PlayerCollectiblesRow" type="HBoxContainer" parent="TopRow/PlayerSide"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 10
+
+[node name="PlayerAmmoLabel" type="Label" parent="TopRow/PlayerSide/PlayerCollectiblesRow"]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.95, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 1
@@ -99,23 +96,25 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
 text = "Ammo 10/10"
 
-[node name="ActionChargeIcon" type="Label" parent="."]
+[node name="ActionChargeIcon" type="Label" parent="TopRow/PlayerSide/PlayerCollectiblesRow"]
 visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -78.0
-offset_right = 52.0
-offset_bottom = -54.0
-grow_vertical = 0
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.72, 0.25, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 22
 text = "👊"
+
+[node name="ClawChargeIcon" type="Label" parent="TopRow/PlayerSide/PlayerCollectiblesRow"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "CLAW ×0"
 
 [node name="Spacer" type="Control" parent="TopRow"]
 layout_mode = 2
@@ -134,18 +133,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_health")
 [node name="EnemyHealthBar" parent="TopRow/EnemySide/EnemyHealthPanel" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="EnemyActionChargeIcon" type="Label" parent="TopRow/EnemySide"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 8
-theme_override_colors/font_color = Color(1, 0.72, 0.25, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 2
-text = "👊"
-
 [node name="EnemyWordPanel" type="PanelContainer" parent="TopRow/EnemySide"]
 visible = false
 layout_mode = 2
@@ -159,6 +146,23 @@ theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 2
 text = ""
+
+[node name="EnemyCollectiblesRow" type="HBoxContainer" parent="TopRow/EnemySide"]
+layout_mode = 2
+size_flags_horizontal = 8
+alignment = 2
+theme_override_constants/separation = 10
+
+[node name="EnemyActionChargeIcon" type="Label" parent="TopRow/EnemySide/EnemyCollectiblesRow"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.72, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+text = "👊"
 
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 1
@@ -190,6 +194,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 z_index = 40
+
+[node name="CollectibleFxLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+z_index = 45
 
 [node name="CombatDebugLabel" type="Label" parent="."]
 visible = false

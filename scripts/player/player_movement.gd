@@ -40,6 +40,11 @@ var _round_intro_land_pose_timer := 0.0
 var _action_sequence_targeted := false
 var _action_strike_frozen := false
 var _action_freeze_position := Vector2.ZERO
+var _action_facing_locked := false
+
+var _finisher_survivor_active := false
+var _finisher_victim: Node2D = null
+var _finisher_arrived := false
 
 const FLOOR_SNAP := 4.0
 const ROUND_INTRO_LAND_POSE_DURATION := 0.5
@@ -203,8 +208,27 @@ func _apply_round_intro_animation() -> void:
 
 func set_action_sequence_targeted(active: bool) -> void:
 	_action_sequence_targeted = active
-	if not active:
+	if active:
+		set_action_facing_locked(true)
+	else:
+		set_action_facing_locked(false)
 		end_action_strike_freeze()
+
+
+func set_action_facing_locked(locked: bool) -> void:
+	_action_facing_locked = locked
+
+
+func is_action_facing_locked() -> bool:
+	return _action_facing_locked
+
+
+func refresh_action_facing_toward(target: Node2D) -> void:
+	if not _action_facing_locked or target == null:
+		return
+	facing = 1 if target.global_position.x >= global_position.x else -1
+	if sprite:
+		sprite.flip_h = facing < 0
 
 
 func is_action_sequence_targeted() -> bool:
@@ -225,6 +249,39 @@ func is_action_strike_frozen() -> bool:
 	return _action_strike_frozen
 
 
+func _combat_owns_sprite_presentation() -> bool:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat:
+		return (combat as CharacterCombat).owns_action_sprite_presentation()
+	return false
+
+
+func begin_finisher_survivor_pose(victim: Node2D) -> void:
+	if not _is_defeated_fighter(victim):
+		return
+	_finisher_survivor_active = true
+	_finisher_victim = victim
+	_finisher_arrived = false
+	movement_locked = true
+	_action_strike_frozen = false
+	_action_sequence_targeted = false
+	_action_facing_locked = false
+	_sprint_active = false
+	_pending_sprint_direction = 0
+	velocity = Vector2.ZERO
+
+
+func end_finisher_survivor_pose() -> void:
+	_finisher_survivor_active = false
+	_finisher_victim = null
+	_finisher_arrived = false
+	velocity = Vector2.ZERO
+
+
+func is_finisher_survivor_active() -> bool:
+	return _finisher_survivor_active
+
+
 func _physics_process(delta: float) -> void:
 	if round_intro_fall_active:
 		velocity = Vector2.ZERO
@@ -238,8 +295,13 @@ func _physics_process(delta: float) -> void:
 		floor_snap_length = FLOOR_SNAP
 		_tick_round_intro_land_pose(delta)
 		return
-	if movement_locked:
-		velocity = Vector2.ZERO
+	# Finish an in-flight action even when round-end pause locks movement.
+	if _process_action_sequence(delta):
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	if _finisher_survivor_active:
+		_process_finisher_survivor(delta)
 		move_and_slide()
 		floor_snap_length = FLOOR_SNAP
 		return
@@ -249,15 +311,26 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		floor_snap_length = FLOOR_SNAP
-		_update_movement_state()
+		if not _combat_owns_sprite_presentation():
+			_update_movement_state()
+		return
+	var combat := get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat and (combat as CharacterCombat).is_dead():
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	if movement_locked:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	if _process_claw(delta):
 		return
 	if Input.is_action_just_pressed("ui_cancel"):
 		get_tree().quit()
-	if _process_action_sequence(delta):
-		return
 	if _process_roll(delta):
 		return
-	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.blocks_movement():
 		_process_combat_lock(delta, combat)
 		move_and_slide()
@@ -463,7 +536,60 @@ func _overlaps_any_ladder() -> bool:
 	return false
 
 
+func _process_finisher_survivor(delta: float) -> void:
+	if not _is_defeated_fighter(_finisher_victim):
+		end_finisher_survivor_pose()
+		return
+	var cfg := _cfg()
+	var motion := FinisherSurvivorPose.compute_motion(
+		self,
+		_finisher_victim,
+		delta,
+		cfg.max_speed,
+		cfg.gravity,
+		cfg.max_falling_speed,
+		is_on_floor(),
+	)
+	velocity = motion.get("velocity", Vector2.ZERO)
+	facing = int(motion.get("facing", facing))
+	_finisher_arrived = bool(motion.get("arrived", true))
+	_update_finisher_survivor_animation()
+
+
+func _update_finisher_survivor_animation() -> void:
+	var new_state := PlayerAnimation.MovementState.IDLE
+	if not _finisher_arrived and absf(velocity.x) > 8.0:
+		new_state = PlayerAnimation.MovementState.RUN
+	elif not is_on_floor():
+		new_state = (
+			PlayerAnimation.MovementState.JUMP
+			if velocity.y < 0.0
+			else PlayerAnimation.MovementState.FALL
+		)
+	if new_state != movement_state:
+		movement_state = new_state
+		movement_state_changed.emit(movement_state)
+	animation_controller.apply_state(movement_state, facing)
+
+
+func _is_defeated_fighter(body: Node2D) -> bool:
+	if body == null or not is_instance_valid(body):
+		return false
+	var combat := body.get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat:
+		var cc := combat as CharacterCombat
+		return cc.is_dead() or cc.has_pending_action_death()
+	return false
+
+
 func _update_movement_state() -> void:
+	if _finisher_survivor_active:
+		_update_finisher_survivor_animation()
+		return
+	if _combat_owns_sprite_presentation():
+		return
+	if _action_strike_frozen or _action_sequence_targeted:
+		return
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.has_method("is_word_stun_active") and combat.is_word_stun_active():
 		return
@@ -661,6 +787,25 @@ func _process_roll(delta: float) -> bool:
 		_update_movement_state()
 		return true
 	return false
+
+
+func _process_claw(delta: float) -> bool:
+	var claw := _get_claw_controller()
+	if claw == null:
+		return false
+	if claw.process_claw(self, delta):
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return true
+	return false
+
+
+func _get_claw_controller() -> Node:
+	for child in get_children():
+		if child.has_method("process_claw"):
+			return child
+	return null
 
 
 func _get_action_controller() -> Node:

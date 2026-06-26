@@ -80,20 +80,20 @@ static func _make_label(word: String, text_color: Color) -> Label:
 	return label
 
 
-static func _layout_label(host: Control, label: Label, center: Vector2, scale: float) -> void:
+static func _layout_label(host: Control, label: Label, center: Vector2, label_scale: float) -> void:
 	label.reset_size()
 	var size := label.get_minimum_size()
 	if size == Vector2.ZERO:
 		size = label.size
-	host.scale = Vector2(scale, scale)
-	host.global_position = center - (size * scale * 0.5)
+	host.scale = Vector2(label_scale, label_scale)
+	host.global_position = center - (size * label_scale * 0.5)
 
 
-static func _center_for_label(label: Label, center: Vector2, scale: float) -> Vector2:
+static func _center_for_label(label: Label, center: Vector2, label_scale: float) -> Vector2:
 	var size := label.get_minimum_size()
 	if size == Vector2.ZERO:
 		size = label.size
-	return center - (size * scale * 0.5)
+	return center - (size * label_scale * 0.5)
 
 
 static func _play_center_slide(

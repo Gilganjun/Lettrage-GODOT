@@ -14,7 +14,9 @@ static func reset_round(ctx: Dictionary) -> void:
 	var enemy_combat: Node = ctx.get("enemy_combat")
 	var player_shooter: LetterShooter = ctx.get("player_shooter")
 	var player_action: Node = ctx.get("player_action")
+	var player_claw: Node = ctx.get("player_claw")
 	var action_spawner: Node = ctx.get("action_spawner")
+	var claw_spawner: Node = ctx.get("claw_spawner")
 	var player_spawn: Vector2 = ctx.get("player_spawn", Vector2.ZERO)
 	var player_landing: Vector2 = ctx.get("player_platform_landing", player_spawn)
 	var enemy_spawn: Vector2 = ctx.get("enemy_spawn", Vector2.ZERO)
@@ -57,13 +59,18 @@ static func reset_round(ctx: Dictionary) -> void:
 		player_shooter.set_ammo(player_shooter.max_ammo)
 	if player_action and player_action.has_method("reset_for_round"):
 		player_action.reset_for_round()
+	if player_claw and player_claw.has_method("reset_for_round"):
+		player_claw.reset_for_round()
 	if enemy and enemy.has_method("get_action_controller"):
 		var enemy_action = enemy.get_action_controller()
 		if enemy_action and enemy_action.has_method("reset_for_round"):
 			enemy_action.reset_for_round()
 	_clear_action_collectibles(scene_tree)
+	_clear_claw_collectibles(scene_tree)
 	if action_spawner and action_spawner.has_method("set_spawning_paused"):
 		action_spawner.set_spawning_paused(true)
+	if claw_spawner and claw_spawner.has_method("set_spawning_paused"):
+		claw_spawner.set_spawning_paused(true)
 
 
 static func begin_round_intro(ctx: Dictionary, level_config: LevelGameplayConfig) -> void:
@@ -145,6 +152,7 @@ static func begin_round_play(ctx: Dictionary) -> void:
 	var enemy: Enemy = ctx.get("enemy")
 	var player: PlayerMovement = ctx.get("player")
 	var action_spawner: Node = ctx.get("action_spawner")
+	var claw_spawner: Node = ctx.get("claw_spawner")
 	if player:
 		player.movement_locked = false
 	if enemy:
@@ -153,6 +161,8 @@ static func begin_round_play(ctx: Dictionary) -> void:
 		letter_spawner.set_spawning_paused(false)
 	if action_spawner and action_spawner.has_method("set_spawning_paused"):
 		action_spawner.set_spawning_paused(false)
+	if claw_spawner and claw_spawner.has_method("set_spawning_paused"):
+		claw_spawner.set_spawning_paused(false)
 
 
 static func pause_after_round_end(ctx: Dictionary) -> void:
@@ -160,11 +170,15 @@ static func pause_after_round_end(ctx: Dictionary) -> void:
 	var player: PlayerMovement = ctx.get("player")
 	var enemy: Enemy = ctx.get("enemy")
 	var action_spawner: Node = ctx.get("action_spawner")
+	var claw_spawner: Node = ctx.get("claw_spawner")
 	var player_shooter: LetterShooter = ctx.get("player_shooter")
+	var player_claw: Node = ctx.get("player_claw")
 	if letter_spawner:
 		letter_spawner.set_spawning_paused(true)
 	if action_spawner and action_spawner.has_method("set_spawning_paused"):
 		action_spawner.set_spawning_paused(true)
+	if claw_spawner and claw_spawner.has_method("set_spawning_paused"):
+		claw_spawner.set_spawning_paused(true)
 	if player:
 		player.movement_locked = true
 		player.velocity = Vector2.ZERO
@@ -173,6 +187,8 @@ static func pause_after_round_end(ctx: Dictionary) -> void:
 		enemy.velocity = Vector2.ZERO
 	if player_shooter and player_shooter.has_method("cancel_aim"):
 		player_shooter.cancel_aim()
+	if player_claw and player_claw.has_method("cancel_for_round_end"):
+		player_claw.cancel_for_round_end()
 	var enemy_action: Node = null
 	if enemy and enemy.has_method("get_action_controller"):
 		enemy_action = enemy.get_action_controller()
@@ -235,7 +251,17 @@ static func _clear_action_collectibles(scene_tree: SceneTree) -> void:
 			node.queue_free()
 
 
+static func _clear_claw_collectibles(scene_tree: SceneTree) -> void:
+	if scene_tree == null:
+		return
+	for node in scene_tree.get_nodes_in_group("claw_collectible"):
+		if is_instance_valid(node):
+			node.queue_free()
+
+
 static func _reset_enemy_visual(enemy: Enemy) -> void:
+	if enemy.has_method("end_action_impact_sync"):
+		enemy.end_action_impact_sync()
 	if enemy.sprite == null:
 		return
 	enemy.sprite.speed_scale = 1.0

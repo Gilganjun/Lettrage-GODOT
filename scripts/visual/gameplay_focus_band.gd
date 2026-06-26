@@ -19,21 +19,21 @@ func apply_to_level(level_root: Node2D) -> void:
 	_add_play_band_overlay(level_root)
 
 
-func _store_and_modulate(node: Node, modulate: Color = background_modulate) -> void:
+func _store_and_modulate(node: Node, target_modulate: Color = background_modulate) -> void:
 	if node == null:
 		return
 	for child in node.get_children():
-		_apply_modulate_recursive(child, modulate)
+		_apply_modulate_recursive(child, target_modulate)
 
 
-func _apply_modulate_recursive(node: Node, modulate: Color) -> void:
+func _apply_modulate_recursive(node: Node, target_modulate: Color) -> void:
 	if node is CanvasItem:
 		var item := node as CanvasItem
 		if not _saved_modulates.has(item.get_instance_id()):
 			_saved_modulates[item.get_instance_id()] = item.modulate
-		item.modulate = modulate
+		item.modulate = target_modulate
 	for child in node.get_children():
-		_apply_modulate_recursive(child, modulate)
+		_apply_modulate_recursive(child, target_modulate)
 
 
 func _add_play_band_overlay(level_root: Node2D) -> void:

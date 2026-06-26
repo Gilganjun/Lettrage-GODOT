@@ -90,8 +90,8 @@ func _ready() -> void:
 	_ensure_initialized()
 
 
-func configure_spawn(position: Vector2) -> void:
-	_spawn_position = position
+func configure_spawn(spawn_position: Vector2) -> void:
+	_spawn_position = spawn_position
 
 
 func blocks_movement() -> bool:
@@ -131,6 +131,11 @@ func is_word_stun_active() -> bool:
 func has_pending_action_death() -> bool:
 	_ensure_initialized()
 	return not _pending_action_death_source.is_empty()
+
+
+func owns_action_sprite_presentation() -> bool:
+	_ensure_initialized()
+	return _health().is_dead or not _pending_action_death_source.is_empty() or _word_stun_active
 
 
 func is_enemy_stun_active() -> bool:
@@ -232,6 +237,8 @@ func commit_deferred_action_death() -> void:
 	_ensure_initialized()
 	if _pending_action_death_source.is_empty():
 		return
+	if _body is Enemy and (_body as Enemy).has_method("end_action_impact_sync_for_finisher"):
+		(_body as Enemy).end_action_impact_sync_for_finisher()
 	var source := _pending_action_death_source
 	_pending_action_death_source = ""
 	_execute_death_presentation(source)
@@ -258,6 +265,8 @@ func reset_combat() -> void:
 	if _sprite:
 		if _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
 			_sprite.animation_finished.disconnect(_on_sprite_animation_finished)
+		if _sprite.animation_finished.is_connected(_on_real_death_pose_finished):
+			_sprite.animation_finished.disconnect(_on_real_death_pose_finished)
 		_restore_upright_pose()
 		_sprite.speed_scale = 1.0
 		if _sprite.sprite_frames and _sprite.sprite_frames.has_animation("Idle"):
@@ -553,11 +562,14 @@ func _execute_death_presentation(source: String) -> void:
 	_stun_attacker_body = null
 	if _sprite and _sprite.animation_finished.is_connected(_on_sprite_animation_finished):
 		_sprite.animation_finished.disconnect(_on_sprite_animation_finished)
+	if _sprite and _sprite.animation_finished.is_connected(_on_real_death_pose_finished):
+		_sprite.animation_finished.disconnect(_on_real_death_pose_finished)
 	_release_shield_after_stun()
 	_injury().end_injury()
 	_disable_combat_actions()
 	death_started.emit(source)
 	_play_death_animation()
+	_connect_real_death_pose_hold()
 	if not auto_respawn_on_death:
 		return
 	_pending_respawn = true
@@ -568,8 +580,8 @@ func _disable_combat_actions() -> void:
 	if _body == null:
 		return
 	if owner_kind == "player":
-		var shield := _body.get_node_or_null("PlayerShield")
-		if shield and shield.has_method("set_active"):
+		var shield := PlayerShield.find_on_body(_body)
+		if shield:
 			shield.set_active(false)
 	elif owner_kind == "enemy":
 		var shield := _body.get_node_or_null("ShieldComponent")
@@ -607,16 +619,34 @@ func _restore_upright_pose() -> void:
 func _play_death_animation() -> void:
 	if _sprite == null or _sprite.sprite_frames == null:
 		return
+	_sprite.speed_scale = 1.0
 	if _sprite.sprite_frames.has_animation("Death"):
 		_sprite.play("Death")
+
+
+func _connect_real_death_pose_hold() -> void:
+	if _sprite == null:
+		return
+	if not _sprite.animation_finished.is_connected(_on_real_death_pose_finished):
+		_sprite.animation_finished.connect(_on_real_death_pose_finished)
+
+
+func _on_real_death_pose_finished() -> void:
+	if _sprite == null or _sprite.animation != "Death":
+		return
+	if not _health().is_dead:
+		return
+	_hold_death_pose_at_last_frame()
+	if _sprite.animation_finished.is_connected(_on_real_death_pose_finished):
+		_sprite.animation_finished.disconnect(_on_real_death_pose_finished)
 
 
 func _deactivate_shield_for_stun() -> void:
 	if _body == null:
 		return
 	if owner_kind == "player":
-		var shield := _body.get_node_or_null("PlayerShield")
-		if shield and shield.has_method("set_active"):
+		var shield := PlayerShield.find_on_body(_body)
+		if shield:
 			shield.set_active(false)
 	elif owner_kind == "enemy":
 		var shield_ctrl := _body.get_node_or_null("EnemyShieldController")

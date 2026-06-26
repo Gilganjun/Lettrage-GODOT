@@ -97,8 +97,8 @@ static func _build_collider_map(colliders: Array) -> Dictionary:
 	return map
 
 
-static func _instance_key(name: String, row: Dictionary) -> String:
-	return "%s|%.3f|%.3f" % [name, float(row.get("source_x", 0)), float(row.get("source_y", 0))]
+static func _instance_key(instance_name: String, row: Dictionary) -> String:
+	return "%s|%.3f|%.3f" % [instance_name, float(row.get("source_x", 0)), float(row.get("source_y", 0))]
 
 
 static func _next_name(counters: Dictionary, base_name: String) -> String:

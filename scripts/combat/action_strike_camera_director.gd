@@ -69,6 +69,8 @@ func uses_primary_style() -> bool:
 func tick_strike_frame(frame_num: int) -> void:
 	if not _active or style != Style.DRAMATIC or _cam == null:
 		return
+	if _cam.is_finisher_kill_cam_active():
+		return
 	var in_window := _is_in_window(frame_num)
 	if in_window and not _in_pulse:
 		_enter_pulse()
@@ -88,21 +90,32 @@ func end_sequence() -> void:
 	if _in_pulse:
 		_exit_pulse()
 	if style == Style.PRIMARY:
-		if _cam != null:
+		if _cam != null and not _cam.is_finisher_kill_cam_active():
 			_cam.end_action_cinematic()
 	else:
 		_restore_baseline()
 	_reset_internal()
 
 
-static func force_reset_presentation(cam: CameraZoomController = null) -> void:
+func end_sequence_for_finisher() -> void:
+	if not _active:
+		return
+	_in_pulse = false
+	_reset_internal()
+
+
+static func clear_strike_presentation(cam: CameraZoomController = null) -> void:
 	Engine.time_scale = 1.0
 	if cam == null:
 		return
 	cam.offset = Vector2.ZERO
 	if cam.has_method("end_action_cinematic"):
 		cam.end_action_cinematic()
-	if cam.has_method("reset_to_base"):
+
+
+static func force_reset_presentation(cam: CameraZoomController = null) -> void:
+	clear_strike_presentation(cam)
+	if cam != null and cam.has_method("reset_to_base"):
 		cam.reset_to_base()
 
 
@@ -124,8 +137,11 @@ func _is_in_window(frame_num: int) -> bool:
 
 
 func _enter_pulse() -> void:
+	if _cam != null and _cam.is_finisher_kill_cam_active():
+		return
 	_in_pulse = true
 	Engine.time_scale = dramatic_slow_scale
+	SlowMotionNotifier.notify()
 	_center_on_fighters()
 	_cam.set_zoom_percent(_compute_fill_zoom_percent())
 
@@ -137,7 +153,7 @@ func _exit_pulse() -> void:
 
 func _restore_baseline() -> void:
 	Engine.time_scale = _saved_time_scale
-	if _cam == null:
+	if _cam == null or _cam.is_finisher_kill_cam_active():
 		return
 	_cam.offset = Vector2.ZERO
 	_cam.set_zoom_percent(_saved_zoom_percent)
@@ -145,6 +161,8 @@ func _restore_baseline() -> void:
 
 func _center_on_fighters() -> void:
 	if _cam == null or _attacker == null or _defender == null:
+		return
+	if _cam.is_finisher_kill_cam_active():
 		return
 	var mid := (_attacker.global_position + _defender.global_position) * 0.5
 	var anchor := _cam.get_parent()

@@ -5,7 +5,6 @@ extends Area2D
 
 const LetterShatterEffectScript := preload("res://scripts/letters/letter_shatter_effect.gd")
 const LetterReboundEffectScript := preload("res://scripts/letters/letter_rebound_effect.gd")
-const LetterTint := preload("res://scripts/letters/letter_tint.gd")
 
 ## Shield breaks only: chance per collision for spin-away rebound instead of standard shatter.
 const SHIELD_REBOUND_CHANCE := 0.3
@@ -17,6 +16,7 @@ enum Resolution {
 	PLAYER_SHIELD,
 	ENEMY_SHIELD,
 	BULLET_COLLECT,
+	CLAW_COLLECT,
 	BOUNDARY,
 	EXPIRED,
 }

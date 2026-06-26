@@ -9,6 +9,7 @@ const WORD_COLLECT_POP_SCALE := 1.22
 const WORD_COLLECT_POP_RISE_SEC := 0.14
 const WORD_COLLECT_POP_FALL_SEC := 0.55
 const WORD_COLLECT_SHAKE_ROT := 0.065
+const ClawTargetingLetterRowScript := preload("res://scripts/ui/claw_targeting_letter_row.gd")
 
 @onready var player_bar: Control = $TopRow/PlayerSide/PlayerHealthPanel/PlayerHealthBar
 @onready var enemy_bar: Control = $TopRow/EnemySide/EnemyHealthPanel/EnemyHealthBar
@@ -16,12 +17,14 @@ const WORD_COLLECT_SHAKE_ROT := 0.065
 @onready var enemy_word_panel: PanelContainer = $TopRow/EnemySide/EnemyWordPanel
 @onready var player_word_label: Label = $TopRow/PlayerSide/PlayerWordPanel/PlayerWordLabel
 @onready var enemy_word_label: Label = $TopRow/EnemySide/EnemyWordPanel/EnemyWordLabel
-@onready var player_ammo_label: Label = $PlayerAmmoLabel
-@onready var action_charge_icon: Label = $ActionChargeIcon
-@onready var enemy_action_charge_icon: Label = $TopRow/EnemySide/EnemyActionChargeIcon
+@onready var player_ammo_label: Label = $TopRow/PlayerSide/PlayerCollectiblesRow/PlayerAmmoLabel
+@onready var action_charge_icon: Label = $TopRow/PlayerSide/PlayerCollectiblesRow/ActionChargeIcon
+@onready var claw_charge_icon: Label = $TopRow/PlayerSide/PlayerCollectiblesRow/ClawChargeIcon
+@onready var enemy_action_charge_icon: Label = $TopRow/EnemySide/EnemyCollectiblesRow/EnemyActionChargeIcon
 @onready var status_label: Label = $StatusLabel
 @onready var debug_label: Label = $CombatDebugLabel
 @onready var _damage_number_layer: Control = $DamageNumberLayer
+@onready var _collectible_fx_layer: Control = $CollectibleFxLayer
 
 var _player_combat: Node
 var _enemy_combat: Node
@@ -31,12 +34,32 @@ var _enemy: Enemy
 var _framed_word_ui := false
 var _shooter: LetterShooter
 var _action_controller: Node
+var _claw_controller: PlayerClawController
 var _enemy_action_controller: Node
 var _player_damage_slot := 0
 var _enemy_damage_slot := 0
 var _last_player_word_len := 0
 var _player_word_pop_tween: Tween
 var _block_flash: ActionBlockFlash
+var _slow_motion_banner: SlowMotionBannerFx
+var _claw_targeting_row: ClawTargetingLetterRow
+
+
+func _ready() -> void:
+	_ensure_claw_targeting_row()
+
+
+func get_claw_targeting_row() -> ClawTargetingLetterRow:
+	_ensure_claw_targeting_row()
+	return _claw_targeting_row
+
+
+func _ensure_claw_targeting_row() -> void:
+	if _claw_targeting_row != null:
+		return
+	_claw_targeting_row = ClawTargetingLetterRowScript.new() as ClawTargetingLetterRow
+	_claw_targeting_row.name = "ClawTargetingLetterRow"
+	add_child(_claw_targeting_row)
 
 
 func setup(
@@ -112,6 +135,17 @@ func bind_combat_actions(shooter: LetterShooter, action_controller: Node) -> voi
 		_on_action_charge_changed(_action_controller.get_charges(), _action_controller.max_action_charges)
 
 
+func bind_claw_controller(claw_controller: PlayerClawController) -> void:
+	_claw_controller = claw_controller
+	if _claw_controller:
+		_claw_controller.configure(
+			_word_controller,
+			self,
+		)
+		_claw_controller.claw_charge_changed.connect(_on_claw_charge_changed)
+		_on_claw_charge_changed(_claw_controller.get_charges(), _claw_controller.max_claw_charges)
+
+
 func bind_enemy_action(action_controller: Node) -> void:
 	_enemy_action_controller = action_controller
 	if _enemy_action_controller:
@@ -133,6 +167,18 @@ func show_action_block_flash(defender_is_player: bool) -> void:
 		_block_flash.play_block_flash(defender_is_player)
 
 
+func ensure_slow_motion_banner() -> SlowMotionBannerFx:
+	if _slow_motion_banner == null:
+		_slow_motion_banner = SlowMotionBannerFx.ensure_on(self)
+	return _slow_motion_banner
+
+
+func show_slow_motion_banner() -> void:
+	var banner := ensure_slow_motion_banner()
+	if banner:
+		banner.play_flash()
+
+
 func _on_ammo_changed(current: int, maximum: int) -> void:
 	if player_ammo_label == null:
 		return
@@ -144,6 +190,13 @@ func _on_action_charge_changed(charges: int, _max_charges: int) -> void:
 	if action_charge_icon == null:
 		return
 	action_charge_icon.visible = charges > 0
+
+
+func _on_claw_charge_changed(charges: int, _max_charges: int) -> void:
+	if claw_charge_icon == null:
+		return
+	claw_charge_icon.visible = charges > 0
+	claw_charge_icon.text = "CLAW ×%d" % charges
 
 
 func _on_enemy_action_charge_changed(charges: int, _max_charges: int) -> void:
@@ -308,6 +361,30 @@ func get_player_word_letter_positions(word: String) -> PackedVector2Array:
 	return positions
 
 
+func get_player_collectible_slot_screen_position(slot_id: String) -> Vector2:
+	var target := _player_collectible_slot_control(slot_id)
+	if target == null:
+		var viewport := get_viewport().get_visible_rect()
+		return viewport.position + Vector2(72.0, 96.0)
+	target.force_update_transform()
+	return target.get_global_rect().get_center()
+
+
+func get_collectible_fx_layer() -> Control:
+	return _collectible_fx_layer
+
+
+func _player_collectible_slot_control(slot_id: String) -> Control:
+	match slot_id.to_lower():
+		"combat", "action":
+			return action_charge_icon
+		"claw":
+			return claw_charge_icon
+		"ammo":
+			return player_ammo_label
+	return null
+
+
 func get_garble_message_anchor() -> Vector2:
 	if player_word_panel != null and player_word_panel.visible:
 		var word_rect := player_word_panel.get_global_rect()
@@ -354,11 +431,11 @@ func get_word_exit_target(for_player: bool) -> Vector2:
 	return Vector2(viewport.position.x - margin, viewport.position.y + viewport.size.y * 0.35)
 
 
-func set_side_word_visible(for_player: bool, visible: bool) -> void:
+func set_side_word_visible(for_player: bool, word_visible: bool) -> void:
 	if for_player:
-		_player_word_hidden = not visible
+		_player_word_hidden = not word_visible
 	else:
-		_enemy_word_hidden = not visible
+		_enemy_word_hidden = not word_visible
 	refresh_words()
 
 
@@ -403,6 +480,17 @@ func get_debug_text() -> String:
 		lines.append(
 			"Last dmg: %s -> %s word=%s len=%s dmg=%s"
 			% [e.get("attacker", "?"), e.get("defender", "?"), e.get("word", ""), e.get("word_length", 0), e.get("damage", 0)]
+		)
+	if _claw_controller:
+		var claw_info: Dictionary = _claw_controller.get_debug_info()
+		lines.append(
+			"Claw %s | charges %s | targets %s | selected %s"
+			% [
+				str(claw_info.get("state", "?")),
+				str(claw_info.get("charges", 0)),
+				str(claw_info.get("target_count", 0)),
+				str(claw_info.get("selected_letter", "")),
+			]
 		)
 	return "\n".join(lines)
 

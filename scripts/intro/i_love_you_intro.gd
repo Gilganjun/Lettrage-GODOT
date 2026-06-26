@@ -453,10 +453,10 @@ func _sprite_focus(key: String) -> Vector2:
 	return Vector2(480, 270)
 
 
-func _set_layer_visible(layer_name: String, visible: bool) -> void:
+func _set_layer_visible(layer_name: String, show_layer: bool) -> void:
 	var layer: Node2D = _layer_nodes.get(layer_name)
 	if layer:
-		layer.visible = visible
+		layer.visible = show_layer
 
 
 func _is_layer_visible(layer_name: String) -> bool:

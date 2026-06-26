@@ -59,9 +59,16 @@ var movement_locked := false
 var _idle_stuck_timer := 0.0
 var _action_controller: Node
 var _action_approach_stuck_time := 0.0
+var _action_impact_sync: RefCounted
+var _action_facing_locked := false
+var _action_facing_target: Node2D
+var _finisher_survivor_active := false
+var _finisher_victim: Node2D = null
+var _finisher_arrived := false
 
 const IDLE_STUCK_RESUME_SECONDS := 1.75
 const IDLE_VELOCITY_EPSILON := 2.0
+const EnemyActionImpactSyncScript := preload("res://scripts/enemy/enemy_action_impact_sync.gd")
 
 const FLOOR_SNAP := 4.0
 const MAX_AIR_JUMPS := 1
@@ -93,6 +100,7 @@ func _ready() -> void:
 		movement_controller.direction_changed.connect(func(_d): direction_changes += 1)
 	if ambient_idle_enabled:
 		_schedule_ambient_idle()
+	_action_impact_sync = EnemyActionImpactSyncScript.new()
 
 
 func _setup_word_and_shield() -> void:
@@ -337,12 +345,94 @@ func debug_force_validation() -> void:
 
 func set_action_sequence_targeted(active: bool) -> void:
 	_action_sequence_targeted = active
-	if not active:
+	if active:
+		refresh_action_facing_lock()
+	else:
+		unlock_action_facing()
 		end_action_strike_freeze()
+		_end_action_impact_sync_after_sequence()
+
+
+func _end_action_impact_sync_after_sequence() -> void:
+	if _combat_owns_sprite_presentation():
+		end_action_impact_sync_for_finisher()
+	else:
+		end_action_impact_sync()
+
+
+func _combat_owns_sprite_presentation() -> bool:
+	var combat := get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat:
+		return (combat as CharacterCombat).owns_action_sprite_presentation()
+	return false
 
 
 func is_action_sequence_targeted() -> bool:
 	return _action_sequence_targeted
+
+
+func lock_action_facing_toward(target: Node2D) -> void:
+	_action_facing_locked = true
+	_action_facing_target = target
+	refresh_action_facing_lock()
+
+
+func unlock_action_facing() -> void:
+	_action_facing_locked = false
+	_action_facing_target = null
+
+
+func refresh_action_facing_lock() -> void:
+	if not _action_facing_locked or _action_facing_target == null:
+		return
+	facing = 1 if _action_facing_target.global_position.x >= global_position.x else -1
+	if sprite:
+		sprite.flip_h = facing < 0
+
+
+func _impact_sync() -> RefCounted:
+	if _action_impact_sync == null:
+		_action_impact_sync = EnemyActionImpactSyncScript.new()
+	return _action_impact_sync
+
+
+func begin_action_impact_sync(attack: ActionAttackDefinition) -> void:
+	refresh_action_facing_lock()
+	_impact_sync().begin(attack)
+	if sprite:
+		_impact_sync().tick(sprite, 1, facing)
+
+
+func tick_action_impact_sync(player_attack_frame: int) -> void:
+	if not _impact_sync().is_active() or sprite == null:
+		return
+	if _combat_owns_sprite_presentation():
+		end_action_impact_sync_for_finisher()
+		return
+	refresh_action_facing_lock()
+	_impact_sync().tick(sprite, player_attack_frame, facing)
+
+
+func notify_action_impact_hit(hit_idx: int, total_hits: int) -> void:
+	if sprite:
+		_impact_sync().notify_hit_landed(sprite, hit_idx, total_hits)
+
+
+func freeze_action_impact_after_block() -> void:
+	_impact_sync().freeze_after_block()
+
+
+func end_action_impact_sync() -> void:
+	_impact_sync().end()
+	if _combat_owns_sprite_presentation():
+		return
+	if animation_controller and sprite:
+		animation_controller.force_apply_state(movement_state, facing, _floor_distance)
+
+
+func end_action_impact_sync_for_finisher() -> void:
+	## Stop Impact poses so Death / finisher reactions can own the sprite.
+	_impact_sync().end()
 
 
 func begin_action_strike_freeze() -> void:
@@ -359,19 +449,58 @@ func is_action_strike_frozen() -> bool:
 	return _action_strike_frozen
 
 
+func begin_finisher_survivor_pose(victim: Node2D) -> void:
+	if not _is_defeated_fighter(victim):
+		return
+	_finisher_survivor_active = true
+	_finisher_victim = victim
+	_finisher_arrived = false
+	movement_locked = true
+	_action_strike_frozen = false
+	_action_sequence_targeted = false
+	_action_facing_locked = false
+	_action_facing_target = null
+	velocity = Vector2.ZERO
+	if movement_controller:
+		movement_controller.clear_letter_chase()
+
+
+func end_finisher_survivor_pose() -> void:
+	_finisher_survivor_active = false
+	_finisher_victim = null
+	_finisher_arrived = false
+	velocity = Vector2.ZERO
+
+
+func is_finisher_survivor_active() -> bool:
+	return _finisher_survivor_active
+
+
 func _physics_process(delta: float) -> void:
 	var combat := get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat and (combat as CharacterCombat).is_dead():
+		velocity = Vector2.ZERO
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
+	# Finish an in-flight action even when round-end pause locks movement.
+	if _action_controller and _action_controller.process_action(self, delta):
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		_update_movement_state()
+		return
+	if _finisher_survivor_active:
+		_process_finisher_survivor(delta)
+		move_and_slide()
+		floor_snap_length = FLOOR_SNAP
+		return
 	if _action_strike_frozen:
 		global_position = _action_freeze_position
 		velocity = Vector2.ZERO
 		move_and_slide()
 		floor_snap_length = FLOOR_SNAP
-		_update_movement_state()
-		return
-	if combat and combat.is_dead():
-		velocity = Vector2.ZERO
-		move_and_slide()
-		floor_snap_length = FLOOR_SNAP
+		if not _combat_owns_sprite_presentation():
+			_update_movement_state()
 		return
 	if movement_locked:
 		velocity = Vector2.ZERO
@@ -385,11 +514,8 @@ func _physics_process(delta: float) -> void:
 		floor_snap_length = FLOOR_SNAP
 		_update_movement_state()
 		return
-	if _action_controller and _action_controller.process_action(self, delta):
-		move_and_slide()
-		floor_snap_length = FLOOR_SNAP
-		_update_movement_state()
-		return
+	if _action_controller:
+		_action_controller.process_action(self, delta)
 	if movement_controller:
 		movement_controller.tick(delta)
 	_tick_ambient_idle(delta)
@@ -444,7 +570,7 @@ func _process_platformer(delta: float) -> void:
 			icon_chase_jump = true
 		elif icon_chase_active:
 			chase_dir = _action_controller.get_icon_chase_direction(pickup_pt, cfg.max_speed)
-	elif letter_targeting:
+	if chase_dir == 0 and letter_targeting:
 		chase_dir = letter_targeting.get_chase_direction(global_position)
 	var patrol_dir := movement_controller.get_desired_direction(global_position.x) if movement_controller else 1
 	var desired := patrol_dir
@@ -674,8 +800,63 @@ func _overlaps_any_ladder() -> bool:
 	return false
 
 
+func _process_finisher_survivor(delta: float) -> void:
+	if not _is_defeated_fighter(_finisher_victim):
+		end_finisher_survivor_pose()
+		return
+	var cfg := _cfg()
+	var motion := FinisherSurvivorPose.compute_motion(
+		self,
+		_finisher_victim,
+		delta,
+		cfg.max_speed,
+		cfg.gravity,
+		cfg.max_falling_speed,
+		is_on_floor(),
+	)
+	velocity = motion.get("velocity", Vector2.ZERO)
+	facing = int(motion.get("facing", facing))
+	_finisher_arrived = bool(motion.get("arrived", true))
+	if sprite:
+		sprite.flip_h = facing < 0
+	_update_finisher_survivor_animation()
+
+
+func _update_finisher_survivor_animation() -> void:
+	var new_state := EnemyAnimation.MovementState.IDLE
+	if not _finisher_arrived and absf(velocity.x) > 8.0:
+		new_state = EnemyAnimation.MovementState.RUN
+	elif not is_on_floor():
+		new_state = (
+			EnemyAnimation.MovementState.JUMP
+			if velocity.y < -40.0
+			else EnemyAnimation.MovementState.FALL
+		)
+	if new_state != movement_state:
+		movement_state = new_state
+		movement_state_changed.emit(movement_state)
+	animation_controller.force_apply_state(movement_state, facing, _floor_distance)
+
+
+func _is_defeated_fighter(body: Node2D) -> bool:
+	if body == null or not is_instance_valid(body):
+		return false
+	var combat := body.get_node_or_null("CharacterCombat")
+	if combat is CharacterCombat:
+		var cc := combat as CharacterCombat
+		return cc.is_dead() or cc.has_pending_action_death()
+	return false
+
+
 func _update_movement_state() -> void:
+	if _finisher_survivor_active:
+		_update_finisher_survivor_animation()
+		return
+	if _combat_owns_sprite_presentation():
+		return
 	if _action_controller and _action_controller.is_active():
+		return
+	if _impact_sync().is_active():
 		return
 	if _action_strike_frozen or _action_sequence_targeted:
 		return

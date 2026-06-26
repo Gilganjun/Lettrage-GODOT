@@ -27,9 +27,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -190.0
-offset_top = -388.0
+offset_top = -420.0
 offset_right = 190.0
-offset_bottom = -96.0
+offset_bottom = -150.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -51,13 +51,21 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Panel/Margin"]
+[node name="RootVBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TabBar" type="HBoxContainer" parent="Panel/Margin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin/RootVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 2
 
-[node name="Content" type="VBoxContainer" parent="Panel/Margin/Scroll"]
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/RootVBox/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4

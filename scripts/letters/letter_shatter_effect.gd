@@ -3,8 +3,6 @@ extends Node2D
 
 ## Letter destroy VFX using the live alphabet texture — independent of shield FX.
 
-const LetterTint := preload("res://scripts/letters/letter_tint.gd")
-
 enum Style {
 	GRID_SHATTER,
 	PIXEL_BURST,
@@ -27,8 +25,8 @@ static func spawn(
 	parent: Node,
 	global_pos: Vector2,
 	texture: Texture2D,
-	modulate: Color,
-	scale: Vector2,
+	tint_color: Color,
+	sprite_scale: Vector2,
 	style: Style = active_style,
 ) -> LetterShatterEffect:
 	if parent == null or texture == null:
@@ -36,23 +34,23 @@ static func spawn(
 	var effect := LetterShatterEffect.new()
 	parent.add_child(effect)
 	effect.global_position = global_pos
-	effect.start(texture, modulate, scale, style)
+	effect.start(texture, tint_color, sprite_scale, style)
 	return effect
 
 
-func start(texture: Texture2D, modulate: Color, scale: Vector2, style: Style) -> void:
+func start(texture: Texture2D, tint_color: Color, sprite_scale: Vector2, style: Style) -> void:
 	_style = style
 	_lifetime = SHARD_LIFETIME
 	match style:
 		Style.GRID_SHATTER:
 			_lifetime = SHARD_LIFETIME
-			_build_grid_shatter(texture, modulate, scale, 4, 4)
+			_build_grid_shatter(texture, tint_color, sprite_scale, 4, 4)
 		Style.PIXEL_BURST:
 			_lifetime = 0.55
-			_build_pixel_burst(texture, modulate, scale)
+			_build_pixel_burst(texture, tint_color, sprite_scale)
 		Style.SOFT_DISSOLVE:
 			_lifetime = 0.35
-			_build_soft_dissolve(texture, modulate, scale)
+			_build_soft_dissolve(texture, tint_color, sprite_scale)
 	if _shards.is_empty() and get_child_count() == 0:
 		queue_free()
 		return
@@ -89,8 +87,8 @@ func _process(delta: float) -> void:
 
 func _build_grid_shatter(
 	texture: Texture2D,
-	modulate: Color,
-	scale: Vector2,
+	tint_color: Color,
+	sprite_scale: Vector2,
 	cols: int,
 	rows: int,
 ) -> void:
@@ -107,12 +105,12 @@ func _build_grid_shatter(
 			shard.texture = atlas
 			shard.centered = true
 			var local := Vector2(
-				(col - (cols - 1) * 0.5) * cell.x * scale.x,
-				(row - (rows - 1) * 0.5) * cell.y * scale.y,
+				(col - (cols - 1) * 0.5) * cell.x * sprite_scale.x,
+				(row - (rows - 1) * 0.5) * cell.y * sprite_scale.y,
 			)
 			shard.position = local
-			shard.scale = scale
-			LetterTint.apply(shard, modulate)
+			shard.scale = sprite_scale
+			LetterTint.apply(shard, tint_color)
 			add_child(shard)
 			var dir := local.normalized() if local.length_squared() > 1.0 else Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
 			var speed := randf_range(95.0, 210.0) * maxf(scale.x, 0.35)
@@ -122,12 +120,12 @@ func _build_grid_shatter(
 				"velocity": dir * speed + Vector2(randf_range(-20, 20), randf_range(-40, 10)),
 				"start_rot": randf_range(-0.4, 0.4),
 				"rot_speed": randf_range(-9.0, 9.0),
-				"start_modulate": modulate,
-				"base_scale": scale,
+				"start_modulate": tint_color,
+				"base_scale": sprite_scale,
 			})
 
 
-func _build_pixel_burst(texture: Texture2D, modulate: Color, scale: Vector2) -> void:
+func _build_pixel_burst(texture: Texture2D, tint_color: Color, sprite_scale: Vector2) -> void:
 	var particles := CPUParticles2D.new()
 	particles.texture = texture
 	particles.one_shot = true
@@ -140,25 +138,25 @@ func _build_pixel_burst(texture: Texture2D, modulate: Color, scale: Vector2) -> 
 	particles.direction = Vector2(0, -1)
 	particles.spread = 180.0
 	particles.gravity = Vector2(0, 220.0)
-	particles.initial_velocity_min = 70.0 * scale.x
-	particles.initial_velocity_max = 170.0 * scale.x
+	particles.initial_velocity_min = 70.0 * sprite_scale.x
+	particles.initial_velocity_max = 170.0 * sprite_scale.x
 	particles.angular_velocity_min = -280.0
 	particles.angular_velocity_max = 280.0
-	particles.scale_amount_min = scale.x * 0.18
-	particles.scale_amount_max = scale.x * 0.42
-	LetterTint.apply_particles(particles, modulate)
+	particles.scale_amount_min = sprite_scale.x * 0.18
+	particles.scale_amount_max = sprite_scale.x * 0.42
+	LetterTint.apply_particles(particles, tint_color)
 	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	particles.emission_sphere_radius = 8.0 * scale.x
+	particles.emission_sphere_radius = 8.0 * sprite_scale.x
 	particles.local_coords = true
 	add_child(particles)
 
 
-func _build_soft_dissolve(texture: Texture2D, modulate: Color, scale: Vector2) -> void:
+func _build_soft_dissolve(texture: Texture2D, tint_color: Color, sprite_scale: Vector2) -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
 	sprite.centered = true
-	sprite.scale = scale
-	LetterTint.apply(sprite, modulate)
+	sprite.scale = sprite_scale
+	LetterTint.apply(sprite, tint_color)
 	add_child(sprite)
 	_shards.append({
 		"sprite": sprite,
@@ -166,8 +164,8 @@ func _build_soft_dissolve(texture: Texture2D, modulate: Color, scale: Vector2) -
 		"velocity": Vector2(randf_range(-12, 12), randf_range(-30, -8)),
 		"start_rot": 0.0,
 		"rot_speed": randf_range(-4.0, 4.0),
-		"start_modulate": modulate,
-		"base_scale": scale * 1.08,
+		"start_modulate": tint_color,
+		"base_scale": sprite_scale * 1.08,
 	})
 
 

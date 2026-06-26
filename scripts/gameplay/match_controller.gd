@@ -18,6 +18,8 @@ enum Phase {
 
 @export var config: LevelGameplayConfig
 
+const MANUAL_CONTINUE_INPUT_LOCKOUT_SEC := 3.0
+
 var _overlay: MatchOverlay
 var _ctx: Dictionary = {}
 var _phase := Phase.IDLE
@@ -36,6 +38,7 @@ var _ledger := RoundCombatLedger.new()
 var _action_exchanges := ActionExchangeRegistry.new()
 var _manual_continue_input_lockout := 0.0
 var _round_end_wait_player_action := false
+var _kill_cam_started_msec := -1
 
 
 func setup(overlay: MatchOverlay, round_ctx: Dictionary) -> void:
@@ -100,6 +103,7 @@ func _begin_next_round() -> void:
 	_round_splash_started = false
 	_ledger.reset()
 	_action_exchanges.reset()
+	FinisherKillCam.release(_ctx)
 	_clear_pending_round_end()
 	GameplayRoundReset.reset_round(_ctx)
 	_phase = Phase.COUNTDOWN
@@ -183,6 +187,7 @@ func _start_round_play() -> void:
 func on_player_death() -> void:
 	if _phase != Phase.ROUND_ACTIVE:
 		return
+	_begin_finisher_kill_cam(false)
 	if _is_any_action_blocking_round_end():
 		_queue_round_end(false)
 		return
@@ -192,10 +197,28 @@ func on_player_death() -> void:
 func on_enemy_death() -> void:
 	if _phase != Phase.ROUND_ACTIVE:
 		return
+	_begin_finisher_kill_cam(true)
 	if _is_any_action_blocking_round_end():
 		_queue_round_end(true)
 		return
 	_end_round(true)
+
+
+func _begin_finisher_kill_cam(player_won_round: bool) -> void:
+	var victim: Node2D = _ctx.get("enemy") if player_won_round else _ctx.get("player")
+	_kill_cam_started_msec = Time.get_ticks_msec()
+	FinisherKillCam.arm(_ctx, victim, config)
+	GameplayRoundReset.pause_after_round_end(_ctx)
+
+
+func _finisher_kill_cam_elapsed() -> bool:
+	if _kill_cam_started_msec < 0:
+		return true
+	var duration := 3.0
+	if config != null:
+		duration = config.finisher_kill_cam_duration_sec
+	var elapsed := float(Time.get_ticks_msec() - _kill_cam_started_msec) / 1000.0
+	return elapsed >= duration
 
 
 func _is_any_action_blocking_round_end() -> bool:
@@ -239,22 +262,48 @@ func _queue_round_end(player_won: bool) -> void:
 
 
 func _tick_round_end_pending(delta: float) -> void:
+	_round_end_delay_timer += delta
 	if _waiting_for_action_finish:
-		if not _round_end_wait_player_action:
+		if _round_end_wait_player_action:
+			var player_action: Node = _ctx.get("player_action")
+			if player_action == null \
+					or not player_action.has_method("is_active") \
+					or not player_action.call("is_active"):
+				_waiting_for_action_finish = false
+		else:
+			var enemy: Node = _ctx.get("enemy")
+			var enemy_action: Node = null
+			if enemy and enemy.has_method("get_action_controller"):
+				enemy_action = enemy.get_action_controller()
+			if enemy_action == null \
+					or not enemy_action.has_method("is_active") \
+					or not enemy_action.call("is_active"):
+				_waiting_for_action_finish = false
+		if _waiting_for_action_finish and _round_end_delay_timer >= 6.0:
+			_force_finish_blocking_actions()
 			_waiting_for_action_finish = false
-			_round_end_delay_timer = config.post_action_round_result_delay
+		if _waiting_for_action_finish:
+			return
+	if not _finisher_kill_cam_elapsed():
 		return
-	if _round_end_delay_timer > 0.0:
-		_round_end_delay_timer -= delta
-		if _round_end_delay_timer <= 0.0:
-			_flush_pending_round_end()
+	_flush_pending_round_end()
+
+
+func _force_finish_blocking_actions() -> void:
+	var player_action: Node = _ctx.get("player_action")
+	if player_action and player_action.has_method("abort_for_finisher_survivor"):
+		player_action.call("abort_for_finisher_survivor")
+	var enemy: Node = _ctx.get("enemy")
+	if enemy and enemy.has_method("get_action_controller"):
+		var enemy_action = enemy.get_action_controller()
+		if enemy_action and enemy_action.has_method("abort_for_finisher_survivor"):
+			enemy_action.call("abort_for_finisher_survivor")
 
 
 func _on_action_sequence_finished_for_round_end() -> void:
 	if not _pending_round_end or _phase != Phase.ROUND_END_PENDING:
 		return
 	_waiting_for_action_finish = false
-	_round_end_delay_timer = config.post_action_round_result_delay
 
 
 func _flush_pending_round_end() -> void:
@@ -270,6 +319,7 @@ func _clear_pending_round_end() -> void:
 	_waiting_for_action_finish = false
 	_round_end_wait_player_action = false
 	_round_end_delay_timer = 0.0
+	_kill_cam_started_msec = -1
 
 
 func _connect_player_action_signals() -> void:
@@ -297,10 +347,14 @@ func _end_round(player_won: bool) -> void:
 		_player_round_wins += 1
 	else:
 		_enemy_round_wins += 1
-	_present_round_end(player_won)
+	_pending_round_end = true
+	_waiting_for_action_finish = false
+	_round_end_wait_player_action = false
+	_phase = Phase.ROUND_END_PENDING
 
 
 func _present_round_end(player_won: bool) -> void:
+	FinisherKillCam.release(_ctx)
 	GameplayRoundReset.pause_after_round_end(_ctx)
 	round_ended.emit(player_won)
 	if player_won:
@@ -320,7 +374,7 @@ func _show_round_result(player_won: bool, match_won: bool = false) -> void:
 		_phase = Phase.MATCH_VICTORY
 		_phase_timer = config.match_result_hold_seconds
 		if not config.use_inter_round_countdown:
-			_manual_continue_input_lockout = 0.5
+			_manual_continue_input_lockout = MANUAL_CONTINUE_INPUT_LOCKOUT_SEC
 	else:
 		_phase = Phase.ROUND_RESULT
 		if config.use_inter_round_countdown:
@@ -328,11 +382,10 @@ func _show_round_result(player_won: bool, match_won: bool = false) -> void:
 			_manual_continue_input_lockout = 0.0
 		else:
 			_countdown_remaining = 0.0
-			_manual_continue_input_lockout = 0.5
+			_manual_continue_input_lockout = MANUAL_CONTINUE_INPUT_LOCKOUT_SEC
 	if _overlay:
-		var victory_report: Dictionary = {}
-		if player_won:
-			victory_report = _ledger.build_report_for("player")
+		var player_report := _ledger.build_report_for("player")
+		var enemy_report := _ledger.build_report_for("enemy")
 		_overlay.show_round_result(
 			player_won,
 			_player_round_wins,
@@ -340,7 +393,8 @@ func _show_round_result(player_won: bool, match_won: bool = false) -> void:
 			_current_round,
 			0 if match_won else maxi(int(ceilf(_countdown_remaining)), 1),
 			match_won,
-			victory_report,
+			player_report,
+			enemy_report,
 			not config.use_inter_round_countdown,
 		)
 
@@ -385,12 +439,14 @@ func _show_match_defeat() -> void:
 	_phase = Phase.MATCH_DEFEAT
 	_phase_timer = config.match_result_hold_seconds
 	if not config.use_inter_round_countdown:
-		_manual_continue_input_lockout = 0.5
+		_manual_continue_input_lockout = MANUAL_CONTINUE_INPUT_LOCKOUT_SEC
 	if _overlay:
 		_overlay.show_match_defeat(
 			MatchPhrases.random_defeat_line(_rng),
 			_player_round_wins,
 			_enemy_round_wins,
+			_ledger.build_report_for("player"),
+			_ledger.build_report_for("enemy"),
 			not config.use_inter_round_countdown,
 		)
 

@@ -45,6 +45,7 @@ const POP_SOUNDS := [
 @onready var round_intro_backdrop: RoundIntroBackdrop = $UI/RoundIntroBackdrop
 @onready var match_controller: MatchController = $MatchController
 @onready var action_spawner: Node = $World/ActionCollectibleSpawner
+@onready var claw_spawner: Node = $World/ClawCollectibleSpawner
 
 var _collider_nodes: Array[Node] = []
 var _collision_debug_enabled := false
@@ -61,6 +62,7 @@ var _player_combat: Node
 var _enemy_combat: Node
 var _player_shooter: LetterShooter
 var _player_action: Node
+var _player_claw: PlayerClawController
 var _player_spawn := Vector2(279.0, 231.0)
 var _player_platform_landing := Vector2(279.0, 413.0)
 var _enemy_spawn := Vector2(740.0, 406.0)
@@ -170,8 +172,10 @@ func _round_reset_context() -> Dictionary:
 		"enemy_combat": _enemy_combat,
 		"player_shooter": _player_shooter,
 		"player_action": _player_action,
+		"player_claw": _player_claw,
 		"player_shield": _player_shield,
 		"action_spawner": action_spawner,
+		"claw_spawner": claw_spawner,
 		"player_spawn": _player_spawn,
 		"player_platform_landing": _player_platform_landing,
 		"enemy_spawn": _enemy_spawn,
@@ -226,8 +230,11 @@ func _spawn_player() -> void:
 	_player_shield = attached.get("shield")
 	_player_shooter = attached.get("shooter")
 	_player_action = attached.get("action")
+	_player_claw = attached.get("claw")
 	if _player_action:
 		_player_action.debug_infinite_action = debug_mode
+	if _player_claw:
+		_player_claw.sync_debug_infinite(debug_mode)
 	_player_combat = PlayerAttach.attach_combat(player, "player", _player_spawn)
 	_player_combat.auto_respawn_on_death = false
 	if level_root.has_method("collect_ladder_areas"):
@@ -269,6 +276,8 @@ func _wire_hud() -> void:
 		combat_hud.bind_words(word_controller, _enemy)
 	if combat_hud.has_method("bind_combat_actions"):
 		combat_hud.bind_combat_actions(_player_shooter, _player_action)
+	if combat_hud.has_method("bind_claw_controller") and _player_claw:
+		combat_hud.bind_claw_controller(_player_claw)
 	if combat_hud.has_method("bind_enemy_action") and _enemy:
 		combat_hud.bind_enemy_action(_enemy.get_action_controller())
 	if hud.has_method("set_word_display_on_combat_hud"):
@@ -288,6 +297,8 @@ func _wire_hud() -> void:
 func _apply_debug_visibility() -> void:
 	if _player_action:
 		_player_action.debug_infinite_action = debug_mode
+	if _player_claw:
+		_player_claw.sync_debug_infinite(debug_mode)
 	if hud.has_method("set_debug_visible"):
 		hud.set_debug_visible(debug_mode)
 	combat_hud.set_debug_visible(debug_mode)
@@ -409,6 +420,8 @@ func _blocks_word_submit() -> bool:
 	if _player_combat and _player_combat.blocks_word_submit():
 		return true
 	if _player_action and _player_action.has_method("blocks_word_submit") and _player_action.blocks_word_submit():
+		return true
+	if _player_claw and _player_claw.blocks_word_submit():
 		return true
 	return false
 

@@ -199,9 +199,9 @@ func _build_face_frames() -> SpriteFrames:
 	return frames
 
 
-func _make_fizz_particles(name: String) -> CPUParticles2D:
+func _make_fizz_particles(particle_name: String) -> CPUParticles2D:
 	var particles := CPUParticles2D.new()
-	particles.name = name
+	particles.name = particle_name
 	particles.texture = _load_texture(PATH_GLOW)
 	particles.material = _add_material
 	particles.emitting = false
@@ -226,9 +226,9 @@ func _make_fizz_particles(name: String) -> CPUParticles2D:
 	return particles
 
 
-func _make_burst_particles(name: String, amount: int) -> CPUParticles2D:
+func _make_burst_particles(particle_name: String, amount: int) -> CPUParticles2D:
 	var particles := CPUParticles2D.new()
-	particles.name = name
+	particles.name = particle_name
 	particles.texture = _load_texture(PATH_GLOW)
 	particles.material = _add_material
 	particles.emitting = false

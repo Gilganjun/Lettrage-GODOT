@@ -18,4 +18,7 @@ extends Resource
 ## Single-player: wait for Continue. Set true for multiplayer / 2-player timed advance.
 @export var use_inter_round_countdown: bool = false
 @export var post_action_round_result_delay: float = 1.0
+@export var finisher_kill_cam_duration_sec: float = 3.0
+@export_range(0.05, 1.0, 0.01) var finisher_kill_cam_slow_scale: float = 0.22
+@export_range(0.35, 0.95, 0.01) var finisher_kill_cam_screen_fill: float = 0.52
 @export var match_result_hold_seconds: float = 4.0

@@ -14,6 +14,7 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 		pickup_size = body_rect.size
 
 	var shield := PlayerShield.new()
+	shield.name = "PlayerShield"
 	player.add_child(shield)
 	shield.attach_to_body(player, pickup_center)
 	if shield.shield:
@@ -37,6 +38,7 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 
 	const PlayerRollScript := preload("res://scripts/player/player_roll.gd")
 	const PlayerActionControllerScript := preload("res://scripts/player/player_action_controller.gd")
+	const PlayerClawControllerScript := preload("res://scripts/player/player_claw_controller.gd")
 
 	var roll: Node = PlayerRollScript.new()
 	player.add_child(roll)
@@ -44,12 +46,18 @@ static func attach(player: CharacterBody2D, word_controller: WordGameController)
 	var action: Node = PlayerActionControllerScript.new()
 	player.add_child(action)
 
+	var claw: PlayerClawController = PlayerClawControllerScript.new()
+	claw.configure(word_controller, null)
+	claw.sync_to_body(pickup_center)
+	player.add_child(claw)
+
 	return {
 		"shield": shield,
 		"collector": collector,
 		"shooter": shooter,
 		"roll": roll,
 		"action": action,
+		"claw": claw,
 	}
 
 

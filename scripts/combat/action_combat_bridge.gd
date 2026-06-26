@@ -13,6 +13,8 @@ static func resolve_action_hit(
 ) -> Dictionary:
 	if exchange != null and exchange.is_hit_blocked(hit_idx):
 		exchange.notify_hit_blocked(hit_idx)
+		if defender_combat != null:
+			ActionBlockImpactSfx.play(defender_combat)
 		return {"blocked": true, "dealt": 0}
 	if defender_combat == null or not _can_apply_action_hit(defender_combat):
 		return {"blocked": false, "dealt": 0}

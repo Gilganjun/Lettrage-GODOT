@@ -90,7 +90,8 @@ func _try_collect_for_player(body: CharacterBody2D) -> void:
 	if controller.get_charges() >= controller.max_action_charges:
 		return
 	controller.add_charge(1)
-	_resolve_pickup()
+	PowerUpCollectSfx.play_combat(self)
+	_resolve_player_pickup("COMBAT", "combat")
 
 
 func _try_collect_for_enemy(body: CharacterBody2D) -> void:
@@ -109,6 +110,12 @@ func _resolve_pickup() -> void:
 	_resolved = true
 	collected.emit()
 	queue_free()
+
+
+func _resolve_player_pickup(label_text: String, slot_id: String) -> void:
+	_resolved = true
+	collected.emit()
+	CollectiblePickupFlyFx.begin_player_pickup(self, label_text, slot_id, display_world_size)
 
 
 func _find_player_action_controller(player: CharacterBody2D) -> Node:

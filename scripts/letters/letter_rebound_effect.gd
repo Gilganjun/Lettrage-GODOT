@@ -3,8 +3,6 @@ extends Node2D
 
 ## Shield-only alternate VFX — letter rebounds, spins, sometimes grows, then fades out.
 
-const LetterTint := preload("res://scripts/letters/letter_tint.gd")
-
 const FLY_DURATION := 0.52
 const FADE_DURATION := 0.16
 
@@ -13,8 +11,8 @@ static func spawn(
 	parent: Node,
 	global_pos: Vector2,
 	texture: Texture2D,
-	modulate: Color,
-	scale: Vector2,
+	tint_color: Color,
+	sprite_scale: Vector2,
 	knockback_dir: Vector2,
 ) -> LetterReboundEffect:
 	if parent == null or texture == null:
@@ -23,16 +21,16 @@ static func spawn(
 	effect.z_index = 80
 	parent.add_child(effect)
 	effect.global_position = global_pos
-	effect.start(texture, modulate, scale, knockback_dir)
+	effect.start(texture, tint_color, sprite_scale, knockback_dir)
 	return effect
 
 
-func start(texture: Texture2D, modulate: Color, scale: Vector2, knockback_dir: Vector2) -> void:
+func start(texture: Texture2D, tint_color: Color, sprite_scale: Vector2, knockback_dir: Vector2) -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
 	sprite.centered = true
-	sprite.scale = scale
-	LetterTint.apply(sprite, modulate)
+	sprite.scale = sprite_scale
+	LetterTint.apply(sprite, tint_color)
 	add_child(sprite)
 
 	var dir := knockback_dir

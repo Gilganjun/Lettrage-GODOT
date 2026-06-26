@@ -29,6 +29,14 @@ var _victory_sequence_id := 0
 
 const VICTORY_SPLASH_HOLD_SEC := 2.0
 const VICTORY_TABLE_FADE_SEC := 0.5
+const CONTINUE_ACTIVATION_DELAY_SEC := 3.0
+const CONTINUE_BAR_BOTTOM_MARGIN := 28.0
+const CONTINUE_BAR_MAX_WIDTH := 340.0
+const VICTORY_STACK_GAP := 14.0
+const VICTORY_TOP_CLEARANCE := 72.0
+const DECLARATION_DEFAULT_HEIGHT := 320.0
+
+var _continue_activation_seq := 0
 
 
 func _ready() -> void:
@@ -41,12 +49,18 @@ func _ready() -> void:
 	hide_all()
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_SIZE_CHANGED:
+		call_deferred("_layout_victory_ui_stack")
+
+
 func _process(delta: float) -> void:
 	if _continue_input_lockout > 0.0:
 		_continue_input_lockout = maxf(_continue_input_lockout - delta, 0.0)
 
 
 func hide_all() -> void:
+	_cancel_continue_activation_schedule()
 	dismiss_round_result_ui()
 	visible = false
 	_awaiting_continue = false
@@ -131,7 +145,8 @@ func show_round_result(
 	round_number: int,
 	countdown_seconds: int,
 	match_won: bool = false,
-	victory_report: Dictionary = {},
+	player_report: Dictionary = {},
+	enemy_report: Dictionary = {},
 	manual_continue: bool = false,
 ) -> void:
 	visible = true
@@ -146,43 +161,22 @@ func show_round_result(
 		countdown_seconds,
 		match_won,
 	)
-	if player_won:
-		_panel.visible = not manual_continue
-		_subtitle.visible = not manual_continue
-		_score.visible = not manual_continue
-		_prompt.visible = false
-		_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-		_title.visible = false
-		if _you_win_voice:
-			_you_win_voice.play_you_win()
-		if _round_win_declaration and not victory_report.is_empty():
-			_begin_victory_breakdown_sequence(victory_report)
-		else:
-			_show_round_win_splash()
-			if _round_win_declaration:
-				_round_win_declaration.hide_panel()
-		if manual_continue:
-			call_deferred("_focus_continue_button")
-		elif not manual_continue and not match_won:
-			_subtitle.text = "Round %d complete" % round_number
-			_score.text = "Match: %d - %d" % [player_rounds, enemy_rounds]
+	_panel.visible = not manual_continue
+	_subtitle.visible = not manual_continue
+	_score.visible = not manual_continue
+	_prompt.visible = false
+	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	_title.visible = false
+	var has_scorecard := RoundWinDeclarationPanel.reports_have_entries(player_report, enemy_report)
+	if player_won and _you_win_voice:
+		_you_win_voice.play_you_win()
+	if has_scorecard:
+		_begin_round_end_sequence(player_won, player_report, enemy_report, round_number, match_won)
 	else:
-		_panel.visible = not manual_continue
-		_subtitle.visible = not manual_continue
-		_score.visible = not manual_continue
-		_hide_round_win_splash()
+		_show_round_end_splash(player_won, round_number, match_won)
 		if _round_win_declaration:
 			_round_win_declaration.hide_panel()
-		if _default_panel_style:
-			_panel.add_theme_stylebox_override("panel", _default_panel_style)
-		_title.visible = true
-		_title.text = "YOU LOSE"
-		_title.modulate = Color(1.0, 0.42, 0.38, 1.0)
-		if not manual_continue:
-			_subtitle.text = "Round %d complete" % round_number
-			_score.text = "Match: %d - %d" % [player_rounds, enemy_rounds]
-		else:
-			call_deferred("_focus_continue_button")
+	call_deferred("_layout_victory_ui_stack")
 
 
 func _configure_round_continue_ui(
@@ -196,10 +190,14 @@ func _configure_round_continue_ui(
 ) -> void:
 	_awaiting_continue = true
 	_manual_continue_active = manual_continue
-	_continue_input_lockout = 0.5 if _manual_continue_active else 0.0
 	_hide_continue_bar()
+	_set_continue_button_active(false)
+	if manual_continue:
+		_continue_input_lockout = CONTINUE_ACTIVATION_DELAY_SEC
+	else:
+		_continue_input_lockout = 0.0
 	if match_won and manual_continue:
-		_show_continue_bar(
+		_schedule_continue_activation(
 			"YOU WIN THE FIGHT!",
 			"Final: %d - %d" % [player_rounds, enemy_rounds],
 			"Fight Again  —  Enter / J",
@@ -214,7 +212,7 @@ func _configure_round_continue_ui(
 		return
 	if manual_continue:
 		_prompt.visible = false
-		_show_continue_bar(
+		_schedule_continue_activation(
 			"Round %d complete" % round_number,
 			"Match: %d - %d" % [player_rounds, enemy_rounds],
 		)
@@ -247,8 +245,97 @@ func _show_continue_bar(
 	_continue_bar.visible = true
 	if _continue_button:
 		_continue_button.visible = true
+		_continue_button.disabled = false
 		_continue_button.text = button_text
-		_focus_continue_button()
+	_focus_continue_button()
+	call_deferred("_layout_victory_ui_stack")
+
+
+func _layout_victory_ui_stack() -> void:
+	if not visible:
+		return
+	_layout_continue_bar()
+	_layout_round_win_declaration()
+
+
+func _layout_continue_bar() -> void:
+	if _continue_bar == null or not _continue_bar.visible:
+		return
+	var viewport_rect := get_viewport().get_visible_rect()
+	_continue_bar.reset_size()
+	var min_size := _continue_bar.get_combined_minimum_size()
+	var width := clampf(
+		minf(CONTINUE_BAR_MAX_WIDTH, maxf(min_size.x, 280.0)),
+		240.0,
+		viewport_rect.size.x - 32.0,
+	)
+	var height := maxf(min_size.y, 88.0)
+	_continue_bar.offset_left = -width * 0.5
+	_continue_bar.offset_right = width * 0.5
+	_continue_bar.offset_bottom = -CONTINUE_BAR_BOTTOM_MARGIN
+	_continue_bar.offset_top = -(CONTINUE_BAR_BOTTOM_MARGIN + height)
+
+
+func _layout_round_win_declaration() -> void:
+	if _round_win_declaration == null or not _round_win_declaration.visible:
+		return
+	var viewport_rect := get_viewport().get_visible_rect()
+	var reserved_bottom := CONTINUE_BAR_BOTTOM_MARGIN
+	var reserve_continue_space := (
+		_manual_continue_active
+		and _awaiting_continue
+		and _continue_bar != null
+	)
+	if _continue_bar and (_continue_bar.visible or reserve_continue_space):
+		var bar_height := 104.0
+		if _continue_bar.visible:
+			bar_height = maxf(_continue_bar.offset_bottom - _continue_bar.offset_top, 88.0)
+		reserved_bottom += bar_height + VICTORY_STACK_GAP
+	var decl_bottom := -reserved_bottom
+	var max_decl_height := viewport_rect.size.y - reserved_bottom - VICTORY_TOP_CLEARANCE
+	max_decl_height = maxf(max_decl_height, 120.0)
+	var decl_width := minf(380.0, viewport_rect.size.x - 32.0)
+	var decl_height := minf(DECLARATION_DEFAULT_HEIGHT, max_decl_height)
+	_round_win_declaration.offset_left = -decl_width * 0.5
+	_round_win_declaration.offset_right = decl_width * 0.5
+	_round_win_declaration.offset_bottom = decl_bottom
+	_round_win_declaration.offset_top = decl_bottom - decl_height
+	_round_win_declaration.custom_minimum_size = Vector2(decl_width, decl_height)
+
+
+func _set_continue_button_active(active: bool) -> void:
+	if _continue_button == null:
+		return
+	_continue_button.disabled = not active
+
+
+func _schedule_continue_activation(
+	subtitle_text: String,
+	score_text: String,
+	button_text: String = "Continue  —  Enter / J",
+) -> void:
+	_continue_activation_seq += 1
+	var seq := _continue_activation_seq
+	_hide_continue_bar()
+	_set_continue_button_active(false)
+	_arm_continue_activation_timer(seq, subtitle_text, score_text, button_text)
+
+
+func _arm_continue_activation_timer(
+	seq: int,
+	subtitle_text: String,
+	score_text: String,
+	button_text: String,
+) -> void:
+	await get_tree().create_timer(CONTINUE_ACTIVATION_DELAY_SEC).timeout
+	if seq != _continue_activation_seq or not is_inside_tree():
+		return
+	_continue_input_lockout = 0.0
+	_show_continue_bar(subtitle_text, score_text, button_text)
+
+
+func _cancel_continue_activation_schedule() -> void:
+	_continue_activation_seq += 1
 
 
 func _focus_continue_button() -> void:
@@ -261,9 +348,12 @@ func _hide_continue_bar() -> void:
 		_continue_bar.visible = false
 	if _continue_button:
 		_continue_button.visible = false
+		_continue_button.disabled = true
 
 
 func _on_continue_button_pressed() -> void:
+	if _continue_input_lockout > 0.0:
+		return
 	_request_continue()
 
 
@@ -308,6 +398,8 @@ func show_match_defeat(
 	line: String,
 	player_rounds: int,
 	enemy_rounds: int,
+	player_report: Dictionary = {},
+	enemy_report: Dictionary = {},
 	manual_continue: bool = false,
 ) -> void:
 	_hide_round_win_splash()
@@ -315,34 +407,47 @@ func show_match_defeat(
 	_backdrop.visible = true
 	_backdrop.color = Color(0.0, 0.0, 0.0, 0.65)
 	_panel.visible = not manual_continue
-	_title.visible = not manual_continue
-	_title.text = line
-	_title.modulate = Color(1.0, 0.35, 0.35, 1.0)
+	_title.visible = false
 	_subtitle.visible = not manual_continue
-	_subtitle.text = "YOU LOSE THE FIGHT"
 	_score.visible = not manual_continue
-	_score.text = "Final: %d - %d" % [player_rounds, enemy_rounds]
 	_prompt.visible = not manual_continue
-	_prompt.text = "Press Enter to try again"
+	_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	_awaiting_continue = true
 	_manual_continue_active = manual_continue
-	_continue_input_lockout = 0.5 if manual_continue else 0.0
-	if manual_continue:
-		_show_continue_bar(
+	_hide_continue_bar()
+	var has_scorecard := RoundWinDeclarationPanel.reports_have_entries(player_report, enemy_report)
+	if has_scorecard:
+		_begin_round_end_sequence(false, player_report, enemy_report, 0, true)
+	elif _you_win_splash:
+		_show_round_end_splash(false, 0, true)
+	if not manual_continue:
+		_subtitle.text = line
+		_score.text = "Final: %d - %d" % [player_rounds, enemy_rounds]
+		_prompt.text = "Press Enter to try again"
+		_continue_input_lockout = 0.0
+	else:
+		_continue_input_lockout = CONTINUE_ACTIVATION_DELAY_SEC
+		_schedule_continue_activation(
 			"YOU LOSE THE FIGHT",
 			"Final: %d - %d" % [player_rounds, enemy_rounds],
 			"Try Again  —  Enter / J",
 		)
-	else:
-		_hide_continue_bar()
+	call_deferred("_layout_victory_ui_stack")
 
 
-func _show_round_win_splash() -> void:
-	if _you_win_splash:
-		_you_win_splash.play_splash_centered()
+func _show_round_end_splash(player_won_round: bool, round_number: int, fight_subtitle: bool) -> void:
+	if _you_win_splash == null:
+		return
+	var kind := (
+		YouWinSplashFx.ResultKind.WIN
+		if player_won_round
+		else YouWinSplashFx.ResultKind.LOSE
+	)
+	_you_win_splash.play_splash_centered(kind, round_number, fight_subtitle)
 
 
 func dismiss_round_result_ui() -> void:
+	_cancel_continue_activation_schedule()
 	_victory_sequence_id += 1
 	_hide_round_win_splash()
 	_hide_continue_bar()
@@ -351,21 +456,32 @@ func dismiss_round_result_ui() -> void:
 	_backdrop.visible = false
 
 
-func _begin_victory_breakdown_sequence(report: Dictionary) -> void:
+func _begin_round_end_sequence(
+	player_won_round: bool,
+	player_report: Dictionary,
+	enemy_report: Dictionary,
+	round_number: int,
+	fight_subtitle: bool,
+) -> void:
 	_victory_sequence_id += 1
 	var seq := _victory_sequence_id
 	if _round_win_declaration:
-		_round_win_declaration.prepare_report(report)
-	_show_round_win_splash()
-	_run_victory_breakdown_sequence(seq)
+		_round_win_declaration.prepare_dual_reports(
+			player_report,
+			enemy_report,
+			player_won_round,
+		)
+	_show_round_end_splash(player_won_round, round_number, fight_subtitle)
+	_run_round_end_sequence(seq)
 
 
-func _run_victory_breakdown_sequence(seq: int) -> void:
+func _run_round_end_sequence(seq: int) -> void:
 	await get_tree().create_timer(VICTORY_SPLASH_HOLD_SEC).timeout
 	if seq != _victory_sequence_id or not is_inside_tree():
 		return
 	if _round_win_declaration:
 		_round_win_declaration.fade_in(VICTORY_TABLE_FADE_SEC)
+	call_deferred("_layout_victory_ui_stack")
 	await get_tree().create_timer(VICTORY_TABLE_FADE_SEC).timeout
 	if seq != _victory_sequence_id or not is_inside_tree():
 		return

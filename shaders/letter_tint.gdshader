@@ -16,20 +16,16 @@ uniform float fill_saturation : hint_range(0.8, 1.5, 0.02) = 1.18;
 uniform float shade_floor : hint_range(0.5, 1.2, 0.02) = 0.92;
 uniform float min_output_luminance : hint_range(0.0, 0.8, 0.02) = 0.50;
 
-float sample_neighbor_alpha(vec2 uv, vec2 offset) {
-	return texture(TEXTURE, uv + offset).a;
-}
-
 float max_alpha_at(vec2 uv, vec2 px) {
 	float m = 0.0;
-	m = max(m, sample_neighbor_alpha(uv, vec2(px.x, 0.0)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(-px.x, 0.0)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(0.0, px.y)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(0.0, -px.y)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(px.x, px.y)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(-px.x, px.y)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(px.x, -px.y)));
-	m = max(m, sample_neighbor_alpha(uv, vec2(-px.x, -px.y)));
+	m = max(m, texture(TEXTURE, uv + vec2(px.x, 0.0)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(-px.x, 0.0)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(0.0, px.y)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(0.0, -px.y)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(px.x, px.y)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(-px.x, px.y)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(px.x, -px.y)).a);
+	m = max(m, texture(TEXTURE, uv + vec2(-px.x, -px.y)).a);
 	return m;
 }
 

@@ -10,6 +10,7 @@ const ANIM_RUN := "Run"
 const ANIM_JUMP := "Jump"
 const ANIM_FALL := "Fall"
 const ANIM_CLIMB := "Climb"
+const ANIM_IMPACT := "Impact"
 
 @export var sprite: AnimatedSprite2D
 @export var near_floor_run_distance: float = 60.0

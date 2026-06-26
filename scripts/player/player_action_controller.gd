@@ -182,6 +182,8 @@ func _begin_sequence() -> void:
 		return
 	if _player_is_rolling():
 		return
+	if _player_claw_active():
+		return
 	if not debug_infinite_action:
 		_charges -= 1
 		action_charge_changed.emit(_charges, max_action_charges)
@@ -193,7 +195,8 @@ func _begin_sequence() -> void:
 	for _i in _attack.hit_frames.size():
 		_hit_applied.append(false)
 	_cancel_player_aim(_player)
-	_deactivate_player_shield(_player)
+	_suspend_player_shield_for_action(_player)
+	_lock_mutual_action_facing()
 	if _enemy.has_method("set_action_sequence_targeted"):
 		_enemy.set_action_sequence_targeted(true)
 	_configure_strike_camera()
@@ -318,9 +321,9 @@ func _build_attack1_definition() -> ActionAttackDefinition:
 
 
 func _tick_approach(delta: float) -> void:
+	_refresh_mutual_action_facing()
 	var target := _enemy.global_position
 	var to := target - _player.global_position
-	_player.facing = 1 if to.x >= 0.0 else -1
 	if to.length() <= connect_distance:
 		_begin_strike()
 		return
@@ -377,6 +380,7 @@ func _begin_strike() -> void:
 			_player.sprite.frame = 0
 			_player.sprite.play(_attack.animation_name)
 	_align_player_for_upcoming_hit()
+	_begin_enemy_impact_sync()
 
 
 func _tick_strike(delta: float) -> void:
@@ -385,10 +389,12 @@ func _tick_strike(delta: float) -> void:
 		return
 	_player.velocity = Vector2.ZERO
 	var frame_num := _current_attack_frame_number()
-	_strike_camera.tick_strike_frame(frame_num)
+	_refresh_mutual_action_facing()
+	_tick_strike_camera(frame_num)
 	_update_facing_for_strike(frame_num)
 	_update_strike_pursuit(delta, frame_num)
 	_try_apply_frame_hits(frame_num)
+	_tick_enemy_impact_sync(frame_num)
 	if not _player.sprite.is_playing():
 		_begin_recover()
 
@@ -404,7 +410,7 @@ func _update_strike_pursuit(delta: float, frame_num: int) -> void:
 	if target_idx < 0:
 		return
 	var side := _side_for_hit_index(target_idx)
-	_apply_strike_facing(side)
+	_refresh_mutual_action_facing()
 	var anchor := _strike_anchor_for_side(side)
 	if _uses_side_slides():
 		_update_side_slide_pursuit(frame_num, hit_idx, target_idx, side, anchor)
@@ -536,16 +542,8 @@ func _uses_side_slides() -> bool:
 	)
 
 
-func _update_facing_for_strike(frame_num: int) -> void:
-	if not _uses_side_slides():
-		_update_facing_toward_enemy()
-		return
-	var hit_idx := _hit_index_for_frame(frame_num)
-	if hit_idx < 0:
-		hit_idx = _next_hit_index_after(frame_num - 1)
-	if hit_idx < 0:
-		hit_idx = _attack.hit_frames.size() - 1
-	_apply_strike_facing(_side_for_hit_index(hit_idx))
+func _update_facing_for_strike(_frame_num: int) -> void:
+	_refresh_mutual_action_facing()
 
 
 func _apply_strike_facing(side: int) -> void:
@@ -558,7 +556,7 @@ func _apply_strike_facing(side: int) -> void:
 
 func _align_player_for_upcoming_hit() -> void:
 	var side := _side_for_hit_index(0)
-	_apply_strike_facing(side)
+	_refresh_mutual_action_facing()
 	var anchor := _strike_anchor_for_side(side)
 	_player.global_position = anchor
 	_kinematic_strike_position = anchor
@@ -605,6 +603,8 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 		dealt = int(result.get("dealt", 0))
 		if dealt > 0 and _round_ledger:
 			_round_ledger.record_action_hit("player", dealt)
+		if dealt > 0:
+			_notify_enemy_impact_hit(hit_idx)
 		if is_first and dealt > 0:
 			if _enemy.has_method("begin_action_strike_freeze"):
 				_enemy.begin_action_strike_freeze()
@@ -619,8 +619,11 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 
 
 func _finalize_action_hit_tail(combat: CharacterCombat) -> void:
-	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("end_action_strike_freeze"):
-		_enemy.end_action_strike_freeze()
+	if _enemy and is_instance_valid(_enemy):
+		if _enemy.has_method("end_action_strike_freeze"):
+			_enemy.end_action_strike_freeze()
+		if _enemy.has_method("end_action_impact_sync_for_finisher"):
+			_enemy.end_action_impact_sync_for_finisher()
 	if combat != null:
 		if combat.has_pending_action_death():
 			combat.commit_deferred_action_death()
@@ -629,6 +632,8 @@ func _finalize_action_hit_tail(combat: CharacterCombat) -> void:
 
 
 func _spawn_strike_hit_vfx(hit_idx: int) -> void:
+	if _attack == null:
+		return
 	var world := _find_world()
 	if world == null:
 		return
@@ -706,12 +711,16 @@ func _get_player_camera() -> CameraZoomController:
 
 
 func _strike_vfx_world_for_hit(hit_idx: int) -> Vector2:
-	if _player == null or _player.sprite == null or _attack == null:
+	if _player != null and _player.sprite != null and _attack != null:
+		var pixel := _attack.hit_vfx_pixels[mini(hit_idx, _attack.hit_vfx_pixels.size() - 1)]
+		var sprite := _player.sprite
+		var local := sprite.offset + Vector2(pixel.x * sprite.scale.x, pixel.y * sprite.scale.y)
+		return sprite.global_transform * local
+	if _enemy != null and is_instance_valid(_enemy) and _attack != null:
 		return _enemy.global_position + _attack.enemy_contact_offset
-	var pixel := _attack.hit_vfx_pixels[mini(hit_idx, _attack.hit_vfx_pixels.size() - 1)]
-	var sprite := _player.sprite
-	var local := sprite.offset + Vector2(pixel.x * sprite.scale.x, pixel.y * sprite.scale.y)
-	return sprite.global_transform * local
+	if _player != null:
+		return _player.global_position
+	return Vector2.ZERO
 
 
 func _begin_recover() -> void:
@@ -726,14 +735,38 @@ func _tick_recover(_delta: float) -> void:
 		_finish_sequence()
 
 
-func _finish_sequence() -> void:
+func end_strike_camera_presentation() -> void:
 	_strike_camera.end_sequence()
-	if _enemy and is_instance_valid(_enemy):
+
+
+func end_strike_camera_for_finisher() -> void:
+	_strike_camera.end_sequence_for_finisher()
+
+
+func _tick_strike_camera(frame_num: int) -> void:
+	var cam := _get_player_camera()
+	if cam != null and cam.is_finisher_kill_cam_active():
+		return
+	if _enemy != null and is_instance_valid(_enemy):
 		var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
-		if enemy_combat is CharacterCombat and (enemy_combat as CharacterCombat).has_pending_action_death():
-			(enemy_combat as CharacterCombat).commit_deferred_action_death()
-		if _enemy.has_method("set_action_sequence_targeted"):
-			_enemy.set_action_sequence_targeted(false)
+		if enemy_combat is CharacterCombat:
+			var combat := enemy_combat as CharacterCombat
+			if combat.is_dead() or combat.has_pending_action_death():
+				return
+	_strike_camera.tick_strike_frame(frame_num)
+
+
+func abort_for_finisher_survivor() -> void:
+	if not is_active():
+		return
+	_abort_sequence_without_death_commit()
+
+
+func _abort_sequence_without_death_commit() -> void:
+	_strike_camera.end_sequence()
+	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("set_action_sequence_targeted"):
+		_enemy.set_action_sequence_targeted(false)
+	_unlock_mutual_action_facing()
 	_state = State.IDLE
 	_state_time = 0.0
 	_sequence_time = 0.0
@@ -743,6 +776,34 @@ func _finish_sequence() -> void:
 	_slide_segment_hit_idx = -1
 	if _player:
 		_player.velocity = Vector2.ZERO
+	_restore_player_shield_after_action(_player)
+	if _round_ledger:
+		_round_ledger.finalize_action("player")
+	if _exchange_registry:
+		_exchange_registry.finalize_exchange("player")
+	_active_exchange = null
+	action_sequence_finished.emit()
+
+
+func _finish_sequence() -> void:
+	_strike_camera.end_sequence()
+	if _enemy and is_instance_valid(_enemy):
+		var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
+		if enemy_combat is CharacterCombat and (enemy_combat as CharacterCombat).has_pending_action_death():
+			(enemy_combat as CharacterCombat).commit_deferred_action_death()
+		if _enemy.has_method("set_action_sequence_targeted"):
+			_enemy.set_action_sequence_targeted(false)
+	_unlock_mutual_action_facing()
+	_state = State.IDLE
+	_state_time = 0.0
+	_sequence_time = 0.0
+	_hit_applied.clear()
+	_attack = null
+	_enemy = null
+	_slide_segment_hit_idx = -1
+	if _player:
+		_player.velocity = Vector2.ZERO
+	_restore_player_shield_after_action(_player)
 	if debug_infinite_action:
 		_charges = max_action_charges
 		_emit_charge()
@@ -809,9 +870,23 @@ func _cancel_player_aim(player: PlayerMovement) -> void:
 			(child as LetterShooter).cancel_aim()
 
 
+func _suspend_player_shield_for_action(player: PlayerMovement) -> void:
+	var shield := PlayerShield.find_on_body(player)
+	if shield:
+		shield.suspend_for_action_sequence()
+
+
+func _restore_player_shield_after_action(player: PlayerMovement) -> void:
+	if player == null:
+		return
+	var shield := PlayerShield.find_on_body(player)
+	if shield:
+		shield.restore_after_action_sequence()
+
+
 func _deactivate_player_shield(player: PlayerMovement) -> void:
-	var shield := player.get_node_or_null("PlayerShield")
-	if shield and shield.has_method("set_active"):
+	var shield := PlayerShield.find_on_body(player)
+	if shield:
 		shield.set_active(false)
 
 
@@ -820,6 +895,15 @@ func _player_is_rolling() -> bool:
 		return false
 	for child in _player.get_children():
 		if child.has_method("is_rolling") and child.call("is_rolling"):
+			return true
+	return false
+
+
+func _player_claw_active() -> bool:
+	if _player == null:
+		return false
+	for child in _player.get_children():
+		if child is PlayerClawController and (child as PlayerClawController).is_active():
 			return true
 	return false
 
@@ -868,6 +952,8 @@ func _handle_idle_action_press() -> void:
 		return
 	if _player_combat_blocks():
 		return
+	if _player_claw_active():
+		return
 	if _player.is_action_sequence_targeted():
 		return
 	_begin_sequence()
@@ -907,3 +993,42 @@ func _connect_exchange_block_signal(exchange: ActionExchange) -> void:
 func _on_exchange_strike_blocked(defender: String, _hit_idx: int) -> void:
 	if _block_feedback and _block_feedback.has_method("show_action_block_flash"):
 		_block_feedback.show_action_block_flash(defender == "player")
+
+
+func _begin_enemy_impact_sync() -> void:
+	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("begin_action_impact_sync") and _attack:
+		_enemy.begin_action_impact_sync(_attack)
+
+
+func _lock_mutual_action_facing() -> void:
+	if _player and _player.has_method("set_action_facing_locked"):
+		_player.set_action_facing_locked(true)
+	if _enemy and _enemy.has_method("lock_action_facing_toward"):
+		_enemy.lock_action_facing_toward(_player)
+	_refresh_mutual_action_facing()
+
+
+func _unlock_mutual_action_facing() -> void:
+	if _player and _player.has_method("set_action_facing_locked"):
+		_player.set_action_facing_locked(false)
+	if _enemy and _enemy.has_method("unlock_action_facing"):
+		_enemy.unlock_action_facing()
+
+
+func _refresh_mutual_action_facing() -> void:
+	if _player == null or _enemy == null:
+		return
+	if _player.has_method("refresh_action_facing_toward"):
+		_player.refresh_action_facing_toward(_enemy)
+	if _enemy.has_method("refresh_action_facing_lock"):
+		_enemy.refresh_action_facing_lock()
+
+
+func _tick_enemy_impact_sync(player_frame: int) -> void:
+	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("tick_action_impact_sync"):
+		_enemy.tick_action_impact_sync(player_frame)
+
+
+func _notify_enemy_impact_hit(hit_idx: int) -> void:
+	if _enemy and is_instance_valid(_enemy) and _enemy.has_method("notify_action_impact_hit") and _attack:
+		_enemy.notify_action_impact_hit(hit_idx, _attack.hit_frames.size())

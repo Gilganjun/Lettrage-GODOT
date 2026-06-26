@@ -87,7 +87,6 @@ func _cancel_player_aim(player: PlayerMovement) -> void:
 
 func _player_action_active(player: PlayerMovement) -> bool:
 	for child in player.get_children():
-		if child.has_method("is_active") and child.has_method("process_action"):
-			if child.call("is_active"):
-				return true
+		if child.has_method("is_active") and child.call("is_active"):
+			return true
 	return false

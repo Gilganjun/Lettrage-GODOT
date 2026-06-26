@@ -31,6 +31,20 @@ var _hold_session := false
 var _hybrid_phase := _HybridPhase.IDLE
 var _press_start_msec := 0
 var _intro_input_blocked := false
+var _action_sequence_suspended := false
+var _restore_latch_after_action := false
+
+
+static func find_on_body(body: Node) -> PlayerShield:
+	if body == null:
+		return null
+	var named := body.get_node_or_null("PlayerShield")
+	if named is PlayerShield:
+		return named as PlayerShield
+	for child in body.get_children():
+		if child is PlayerShield:
+			return child as PlayerShield
+	return null
 
 
 func _ready() -> void:
@@ -119,6 +133,26 @@ func set_intro_input_blocked(blocked: bool) -> void:
 
 func blocks_letter_collection() -> bool:
 	return shield != null and shield.blocks_letter_collection()
+
+
+func suspend_for_action_sequence() -> void:
+	_action_sequence_suspended = true
+	_cancel_hybrid_gesture()
+	_end_hold_session()
+	_restore_latch_after_action = is_latched and is_active
+	set_active(false)
+
+
+func restore_after_action_sequence() -> void:
+	if not _action_sequence_suspended:
+		return
+	_action_sequence_suspended = false
+	if not _restore_latch_after_action or shield == null:
+		_restore_latch_after_action = false
+		return
+	_restore_latch_after_action = false
+	shield.activate("player_toggle_latch")
+	_set_latched(true)
 
 
 func get_debug_info() -> Dictionary:
@@ -243,6 +277,8 @@ func _set_latched(latched: bool) -> void:
 
 
 func _is_input_blocked() -> bool:
+	if _action_sequence_suspended:
+		return true
 	if _intro_input_blocked:
 		return true
 	var body := get_parent() as Node

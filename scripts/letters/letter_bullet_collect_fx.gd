@@ -3,8 +3,6 @@ extends Node2D
 
 ## Bullet collect (shield off) — pause, cyber frame, glide letter into the HUD word row.
 
-const LetterTint := preload("res://scripts/letters/letter_tint.gd")
-
 const PAUSE_SEC := 0.14
 const FRAME_IN_SEC := 0.16
 const FLY_SEC := 0.42

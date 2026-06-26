@@ -338,7 +338,7 @@ func _tick_lifetime() -> void:
 func _on_letter_resolved(letter: Letter, outcome: Letter.Resolution, _character: String) -> void:
 	if outcome == Letter.Resolution.PLAYER_COLLECT or outcome == Letter.Resolution.ENEMY_COLLECT:
 		register_collected(letter)
-	if outcome == Letter.Resolution.BULLET_COLLECT:
+	if outcome == Letter.Resolution.BULLET_COLLECT or outcome == Letter.Resolution.CLAW_COLLECT:
 		register_collected(letter)
 	_active.erase(letter)
 

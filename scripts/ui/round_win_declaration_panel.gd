@@ -1,7 +1,12 @@
 class_name RoundWinDeclarationPanel
 extends Control
 
-## Victory breakdown — words spelled and ACTION attacks with damage totals.
+## Tabbed round scorecard — words and ACTION attacks for player and enemy.
+
+enum FighterTab {
+	PLAYER,
+	ENEMY,
+}
 
 enum WordSortMode {
 	POINTS_HIGH,
@@ -24,33 +29,79 @@ const SORT_LABELS: Array[String] = [
 
 @export var row_stagger := 0.08
 @export var row_fade_duration := 0.2
+@export var tab_blink_speed := 2.0
+
+const PLAYER_ACCENT := Color(0.32, 0.92, 0.48, 1.0)
+const PLAYER_ACCENT_DIM := Color(0.18, 0.55, 0.32, 1.0)
+const ENEMY_ACCENT := Color(0.95, 0.32, 0.36, 1.0)
+const ENEMY_ACCENT_DIM := Color(0.58, 0.16, 0.2, 1.0)
 
 @onready var _panel: PanelContainer = $Panel
-@onready var _scroll: ScrollContainer = $Panel/Margin/Scroll
-@onready var _content: VBoxContainer = $Panel/Margin/Scroll/Content
+@onready var _tab_bar: HBoxContainer = $Panel/Margin/RootVBox/TabBar
+@onready var _scroll: ScrollContainer = $Panel/Margin/RootVBox/Scroll
+@onready var _content: VBoxContainer = $Panel/Margin/RootVBox/Scroll/Content
 
+var _player_report: Dictionary = {}
+var _enemy_report: Dictionary = {}
+var _active_tab := FighterTab.PLAYER
 var _words: Array = []
 var _attacks: Array = []
 var _total_damage := 0
 var _sort_mode := WordSortMode.POINTS_HIGH
+var _player_tab_btn: Button
+var _enemy_tab_btn: Button
+var _tab_blink_phase := 0.0
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_build_tab_bar()
 	visible = false
+	set_process(false)
 
 
-func prepare_report(report: Dictionary) -> void:
-	_words = (report.get("words", []) as Array).duplicate(true)
-	_attacks = (report.get("attacks", []) as Array).duplicate(true)
-	_total_damage = int(report.get("total_damage", 0))
+func _process(delta: float) -> void:
+	if not visible:
+		return
+	_tab_blink_phase += delta * tab_blink_speed
+	var pulse := 0.78 + 0.22 * (0.5 + 0.5 * sin(_tab_blink_phase))
+	_update_tab_styles(pulse)
+
+
+func _build_tab_bar() -> void:
+	if _tab_bar == null:
+		return
+	_player_tab_btn = _make_tab_button("PLAYER", FighterTab.PLAYER)
+	_enemy_tab_btn = _make_tab_button("ENEMY", FighterTab.ENEMY)
+	_tab_bar.add_child(_player_tab_btn)
+	_tab_bar.add_child(_enemy_tab_btn)
+	_player_tab_btn.pressed.connect(_on_player_tab_pressed)
+	_enemy_tab_btn.pressed.connect(_on_enemy_tab_pressed)
+	_update_tab_styles()
+
+
+func prepare_dual_reports(
+	player_report: Dictionary,
+	enemy_report: Dictionary,
+	default_player_tab: bool,
+) -> void:
+	_player_report = player_report.duplicate(true)
+	_enemy_report = enemy_report.duplicate(true)
+	_active_tab = FighterTab.PLAYER if default_player_tab else FighterTab.ENEMY
 	_sort_mode = WordSortMode.POINTS_HIGH
-	if _words.is_empty() and _attacks.is_empty():
+	if not _has_any_entries():
 		hide_panel()
 		return
+	_update_tab_styles()
+	_load_active_report_data()
 	_rebuild_display(false)
 	visible = true
 	modulate.a = 0.0
+	set_process(true)
+
+
+func prepare_report(report: Dictionary) -> void:
+	prepare_dual_reports(report, {}, true)
 
 
 func fade_in(duration: float = 0.45) -> void:
@@ -65,23 +116,124 @@ func get_orbit_anchor_global() -> Vector2:
 
 
 func show_report(report: Dictionary) -> void:
-	_words = (report.get("words", []) as Array).duplicate(true)
-	_attacks = (report.get("attacks", []) as Array).duplicate(true)
-	_total_damage = int(report.get("total_damage", 0))
-	_sort_mode = WordSortMode.POINTS_HIGH
-	if _words.is_empty() and _attacks.is_empty():
-		hide_panel()
-		return
+	prepare_dual_reports(report, {}, true)
 	_rebuild_display(true)
 
 
 func hide_panel() -> void:
 	visible = false
 	modulate.a = 1.0
+	set_process(false)
+	_player_report.clear()
+	_enemy_report.clear()
 	_words.clear()
 	_attacks.clear()
 	_total_damage = 0
 	_clear_content()
+
+
+static func reports_have_entries(player_report: Dictionary, enemy_report: Dictionary) -> bool:
+	return _report_has_entries(player_report) or _report_has_entries(enemy_report)
+
+
+static func _report_has_entries(report: Dictionary) -> bool:
+	if report.is_empty():
+		return false
+	return not report.get("words", []).is_empty() or not report.get("attacks", []).is_empty()
+
+
+func _has_any_entries() -> bool:
+	return reports_have_entries(_player_report, _enemy_report)
+
+
+func _on_player_tab_pressed() -> void:
+	_set_active_tab(FighterTab.PLAYER)
+
+
+func _on_enemy_tab_pressed() -> void:
+	_set_active_tab(FighterTab.ENEMY)
+
+
+func _set_active_tab(tab: FighterTab) -> void:
+	if _active_tab == tab:
+		return
+	_active_tab = tab
+	_sort_mode = WordSortMode.POINTS_HIGH
+	_update_tab_styles()
+	_load_active_report_data()
+	_rebuild_display(false)
+
+
+func _load_active_report_data() -> void:
+	var report := _active_report()
+	_words = (report.get("words", []) as Array).duplicate(true)
+	_attacks = (report.get("attacks", []) as Array).duplicate(true)
+	_total_damage = int(report.get("total_damage", 0))
+
+
+func _active_report() -> Dictionary:
+	return _player_report if _active_tab == FighterTab.PLAYER else _enemy_report
+
+
+func _make_tab_button(label_text: String, fighter: FighterTab) -> Button:
+	var button := Button.new()
+	button.focus_mode = Control.FOCUS_NONE
+	button.toggle_mode = false
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.custom_minimum_size.y = 40.0
+	button.text = label_text
+	button.modulate = Color.WHITE
+	button.add_theme_font_override("font", FONT)
+	button.add_theme_font_size_override("font_size", 15)
+	button.set_meta("fighter_tab", fighter)
+	return button
+
+
+func _update_tab_styles(pulse: float = 1.0) -> void:
+	_style_tab_button(_player_tab_btn, FighterTab.PLAYER, _active_tab == FighterTab.PLAYER, pulse)
+	_style_tab_button(_enemy_tab_btn, FighterTab.ENEMY, _active_tab == FighterTab.ENEMY, pulse)
+
+
+func _style_tab_button(button: Button, fighter: FighterTab, selected: bool, pulse: float) -> void:
+	if button == null:
+		return
+	button.modulate = Color.WHITE
+	var accent := PLAYER_ACCENT if fighter == FighterTab.PLAYER else ENEMY_ACCENT
+	var accent_dim := PLAYER_ACCENT_DIM if fighter == FighterTab.PLAYER else ENEMY_ACCENT_DIM
+	var bg := Color(0.05, 0.08, 0.12, 0.92)
+	var border := accent_dim
+	var font := accent.lerp(Color(0.92, 0.96, 1.0), 0.35)
+	if selected:
+		bg = accent.darkened(0.18).lerp(accent, 0.35 + 0.25 * pulse)
+		border = accent.lightened(0.12 + 0.1 * pulse)
+		font = Color(0.98, 1.0, 0.98, 1.0)
+	var normal := _make_tab_stylebox(bg, border, 2 if selected else 1)
+	var hover := _make_tab_stylebox(bg.lightened(0.08), border.lightened(0.06), 2)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", normal)
+	button.add_theme_stylebox_override("focus", normal)
+	button.add_theme_stylebox_override("disabled", normal)
+	button.add_theme_color_override("font_color", font)
+	button.add_theme_color_override("font_pressed_color", font)
+	button.add_theme_color_override("font_hover_color", font)
+	button.add_theme_color_override("font_disabled_color", font)
+	button.add_theme_color_override("font_focus_color", font)
+	button.add_theme_color_override("font_outline_color", Color(0.04, 0.04, 0.06, 0.9))
+	button.add_theme_constant_override("outline_size", 3)
+
+
+func _make_tab_stylebox(bg: Color, border: Color, border_width: int) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = bg
+	box.border_color = border
+	box.set_border_width_all(border_width)
+	box.set_corner_radius_all(6)
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
+	box.content_margin_left = 10
+	box.content_margin_right = 10
+	return box
 
 
 func _clear_content() -> void:
@@ -93,18 +245,28 @@ func _clear_content() -> void:
 
 func _rebuild_display(animate: bool) -> void:
 	_clear_content()
-	_add_header("VICTORY BREAKDOWN")
-	if not _words.is_empty():
-		_add_word_sort_bar()
-		_add_section_title("WORDS CAST")
-		for entry in _sorted_words():
-			_add_row(str(entry.get("word", "?")), int(entry.get("damage", 0)), Color(0.98, 0.9, 0.42))
-	if not _attacks.is_empty():
-		_add_section_title("ACTION STRIKES")
-		for entry in _attacks:
-			_add_row(str(entry.get("label", "Attack")), int(entry.get("damage", 0)), Color(1.0, 0.62, 0.34))
-	_add_divider()
-	_add_total_row(_total_damage)
+	var header := "PLAYER ROUND LOG" if _active_tab == FighterTab.PLAYER else "ENEMY ROUND LOG"
+	var header_color := PLAYER_ACCENT if _active_tab == FighterTab.PLAYER else ENEMY_ACCENT
+	_add_header(header, header_color)
+	if _words.is_empty() and _attacks.is_empty():
+		_add_empty_message()
+	else:
+		if not _words.is_empty():
+			_add_word_sort_bar()
+			_add_section_title("WORDS CAST")
+			for entry in _sorted_words():
+				var accent := (
+					Color(0.98, 0.9, 0.42)
+					if _active_tab == FighterTab.PLAYER
+					else Color(0.82, 0.62, 1.0)
+				)
+				_add_row(str(entry.get("word", "?")), int(entry.get("damage", 0)), accent)
+		if not _attacks.is_empty():
+			_add_section_title("ACTION STRIKES")
+			for entry in _attacks:
+				_add_row(str(entry.get("label", "Attack")), int(entry.get("damage", 0)), Color(1.0, 0.62, 0.34))
+		_add_divider()
+		_add_total_row(_total_damage)
 	visible = true
 	modulate.a = 1.0
 	call_deferred("_sync_content_width")
@@ -112,6 +274,19 @@ func _rebuild_display(animate: bool) -> void:
 		_animate_rows()
 	else:
 		_show_rows_immediately()
+
+
+func _add_empty_message() -> void:
+	var label := Label.new()
+	_prepare_row(label, 48.0)
+	label.text = "No words or attacks logged this round."
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_override("font", FONT)
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", Color(0.7, 0.76, 0.88))
+	_content.add_child(label)
 
 
 func _sorted_words() -> Array:
@@ -210,15 +385,15 @@ func _prepare_row(node: Control, min_height: float = ROW_HEIGHT) -> void:
 	node.set_meta("declare_row", true)
 
 
-func _add_header(text: String) -> void:
+func _add_header(text: String, accent: Color = Color(1.0, 0.92, 0.45)) -> void:
 	var label := Label.new()
-	_prepare_row(label, 34.0)
+	_prepare_row(label, 30.0)
 	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_override("font", FONT)
-	label.add_theme_font_size_override("font_size", 22)
-	label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.45))
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", accent.lightened(0.18))
 	label.add_theme_color_override("font_outline_color", Color(0.15, 0.05, 0.0, 0.85))
 	label.add_theme_constant_override("outline_size", 4)
 	_content.add_child(label)

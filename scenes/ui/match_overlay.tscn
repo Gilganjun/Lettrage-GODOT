@@ -92,8 +92,19 @@ script = ExtResource("3_you_win_splash")
 layout_mode = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="YouWinSplashLayer/YouWinSplashFx/Pivot"]
+[node name="Stack" type="VBoxContainer" parent="YouWinSplashLayer/YouWinSplashFx/Pivot"]
 layout_mode = 0
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="MainTexture" type="TextureRect" parent="YouWinSplashLayer/YouWinSplashFx/Pivot/Stack"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SubtitleTexture" type="TextureRect" parent="YouWinSplashLayer/YouWinSplashFx/Pivot/Stack"]
+visible = false
+layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
@@ -189,10 +200,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -88.0
-offset_right = 150.0
-offset_bottom = -16.0
+offset_left = -170.0
+offset_top = -132.0
+offset_right = 170.0
+offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/separation = 6

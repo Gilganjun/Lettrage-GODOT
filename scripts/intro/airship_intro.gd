@@ -296,10 +296,10 @@ func _fire_once(id: String, condition: bool, action: Callable) -> void:
 	action.call()
 
 
-func _set_layer_visible(layer_name: String, visible: bool) -> void:
+func _set_layer_visible(layer_name: String, show_layer: bool) -> void:
 	var layer: Node2D = _layer_nodes.get(layer_name)
 	if layer:
-		layer.visible = visible
+		layer.visible = show_layer
 
 
 func _is_layer_visible(layer_name: String) -> bool:

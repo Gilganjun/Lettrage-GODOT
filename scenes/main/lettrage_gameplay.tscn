@@ -16,6 +16,7 @@
 [ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
 [ext_resource type="PackedScene" path="res://scenes/visual/phase2c1_visual_pass.tscn" id="14_visual"]
 [ext_resource type="Script" path="res://scripts/collectibles/action_collectible_spawner.gd" id="15_action_spawner"]
+[ext_resource type="Script" path="res://scripts/collectibles/claw_collectible_spawner.gd" id="15_claw_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/ui/match_overlay.tscn" id="16_match_overlay"]
 [ext_resource type="Script" path="res://scripts/gameplay/match_controller.gd" id="17_match"]
 [ext_resource type="Resource" path="res://resources/gameplay/level1_config.tres" id="18_level_cfg"]
@@ -77,6 +78,12 @@ letter_speed = 150.0
 [node name="ActionCollectibleSpawner" type="Node2D" parent="World"]
 script = ExtResource("15_action_spawner")
 spawn_interval = 25.0
+spawn_x_min = 120.0
+spawn_x_max = 840.0
+
+[node name="ClawCollectibleSpawner" type="Node2D" parent="World"]
+script = ExtResource("15_claw_spawner")
+spawn_interval = 30.0
 spawn_x_min = 120.0
 spawn_x_max = 840.0
 

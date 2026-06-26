@@ -17,6 +17,7 @@ ANIMATIONS: list[tuple[str, str, str, bool, float]] = [
 	("Jump", "Jump", "jump", False, 12.0),
 	("Climb", "Walk", "walk", True, 10.0),
 	("Death", "Death", "death", False, 12.0),
+	("Impact", "Impact", "IImpact", False, 24.0),
 ]
 
 

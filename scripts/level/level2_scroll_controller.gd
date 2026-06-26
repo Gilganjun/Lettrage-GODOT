@@ -49,6 +49,9 @@ func _visible_half_width() -> float:
 
 
 func _apply_scroll_offset(_snap: bool) -> void:
+	if _camera != null and _camera.has_method("is_finisher_kill_cam_active"):
+		if _camera.call("is_finisher_kill_cam_active"):
+			return
 	var intro_active: bool = false
 	if _camera.has_method("is_round_intro_active"):
 		intro_active = _camera.is_round_intro_active()

@@ -3,8 +3,6 @@ extends Node2D
 
 ## Shielded bullet hit — layered burst, shockwave, fire, smoke, sparks, and letter debris.
 
-const LetterTint := preload("res://scripts/letters/letter_tint.gd")
-
 const LIFETIME := 0.85
 
 var _elapsed := 0.0
@@ -186,7 +184,7 @@ func _spawn_shockwave_particles() -> void:
 	add_child(p)
 
 
-func _spawn_letter_debris(texture: Texture2D, modulate: Color, scale: Vector2) -> void:
+func _spawn_letter_debris(texture: Texture2D, tint_color: Color, sprite_scale: Vector2) -> void:
 	var p := CPUParticles2D.new()
 	p.texture = texture
 	p.one_shot = true
@@ -199,15 +197,15 @@ func _spawn_letter_debris(texture: Texture2D, modulate: Color, scale: Vector2) -
 	p.direction = Vector2(0.0, -1.0)
 	p.spread = 180.0
 	p.gravity = Vector2(0.0, 280.0)
-	p.initial_velocity_min = 120.0 * scale.x
-	p.initial_velocity_max = 340.0 * scale.x
+	p.initial_velocity_min = 120.0 * sprite_scale.x
+	p.initial_velocity_max = 340.0 * sprite_scale.x
 	p.angular_velocity_min = -420.0
 	p.angular_velocity_max = 420.0
-	p.scale_amount_min = scale.x * 0.12
-	p.scale_amount_max = scale.x * 0.32
-	LetterTint.apply_particles(p, modulate)
+	p.scale_amount_min = sprite_scale.x * 0.12
+	p.scale_amount_max = sprite_scale.x * 0.32
+	LetterTint.apply_particles(p, tint_color)
 	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	p.emission_sphere_radius = 6.0 * scale.x
+	p.emission_sphere_radius = 6.0 * sprite_scale.x
 	p.local_coords = true
 	add_child(p)
 
