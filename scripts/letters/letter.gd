@@ -37,6 +37,18 @@ var motion_gravity: float = 0.0
 var field_speed_multiplier: float = 1.0
 var lifetime_max: float = -1.0
 var lifetime_fade_start: float = 8.0
+var boundary_fade_enabled := false
+var fade_x_min: float = 0.0
+var fade_x_max: float = 2272.0
+var fade_y_max: float = 648.0
+var off_screen_grace_sec: float = 3.0
+var off_screen_fade_duration_sec: float = 2.5
+var claw_selected_decay_bonus_sec: float = 3.0
+var _exit_started_at: float = -1.0
+var _decay_paused_total: float = 0.0
+var _decay_pause_started_at: float = -1.0
+var _decay_bonus_remaining: float = 0.0
+var _claw_decay_hold_active := false
 var age: float = 0.0
 var resolution: Resolution = Resolution.NONE
 var resolution_source: String = ""
@@ -81,6 +93,7 @@ func configure(
 	p_lifetime_fade_start: float = 8.0,
 	p_motion_gravity: float = 0.0,
 	p_target_world_size: float = -1.0,
+	p_boundary_fade: Dictionary = {},
 ) -> void:
 	character = p_character.to_upper()
 	spawn_id = p_spawn_id
@@ -89,6 +102,23 @@ func configure(
 	motion_gravity = p_motion_gravity
 	lifetime_max = p_lifetime_max
 	lifetime_fade_start = p_lifetime_fade_start
+	boundary_fade_enabled = bool(p_boundary_fade.get("enabled", false))
+	if boundary_fade_enabled:
+		fade_x_min = float(p_boundary_fade.get("fade_x_min", fade_x_min))
+		fade_x_max = float(p_boundary_fade.get("fade_x_max", fade_x_max))
+		fade_y_max = float(p_boundary_fade.get("fade_y_max", fade_y_max))
+		off_screen_grace_sec = float(p_boundary_fade.get("grace_sec", off_screen_grace_sec))
+		off_screen_fade_duration_sec = float(
+			p_boundary_fade.get("fade_duration_sec", off_screen_fade_duration_sec)
+		)
+		claw_selected_decay_bonus_sec = float(
+			p_boundary_fade.get("claw_selected_decay_bonus_sec", claw_selected_decay_bonus_sec)
+		)
+	_exit_started_at = -1.0
+	_decay_paused_total = 0.0
+	_decay_pause_started_at = -1.0
+	_decay_bonus_remaining = 0.0
+	_claw_decay_hold_active = false
 	age = 0.0
 	field_speed_multiplier = 1.0
 	if p_target_world_size > 0.0:
@@ -299,6 +329,38 @@ func freeze_motion() -> void:
 	set_physics_process(false)
 
 
+func set_claw_decay_hold(active: bool) -> void:
+	if active:
+		if not _claw_decay_hold_active and _decay_pause_started_at < 0.0:
+			_decay_pause_started_at = age
+		_claw_decay_hold_active = true
+		return
+	if not _claw_decay_hold_active:
+		return
+	if _decay_pause_started_at >= 0.0:
+		_decay_paused_total += age - _decay_pause_started_at
+		_decay_pause_started_at = -1.0
+	if _exit_started_at >= 0.0:
+		_decay_bonus_remaining = maxf(_decay_bonus_remaining, claw_selected_decay_bonus_sec)
+	_claw_decay_hold_active = false
+
+
+func is_claw_decay_held() -> bool:
+	return _claw_decay_hold_active
+
+
+func is_ready_for_boundary_cleanup(
+	_delete_x_min: float,
+	_delete_x_max: float,
+	_delete_y: float,
+) -> bool:
+	if _claw_decay_hold_active:
+		return false
+	if _exit_started_at < 0.0:
+		return false
+	return _exit_elapsed() >= _total_grace_sec()
+
+
 func get_sprite() -> Sprite2D:
 	return _sprite
 
@@ -308,6 +370,9 @@ func get_display_scale() -> Vector2:
 
 
 func _update_lifetime_fade() -> void:
+	if boundary_fade_enabled:
+		_update_boundary_fade()
+		return
 	if _sprite == null or lifetime_max <= 0.0:
 		return
 	if age < lifetime_fade_start:
@@ -316,6 +381,68 @@ func _update_lifetime_fade() -> void:
 		return
 	var t := inverse_lerp(lifetime_fade_start, lifetime_max, age)
 	t = clampf(t, 0.0, 1.0)
+	_apply_fade_t(t)
+
+
+func _update_boundary_fade() -> void:
+	if _sprite == null:
+		return
+	_update_exit_arm_state()
+	if _exit_started_at < 0.0:
+		_apply_letter_visual()
+		_sync_backdrop_alpha(1.0)
+		return
+	var fade_duration := maxf(off_screen_fade_duration_sec, 0.05)
+	var t := clampf(_exit_elapsed() / fade_duration, 0.0, 1.0)
+	if t <= 0.0:
+		_apply_letter_visual()
+		_sync_backdrop_alpha(1.0)
+		return
+	_apply_fade_t(t)
+
+
+func _update_exit_arm_state() -> void:
+	if _exit_started_at >= 0.0:
+		return
+	var pos := global_position
+	if _is_horizontal_motion_dominant():
+		if velocity.x > 0.0 and pos.x >= fade_x_max:
+			_arm_exit_decay()
+		elif velocity.x < 0.0 and pos.x <= fade_x_min:
+			_arm_exit_decay()
+		return
+	if _is_vertical_motion_dominant() and pos.y >= fade_y_max:
+		_arm_exit_decay()
+
+
+func _is_horizontal_motion_dominant() -> bool:
+	return absf(velocity.x) > 20.0 and absf(velocity.x) >= absf(velocity.y)
+
+
+func _is_vertical_motion_dominant() -> bool:
+	if absf(velocity.y) > 20.0:
+		return absf(velocity.y) > absf(velocity.x)
+	return absf(velocity.x) <= 20.0 and velocity.y >= 0.0
+
+
+func _arm_exit_decay() -> void:
+	_exit_started_at = age
+
+
+func _exit_elapsed() -> float:
+	if _exit_started_at < 0.0:
+		return 0.0
+	var elapsed := age - _exit_started_at - _decay_paused_total
+	if _decay_pause_started_at >= 0.0:
+		elapsed -= age - _decay_pause_started_at
+	return maxf(0.0, elapsed)
+
+
+func _total_grace_sec() -> float:
+	return off_screen_grace_sec + _decay_bonus_remaining
+
+
+func _apply_fade_t(t: float) -> void:
 	var pulse := 0.85 + 0.15 * sin(age * 12.0)
 	if catalog and not catalog.uses_tint_shader():
 		_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0 - t * pulse * 0.65)

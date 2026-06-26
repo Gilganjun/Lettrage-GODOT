@@ -15,9 +15,16 @@ enum ProfileKind {
 @export var spawn_x_min: float = 100.0
 @export var spawn_x_max: float = 2000.0
 @export var spawn_y: float = -256.0
-@export var delete_y: float = 648.0
-@export var delete_x_min: float = -64.0
-@export var delete_x_max: float = 2336.0
+## Visible playfield edges — letters begin fading after crossing these bounds.
+@export var fade_x_min: float = 0.0
+@export var fade_x_max: float = 2272.0
+@export var fade_y_max: float = 648.0
+## Extra travel past fade edges before boundary cleanup (safety distance).
+@export var off_screen_grace_sec: float = 3.0
+@export var off_screen_grace_horizontal_speed: float = 150.0
+@export var off_screen_fade_duration_sec: float = 2.5
+## Extra off-screen lifetime while that letter is the active claw target.
+@export var claw_selected_decay_bonus_sec: float = 3.0
 @export var size_min: float = 25.0
 @export var size_max: float = 50.0
 @export var fall_speed_min: float = 120.0
@@ -29,8 +36,9 @@ enum ProfileKind {
 @export var min_horizontal_spacing_x: float = 200.0
 @export var horizontal_lane_y_tolerance: float = 72.0
 @export var horizontal_spacing_retries: int = 8
-@export var letter_lifetime: float = 10.0
-@export var letter_fade_start: float = 8.0
+## Safety cap only — boundary cleanup removes letters first.
+@export var letter_lifetime: float = 120.0
+@export var letter_fade_start: float = 115.0
 @export var throttle_count_low: int = 10
 @export var throttle_count_high: int = 20
 @export var throttle_multiplier_mid: float = 2.0
@@ -45,3 +53,23 @@ enum ProfileKind {
 @export var lane_common_end: float = 0.66
 
 const RARE_CONSONANTS := "QZXJK"
+
+
+func get_off_screen_grace_x() -> float:
+	return off_screen_grace_sec * off_screen_grace_horizontal_speed
+
+
+func get_off_screen_grace_y() -> float:
+	return off_screen_grace_sec * fall_speed_max
+
+
+func get_delete_x_min() -> float:
+	return fade_x_min - get_off_screen_grace_x()
+
+
+func get_delete_x_max() -> float:
+	return fade_x_max + get_off_screen_grace_x()
+
+
+func get_delete_y() -> float:
+	return fade_y_max + get_off_screen_grace_y()

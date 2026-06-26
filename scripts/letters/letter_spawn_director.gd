@@ -157,6 +157,7 @@ func spawn_letter_at(
 		profile.letter_fade_start,
 		0.0,
 		target,
+		_build_boundary_fade_config(),
 	)
 	letter.resolved.connect(_on_letter_resolved)
 	_active.append(letter)
@@ -344,18 +345,29 @@ func _on_letter_resolved(letter: Letter, outcome: Letter.Resolution, _character:
 
 
 func _cleanup_boundaries() -> void:
+	var delete_y := profile.get_delete_y()
+	var delete_x_min := profile.get_delete_x_min()
+	var delete_x_max := profile.get_delete_x_max()
 	for i in range(_active.size() - 1, -1, -1):
 		var letter := _active[i]
 		if letter == null or not is_instance_valid(letter):
 			_active.remove_at(i)
 			continue
-		var pos := letter.global_position
-		if (
-			pos.y >= profile.delete_y
-			or pos.x <= profile.delete_x_min
-			or pos.x >= profile.delete_x_max
-		):
-			letter_deleted_boundary.emit(letter)
-			total_deleted_boundary += 1
-			_active.remove_at(i)
-			letter.try_resolve(Letter.Resolution.BOUNDARY, "boundary")
+		if not letter.is_ready_for_boundary_cleanup(delete_x_min, delete_x_max, delete_y):
+			continue
+		letter_deleted_boundary.emit(letter)
+		total_deleted_boundary += 1
+		_active.remove_at(i)
+		letter.try_resolve(Letter.Resolution.BOUNDARY, "boundary")
+
+
+func _build_boundary_fade_config() -> Dictionary:
+	return {
+		"enabled": true,
+		"fade_x_min": profile.fade_x_min,
+		"fade_x_max": profile.fade_x_max,
+		"fade_y_max": profile.fade_y_max,
+		"grace_sec": profile.off_screen_grace_sec,
+		"fade_duration_sec": profile.off_screen_fade_duration_sec,
+		"claw_selected_decay_bonus_sec": profile.claw_selected_decay_bonus_sec,
+	}

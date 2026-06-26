@@ -37,6 +37,7 @@ var _preview_line: Line2D
 var _reticle: Line2D
 var _letter_row: ClawTargetingLetterRow
 var _highlight_restore: Dictionary = {}
+var _decay_hold_letter_id := -1
 
 
 func _ready() -> void:
@@ -113,10 +114,12 @@ func reset_for_round() -> void:
 func cancel_for_round_end() -> void:
 	_ensure_targeting_visuals_hidden()
 	_hide_letter_row()
+	_release_claw_decay_hold()
 	_targets.clear()
 	_selected_index = 0
 	_selected_letter_id = -1
 	_selected_grace_until = 0.0
+	_decay_hold_letter_id = -1
 	_confirm_armed = false
 	_state = State.IDLE
 	_state_time = 0.0
@@ -266,6 +269,7 @@ func _tick_targeting(delta: float) -> bool:
 		return true
 	_prune_snapshotted_targets()
 	_tick_selected_grace()
+	_sync_claw_decay_hold()
 	var ids_before := _target_instance_ids()
 	_discover_new_targets()
 	var row_structure_changed := _target_instance_ids() != ids_before
@@ -346,6 +350,7 @@ func _fire_selected() -> void:
 	_selected_index = 0
 	_selected_letter_id = -1
 	_selected_grace_until = 0.0
+	_release_claw_decay_hold()
 	_clear_targeting_visuals()
 	_state = State.FIRING
 	_state_time = 0.0
@@ -367,6 +372,7 @@ func _on_claw_fx_finished(_success: bool) -> void:
 
 func _cancel_targeting(emit_finished: bool) -> void:
 	var was_engaged := _state == State.TARGETING or _state == State.PENDING_LAND
+	_release_claw_decay_hold()
 	_clear_targeting_visuals()
 	_targets.clear()
 	_selected_index = 0
@@ -549,6 +555,8 @@ func _should_prune_snapshotted_letter(letter: Letter) -> bool:
 	if is_selected:
 		if _is_letter_in_normal_range(letter):
 			return false
+		if letter.has_method("is_claw_decay_held") and letter.is_claw_decay_held():
+			return false
 		return not _selected_has_active_grace()
 	if not _is_letter_in_claw_range(letter):
 		return true
@@ -632,6 +640,28 @@ func _selected_has_active_grace() -> bool:
 	if _selected_grace_until <= 0.0:
 		return false
 	return Time.get_ticks_msec() / 1000.0 < _selected_grace_until
+
+
+func _sync_claw_decay_hold() -> void:
+	var selected := _get_selected_letter()
+	var new_id := selected.get_instance_id() if selected != null else -1
+	if new_id == _decay_hold_letter_id:
+		if selected != null and selected.has_method("set_claw_decay_hold"):
+			selected.set_claw_decay_hold(true)
+		return
+	_release_claw_decay_hold()
+	if selected != null and selected.has_method("set_claw_decay_hold"):
+		selected.set_claw_decay_hold(true)
+		_decay_hold_letter_id = new_id
+
+
+func _release_claw_decay_hold() -> void:
+	if _decay_hold_letter_id < 0:
+		return
+	var letter := instance_from_id(_decay_hold_letter_id)
+	if letter is Letter and letter.has_method("set_claw_decay_hold"):
+		(letter as Letter).set_claw_decay_hold(false)
+	_decay_hold_letter_id = -1
 
 
 func _is_letter_in_claw_range(letter: Letter) -> bool:
