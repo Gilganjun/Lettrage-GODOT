@@ -112,7 +112,6 @@ func bind_words(word_controller: WordGameController, enemy: Enemy) -> void:
 		_word_controller.word_state.word_changed.connect(func(_w): refresh_words())
 		_word_controller.word_state.score_changed.connect(func(_s): refresh_words())
 		_word_controller.word_state.validation_changed.connect(func(a, b): _on_validation(a, b))
-		_word_controller.valid_word_submitted.connect(func(_w, _l, _d): refresh_words())
 	if _enemy and _enemy.has_method("get_word_controller"):
 		var wc: Node = _enemy.get_word_controller()
 		wc.word_state.word_changed.connect(func(_a, _b): refresh_words())
@@ -421,6 +420,23 @@ func get_word_anchor_center(for_player: bool) -> Vector2:
 		return Vector2(hp_rect.position.x + 40.0, hp_rect.end.y + 28.0)
 	var viewport := get_viewport().get_visible_rect()
 	return Vector2(viewport.end.x - 40.0, 56.0)
+
+
+func get_word_celebration_anchor(for_player: bool, word: String) -> Vector2:
+	var label := player_word_label if for_player else enemy_word_label
+	if label == null or word.is_empty():
+		return get_word_anchor_center(for_player)
+	var font: Font = label.get_theme_font("font")
+	var font_size := label.get_theme_font_size("font_size")
+	if font == null:
+		return get_word_anchor_center(for_player)
+	var text_w := font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var panel := player_word_panel if for_player else enemy_word_panel
+	if panel != null and panel.visible:
+		var rect := label.get_global_rect()
+		return Vector2(rect.position.x + text_w * 0.5, rect.get_center().y)
+	var hub := get_word_anchor_center(for_player)
+	return Vector2(hub.x + text_w * 0.5, hub.y)
 
 
 func get_word_exit_target(for_player: bool) -> Vector2:

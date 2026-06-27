@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://lettrage_gameplay_main"]
+[gd_scene load_steps=22 format=3 uid="uid://lettrage_gameplay_main"]
 
 [ext_resource type="Script" path="res://scripts/main/lettrage_gameplay.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -22,6 +22,7 @@
 [ext_resource type="Resource" path="res://resources/gameplay/level1_config.tres" id="18_level_cfg"]
 [ext_resource type="PackedScene" path="res://scenes/ui/gameplay_debug_dock.tscn" id="19_debug_dock"]
 [ext_resource type="PackedScene" path="res://scenes/ui/round_intro_backdrop.tscn" id="20_round_intro"]
+[ext_resource type="PackedScene" path="res://scenes/ui/gameplay_pause_overlay.tscn" id="21_pause"]
 
 [node name="LettrageGameplay" type="Node2D"]
 script = ExtResource("1_root")
@@ -110,3 +111,5 @@ script = ExtResource("10_garble")
 [node name="RoundIntroBackdrop" parent="UI" instance=ExtResource("20_round_intro")]
 
 [node name="GameplayDebugDock" parent="UI" instance=ExtResource("19_debug_dock")]
+
+[node name="GameplayPauseOverlay" parent="UI" instance=ExtResource("21_pause")]

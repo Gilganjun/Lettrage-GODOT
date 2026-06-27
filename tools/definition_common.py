@@ -6,11 +6,14 @@ import re
 import unicodedata
 
 MAX_DEFINITION_LEN = 80
-MAX_SENSES_PER_WORD = 10
+MAX_SENSES_COMPREHENSIVE = 10
+MAX_SENSES_TOP3 = 3
+# Backward-compatible alias used by older scripts.
+MAX_SENSES_PER_WORD = MAX_SENSES_COMPREHENSIVE
 SENSE_DELIMITER = "|"
 
 _POS_PREFIX = re.compile(
-    r"^(?:—|n\.|v\.|adj\.|adv\.|prep\.|conj\.|int\.|abbr\.|prefix|suffix|predic\.|symb\.)\s*",
+    r"^(?:—|n\.|v\.|adj\.|adv\.|prep\.|conj\.|int\.|pron\.|abbr\.|prefix|suffix|predic\.|symb\.)\s*",
     re.I,
 )
 _WS = re.compile(r"\s+")
@@ -35,6 +38,7 @@ def normalize_word(raw: str) -> str:
 
 def clean_tsv_field(text: str) -> str:
     text = _WS.sub(" ", text.replace("\t", " ").replace("\r", " ").replace("\n", " ")).strip()
+    text = text.replace("|", " / ")
     while True:
         trimmed = _ETYM_SUFFIX.sub("", text).strip()
         if trimmed == text:
@@ -78,7 +82,13 @@ def is_abbreviation_gloss(text: str, pos_marker: str = "") -> bool:
 
 
 def split_numbered_senses(text: str) -> list[str]:
-    text = strip_display_prefixes(text)
+    text = clean_tsv_field(text)
+    while text.startswith("("):
+        trimmed = _LEADING_PAREN.sub("", text, count=1).strip()
+        if trimmed == text:
+            break
+        text = trimmed
+    text = _POS_PREFIX.sub("", text).strip()
     if not text:
         return []
     parts = _NUMBERED_SPLIT.split(text)
@@ -96,7 +106,7 @@ def split_numbered_senses(text: str) -> list[str]:
             else:
                 other_out.append(cleaned)
     if numbered_out:
-        return numbered_out
+        return numbered_out + [s for s in other_out if s not in numbered_out]
     return other_out if other_out else [text]
 
 
@@ -113,7 +123,8 @@ def shorten_definition(text: str, max_len: int = MAX_DEFINITION_LEN) -> str:
 
 
 def encode_senses(senses: list[str]) -> str:
-    return SENSE_DELIMITER.join(senses)
+    safe = [clean_tsv_field(s) for s in senses if clean_tsv_field(s)]
+    return SENSE_DELIMITER.join(safe)
 
 
 def decode_senses(payload: str) -> list[str]:

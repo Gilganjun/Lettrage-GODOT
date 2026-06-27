@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dictionary/Definitions.txt from Oxford, OEWN, Kaikki, and GCIDE."""
+"""Build Top 3 and comprehensive definition dictionaries for Lettrage."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import sys
 import tarfile
 import urllib.request
 import zipfile
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -19,7 +19,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 
 from definition_common import (
-    MAX_SENSES_PER_WORD,
+    MAX_SENSES_COMPREHENSIVE,
+    MAX_SENSES_TOP3,
     clean_tsv_field,
     encode_senses,
     is_abbreviation_gloss,
@@ -30,6 +31,7 @@ from definition_common import (
     split_numbered_senses,
     strip_display_prefixes,
 )
+from definition_ranking import SenseEntry, select_game_top3
 
 LIVE_PATH = ROOT / "dictionary" / "EnglishWords5.txt"
 OXFORD_PATH = (
@@ -39,18 +41,20 @@ OXFORD_PATH = (
     / "f7b7aca357778972040234cae7985db8-12d25c63f58daa5355c19b5b2270c200dee46a86"
     / "Oxford-Word-List-With-Definition.txt"
 )
-OUTPUT_PATH = ROOT / "dictionary" / "Definitions.txt"
-MISSING_PATH = ROOT / "dictionary" / "DefinitionsMissing.txt"
-ABBREV_ONLY_PATH = ROOT / "dictionary" / "AbbrevOnlyRemovals.txt"
-REPORT_PATH = ROOT / "reports" / "DEFINITIONS_BUILD_REPORT.txt"
-CACHE_DIR = ROOT / "dictionary" / "cache"
+DEFAULT_OUTPUT_DIR = Path(r"C:\Lettrage\Dictionary")
+PROJECT_OUTPUT_DIR = ROOT / "dictionary"
+TOP3_FILENAME = "DefinitionsTop3.txt"
+COMPREHENSIVE_FILENAME = "DefinitionsComprehensive.txt"
+MISSING_FILENAME = "DefinitionsMissing.txt"
+ABBREV_ONLY_FILENAME = "AbbrevOnlyRemovals.txt"
+REPORT_FILENAME = "DEFINITIONS_BUILD_REPORT.txt"
 
 OEWN_URL = "https://en-word.net/static/english-wordnet-2025-json.zip"
 KAIKKI_URL = "https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl.gz"
 GCIDE_URL = "https://ftp.gnu.org/gnu/gcide/gcide-0.54.tar.gz"
 
 OXFORD_POS = re.compile(
-    r"\s{2,}(?:—|n\.|v\.|adj\.|adv\.|prep\.|conj\.|int\.|abbr\.|prefix|suffix|predic\.|symb\.)",
+    r"\s{2,}(?:—|n\.|v\.|adj\.|adv\.|prep\.|conj\.|int\.|pron\.|abbr\.|prefix|suffix|predic\.|symb\.)",
     re.I,
 )
 
@@ -83,7 +87,7 @@ GCIDE_DEF = re.compile(r"<def>(.*?)</def>", re.I | re.S)
 @dataclass
 class SenseCollector:
     needed: set[str]
-    senses: dict[str, list[tuple[str, bool, int]]] = field(default_factory=lambda: defaultdict(list))
+    senses: dict[str, list[SenseEntry]] = field(default_factory=lambda: defaultdict(list))
     _seen: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
     _order: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     sources: dict[str, str] = field(default_factory=dict)
@@ -104,7 +108,7 @@ class SenseCollector:
         self._seen[word].add(key)
         order = self._order[word]
         self._order[word] += 1
-        self.senses[word].append((short, is_abbrev, order))
+        self.senses[word].append(SenseEntry(short, is_abbrev, order, source))
         if word not in self.sources:
             self.sources[word] = source
 
@@ -112,17 +116,21 @@ class SenseCollector:
         for text in texts:
             self.add(word, text, is_abbrev, source)
 
-    def finalize(self) -> tuple[dict[str, list[str]], set[str]]:
-        defs: dict[str, list[str]] = {}
+    def finalize(
+        self,
+    ) -> tuple[dict[str, list[str]], dict[str, list[str]], set[str]]:
+        comprehensive: dict[str, list[str]] = {}
+        top3: dict[str, list[str]] = {}
         abbrev_only: set[str] = set()
         for word, entries in self.senses.items():
-            entries.sort(key=lambda item: (item[1], item[2]))
-            ordered = [text for text, _, _ in entries]
+            entries.sort(key=lambda item: (item.is_abbrev, item.order))
+            ordered = [entry.text for entry in entries]
             if ordered:
-                defs[word] = ordered[:MAX_SENSES_PER_WORD]
-                if all(is_abbrev for _, is_abbrev, _ in entries):
+                comprehensive[word] = ordered[:MAX_SENSES_COMPREHENSIVE]
+                top3[word] = select_game_top3(word, entries)[:MAX_SENSES_TOP3]
+                if all(entry.is_abbrev for entry in entries):
                     abbrev_only.add(word)
-        return defs, abbrev_only
+        return comprehensive, top3, abbrev_only
 
 
 def load_live_words() -> list[str]:
@@ -286,12 +294,7 @@ def parse_gcide(collector: SenseCollector, tar_path: Path) -> int:
     return len(collector.senses) - before
 
 
-def write_outputs(
-    all_words: list[str],
-    defs: dict[str, list[str]],
-    abbrev_only: set[str],
-    sources: dict[str, str],
-) -> None:
+def _write_dictionary(path: Path, all_words: list[str], defs: dict[str, list[str]], abbrev_only: set[str]) -> int:
     lines: list[str] = []
     for word in all_words:
         if word in abbrev_only:
@@ -299,53 +302,95 @@ def write_outputs(
         senses = defs.get(word, [])
         if senses:
             lines.append(f"{word}\t{encode_senses(senses)}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return len(lines)
 
-    OUTPUT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    missing = [w for w in all_words if w not in defs and w not in abbrev_only]
-    MISSING_PATH.write_text("\n".join(missing) + ("\n" if missing else ""), encoding="utf-8")
-    ABBREV_ONLY_PATH.write_text("\n".join(sorted(abbrev_only)) + ("\n" if abbrev_only else ""), encoding="utf-8")
+def write_outputs(
+    output_dir: Path,
+    all_words: list[str],
+    comprehensive: dict[str, list[str]],
+    top3: dict[str, list[str]],
+    abbrev_only: set[str],
+) -> None:
+    top3_path = output_dir / TOP3_FILENAME
+    comprehensive_path = output_dir / COMPREHENSIVE_FILENAME
+    missing_path = output_dir / MISSING_FILENAME
+    abbrev_path = output_dir / ABBREV_ONLY_FILENAME
+    report_path = output_dir / REPORT_FILENAME
 
-    multi = sum(1 for senses in defs.values() if len(senses) > 1)
+    top3_count = _write_dictionary(top3_path, all_words, top3, abbrev_only)
+    comprehensive_count = _write_dictionary(comprehensive_path, all_words, comprehensive, abbrev_only)
+
+    missing = [w for w in all_words if w not in comprehensive and w not in abbrev_only]
+    missing_path.write_text("\n".join(missing) + ("\n" if missing else ""), encoding="utf-8")
+    abbrev_path.write_text("\n".join(sorted(abbrev_only)) + ("\n" if abbrev_only else ""), encoding="utf-8")
+
+    multi_comp = sum(1 for senses in comprehensive.values() if len(senses) > 1)
+    multi_top3 = sum(1 for senses in top3.values() if len(senses) > 1)
+    pilot = ("A", "I", "THE", "BE", "BANK", "BARK", "DATE", "LIGHT", "CRACK", "FAIR", "NOVEL")
     report = [
         "=" * 72,
         "DEFINITIONS BUILD REPORT",
         "=" * 72,
-        f"Live words:        {len(all_words):,}",
-        f"Defined:           {len(lines):,} ({100 * len(lines) / len(all_words):.2f}%)",
-        f"Multi-sense:       {multi:,}",
-        f"Abbrev-only drops:  {len(abbrev_only):,}",
-        f"Missing:           {len(missing):,}",
-        f"Output size:       {OUTPUT_PATH.stat().st_size / 1e6:.2f} MB",
+        f"Live words:                 {len(all_words):,}",
+        f"Top 3 defined:              {top3_count:,} ({100 * top3_count / len(all_words):.2f}%)",
+        f"Comprehensive defined:      {comprehensive_count:,} ({100 * comprehensive_count / len(all_words):.2f}%)",
+        f"Top 3 multi-sense:          {multi_top3:,}",
+        f"Comprehensive multi-sense:  {multi_comp:,}",
+        f"Abbrev-only drops:           {len(abbrev_only):,}",
+        f"Missing:                    {len(missing):,}",
+        f"Top 3 output:               {top3_path} ({top3_path.stat().st_size / 1e6:.2f} MB)",
+        f"Comprehensive output:       {comprehensive_path} ({comprehensive_path.stat().st_size / 1e6:.2f} MB)",
         "",
-        "Samples:",
+        "Pilot Top 3 samples:",
     ]
+    for sample in pilot:
+        if sample in top3:
+            report.append(f"  {sample}: {' | '.join(top3[sample])}")
+    report.extend(["", "Comprehensive samples:"])
     for sample in ("HE", "CAT", "ABANDON", "AARDVARK"):
-        if sample in defs:
-            report.append(f"  {sample}: {' | '.join(defs[sample][:4])}")
+        if sample in comprehensive:
+            report.append(f"  {sample}: {' | '.join(comprehensive[sample][:4])}")
     if abbrev_only:
         report.append("")
         report.append(f"Abbrev-only sample: {', '.join(sorted(abbrev_only)[:30])}")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text("\n".join(report) + "\n", encoding="utf-8")
+    report_path.write_text("\n".join(report) + "\n", encoding="utf-8")
+
+
+def copy_to_project(output_dir: Path) -> None:
+    top3_src = output_dir / TOP3_FILENAME
+    if not top3_src.is_file():
+        return
+    PROJECT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    project_top3 = PROJECT_OUTPUT_DIR / "Definitions.txt"
+    project_top3.write_text(top3_src.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"Copied Top 3 dictionary to {project_top3}")
 
 
 def main() -> None:
     print("Definitions build starting...", flush=True)
-    parser = argparse.ArgumentParser(description="Build Definitions.txt for Lettrage.")
+    parser = argparse.ArgumentParser(description="Build Top 3 and comprehensive dictionaries for Lettrage.")
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--copy-to-project", action="store_true", help="Copy Top 3 file into the Godot project.")
     parser.add_argument("--skip-kaikki", action="store_true")
     parser.add_argument("--skip-gcide", action="store_true")
     parser.add_argument("--skip-download", action="store_true")
     args = parser.parse_args()
 
+    cache_dir = args.output_dir / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
     all_words = load_live_words()
     collector = SenseCollector(needed=set(all_words))
     print(f"Live words: {len(all_words):,}")
+    print(f"Output dir: {args.output_dir}")
 
     print("Oxford...")
     print(f"  +{parse_oxford(collector):,} words touched")
 
-    oewn_zip = CACHE_DIR / "english-wordnet-2025-json.zip"
+    oewn_zip = cache_dir / "english-wordnet-2025-json.zip"
     if not args.skip_download:
         download(OEWN_URL, oewn_zip)
     elif not oewn_zip.is_file():
@@ -354,7 +399,7 @@ def main() -> None:
     print(f"  +{parse_oewn(collector, oewn_zip):,} words touched")
 
     if not args.skip_kaikki:
-        kaikki_gz = CACHE_DIR / "kaikki.org-dictionary-English.jsonl.gz"
+        kaikki_gz = cache_dir / "kaikki.org-dictionary-English.jsonl.gz"
         if not args.skip_download:
             download(KAIKKI_URL, kaikki_gz)
         elif not kaikki_gz.is_file():
@@ -363,7 +408,7 @@ def main() -> None:
         print(f"  +{parse_kaikki(collector, kaikki_gz):,} words touched")
 
     if not args.skip_gcide:
-        gcide_tar = CACHE_DIR / "gcide-0.54.tar.gz"
+        gcide_tar = cache_dir / "gcide-0.54.tar.gz"
         if not args.skip_download:
             download(GCIDE_URL, gcide_tar)
         elif not gcide_tar.is_file():
@@ -371,15 +416,22 @@ def main() -> None:
         print("GCIDE...")
         print(f"  +{parse_gcide(collector, gcide_tar):,} words touched")
 
-    defs, abbrev_only = collector.finalize()
-    write_outputs(all_words, defs, abbrev_only, collector.sources)
-    removed = apply_abbrev_removals(abbrev_only & set(all_words))
-    print(f"Defined: {len(defs) - len(abbrev_only):,}, abbrev-only removed from live: {removed:,}")
+    comprehensive, top3, abbrev_only = collector.finalize()
+    write_outputs(args.output_dir, all_words, comprehensive, top3, abbrev_only)
+    if args.copy_to_project:
+        copy_to_project(args.output_dir)
+    removed = apply_abbrev_removals(abbrev_only & set(all_words), args.output_dir)
+    print(
+        f"Top 3 defined: {len(top3) - len(abbrev_only):,}, "
+        f"comprehensive defined: {len(comprehensive) - len(abbrev_only):,}, "
+        f"abbrev-only removed from live: {removed:,}"
+    )
 
 
-def apply_abbrev_removals(words_to_remove: set[str]) -> int:
+def apply_abbrev_removals(words_to_remove: set[str], output_dir: Path) -> int:
+    abbrev_path = output_dir / ABBREV_ONLY_FILENAME
     if not words_to_remove:
-        ABBREV_ONLY_PATH.write_text("", encoding="utf-8")
+        abbrev_path.write_text("", encoding="utf-8")
         return 0
     kept = [w for w in load_live_words() if w not in words_to_remove]
     LIVE_PATH.write_text("\n".join(kept) + "\n", encoding="utf-8")
