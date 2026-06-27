@@ -14,10 +14,11 @@ from definition_common import (
 STREAMLINED_MAX_LEN = 48
 
 _FILLER_RE = re.compile(
-    r"\b(?:colloq\.?|esp\.?|e\.g\.?|etc\.?|i\.e\.?|viz\.?|cf\.?|foll\.|predic\.?|"
-    r"often offens\.?|offens\.?|abbr\.?|symb\.?)\b",
+    r"\b(?:colloq|esp|e\.g|etc|i\.e|viz|cf|foll|predic|often offens|offens|abbr|symb)\.?\s*",
     re.I,
 )
+_ORPHAN_PUNCT_RE = re.compile(r",\s*\.(\s*)")
+_DOUBLE_PUNCT_RE = re.compile(r"\s+\.\s+")
 _POS_TAIL_RE = re.compile(r"\s*[—–-]\s*(?:n|v|adj|adv|prep|conj|int)\.?\s*$", re.I)
 _ENUM_SPLIT_RE = re.compile(r"\.\s*[Bb]\s+")
 _EXAMPLE_PAREN_RE = re.compile(r"\([^)]{8,}\)")
@@ -64,10 +65,10 @@ _SIMPLE_REPLACEMENTS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\bsharp explosive cry\b", re.I), "sudden loud bark"),
     (re.compile(r"\bday of the month\b", re.I), "calendar day"),
     (re.compile(r"\bnot heavy\b", re.I), "light in weight"),
-    (re.compile(r"\bjust, equitable\b", re.I), "fair"),
+    (re.compile(r"\bjust, equitable\b", re.I), "fair and just"),
     (re.compile(r"\bsecluded retreat\b", re.I), "private hideaway"),
-    (re.compile(r"\bwithdraw(?:ing)?\b", re.I), "take out"),
-    (re.compile(r"\bdeposit(?:ing)?\b", re.I), "put in"),
+    (re.compile(r"\bestablishment for depositing, withdrawing, and borrowing money\b", re.I), "place that keeps and lends money"),
+    (re.compile(r"\bdepositing, withdrawing, and borrowing money\b", re.I), "keeping and lending money"),
 ]
 
 
@@ -102,6 +103,8 @@ def streamline_definition(text: str, max_len: int = STREAMLINED_MAX_LEN) -> str:
     if not text:
         return ""
     text = _FILLER_RE.sub(" ", text)
+    text = _ORPHAN_PUNCT_RE.sub(",", text)
+    text = _DOUBLE_PUNCT_RE.sub(" ", text)
     text = _POS_TAIL_RE.sub("", text)
     text = _TRAILING_CLAUSE_RE.sub("", text)
     text = _EXAMPLE_PAREN_RE.sub("", text)
