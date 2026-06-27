@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="CharacterVisualProfile" load_steps=3 format=3 uid="uid://cvp_alien01_enemy"]
+[gd_resource type="Resource" script_class="CharacterVisualProfile" format=3 uid="uid://cahaip8c5sslf"]
 
-[ext_resource type="Script" path="res://scripts/resources/character_visual_profile.gd" id="1_script"]
-[ext_resource type="SpriteFrames" path="res://resources/sprite_frames/alien01_frames.tres" id="2_frames"]
+[ext_resource type="Script" uid="uid://ccmog8u7wydo0" path="res://scripts/resources/character_visual_profile.gd" id="1_script"]
+[ext_resource type="SpriteFrames" uid="uid://bbaf3b086pg5f" path="res://resources/sprite_frames/alien01_frames.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_script")
@@ -9,8 +9,6 @@ character_id = "alien01"
 role_label = "ENEMY — Alien01"
 sprite_frames = ExtResource("2_frames")
 animation_order = Array[String](["Idle", "Run", "Walk", "Climb", "Jump", "Fall", "Death", "Impact"])
-modulate = Color(1, 1, 1, 1)
-display_scale = 0.45
 native_width_override = 388.0
 native_height_override = 258.0
 native_foot_y = 208.0
@@ -22,7 +20,4 @@ glow_color = Color(1, 0.164706, 0.066667, 1)
 glow_distance = 15.0
 glow_inner_strength = 1.0
 glow_outer_strength = 2.0
-night_effect_enabled = false
-night_intensity = 0.0
-night_opacity = 0.0
 source_effect_notes = "Alien01 sprite set from assets/Characters/Alien01. Attack animation not yet imported."

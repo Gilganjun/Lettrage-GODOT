@@ -207,6 +207,8 @@ func _begin_sequence() -> void:
 		_attack,
 		_begin_action_camera,
 	)
+	if _uses_side_slides() and _enemy.has_method("set_action_defender_facing_hold"):
+		_enemy.set_action_defender_facing_hold(true)
 	action_sequence_started.emit(_attack.attack_id)
 	if _round_ledger and _attack:
 		_round_ledger.begin_action("player", _attack.attack_id, _attack.display_name)
@@ -622,13 +624,11 @@ func _finalize_action_hit_tail(combat: CharacterCombat) -> void:
 	if _enemy and is_instance_valid(_enemy):
 		if _enemy.has_method("end_action_strike_freeze"):
 			_enemy.end_action_strike_freeze()
-		if _enemy.has_method("end_action_impact_sync_for_finisher"):
-			_enemy.end_action_impact_sync_for_finisher()
-	if combat != null:
-		if combat.has_pending_action_death():
-			combat.commit_deferred_action_death()
-		elif not combat.is_dead():
-			combat.apply_action_finisher_reaction(_player.global_position)
+		if combat == null or not combat.has_pending_action_death():
+			if _enemy.has_method("end_action_impact_sync_for_finisher"):
+				_enemy.end_action_impact_sync_for_finisher()
+	if combat != null and not combat.is_dead() and not combat.has_pending_action_death():
+		combat.apply_action_finisher_reaction(_player.global_position)
 
 
 func _spawn_strike_hit_vfx(hit_idx: int) -> void:
@@ -747,12 +747,6 @@ func _tick_strike_camera(frame_num: int) -> void:
 	var cam := _get_player_camera()
 	if cam != null and cam.is_finisher_kill_cam_active():
 		return
-	if _enemy != null and is_instance_valid(_enemy):
-		var enemy_combat := _enemy.get_node_or_null("CharacterCombat")
-		if enemy_combat is CharacterCombat:
-			var combat := enemy_combat as CharacterCombat
-			if combat.is_dead() or combat.has_pending_action_death():
-				return
 	_strike_camera.tick_strike_frame(frame_num)
 
 
@@ -1009,6 +1003,8 @@ func _lock_mutual_action_facing() -> void:
 
 
 func _unlock_mutual_action_facing() -> void:
+	if _enemy and _enemy.has_method("set_action_defender_facing_hold"):
+		_enemy.set_action_defender_facing_hold(false)
 	if _player and _player.has_method("set_action_facing_locked"):
 		_player.set_action_facing_locked(false)
 	if _enemy and _enemy.has_method("unlock_action_facing"):

@@ -1,27 +1,11 @@
-[gd_resource type="Resource" script_class="LetterSpawnProfile" format=3]
+[gd_resource type="Resource" script_class="LetterSpawnProfile" format=3 uid="uid://bs3mj7rciscv"]
 
-[ext_resource type="Script" path="res://scripts/letters/letter_spawn_profile.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cav1d44gqhsr6" path="res://scripts/letters/letter_spawn_profile.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
 kind = 1
-spawn_interval = 0.25
-max_active_letters = 24
-letter_lifetime = 120.0
-letter_fade_start = 115.0
-fade_x_min = 0.0
-fade_x_max = 2272.0
-fade_y_max = 648.0
-off_screen_grace_sec = 3.0
-off_screen_grace_horizontal_speed = 150.0
-off_screen_fade_duration_sec = 2.5
-claw_selected_decay_bonus_sec = 3.0
-lane_vowel_end = 0.33
-lane_common_end = 0.66
 vowel_spawn_interval = 0.92
-lane_rain_vowel_reroll_chance = 0.0
-lane_rain_consonant_reroll_chance = 0.0
 min_spawn_spacing_x = 110.0
 spawn_spacing_retries = 8
 min_horizontal_spacing_x = 220.0
-horizontal_lane_y_tolerance = 72.0

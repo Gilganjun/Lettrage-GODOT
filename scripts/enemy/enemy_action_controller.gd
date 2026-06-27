@@ -512,11 +512,8 @@ func _apply_guaranteed_hit(damage: int, hit_index: int, hit_idx: int) -> void:
 
 
 func _finalize_action_hit_tail(combat: CharacterCombat) -> void:
-	if combat != null:
-		if combat.has_pending_action_death():
-			combat.commit_deferred_action_death()
-		elif not combat.is_dead():
-			combat.apply_action_finisher_reaction(_enemy.global_position)
+	if combat != null and not combat.is_dead() and not combat.has_pending_action_death():
+		combat.apply_action_finisher_reaction(_enemy.global_position)
 	if _player and is_instance_valid(_player) and _player.has_method("end_action_strike_freeze"):
 		_player.end_action_strike_freeze()
 
@@ -572,12 +569,6 @@ func _tick_strike_camera(frame_num: int) -> void:
 	var cam := _get_fight_camera()
 	if cam != null and cam.is_finisher_kill_cam_active():
 		return
-	if _player != null and is_instance_valid(_player):
-		var player_combat := _player.get_node_or_null("CharacterCombat")
-		if player_combat is CharacterCombat:
-			var combat := player_combat as CharacterCombat
-			if combat.is_dead() or combat.has_pending_action_death():
-				return
 	_strike_camera.tick_strike_frame(frame_num)
 
 

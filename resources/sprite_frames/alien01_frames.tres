@@ -1,320 +1,142 @@
-[gd_resource type="SpriteFrames" load_steps=135 format=3 uid="uid://alien01_sprite_frames"]
+[gd_resource type="SpriteFrames" format=3 uid="uid://bbaf3b086pg5f"]
 
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_001.png" id="1"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_002.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_003.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_004.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_005.png" id="5"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_006.png" id="6"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_007.png" id="7"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_008.png" id="8"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_009.png" id="9"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_010.png" id="10"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_011.png" id="11"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_012.png" id="12"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Idle/idle_013.png" id="13"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_001.png" id="14"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_002.png" id="15"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_003.png" id="16"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_004.png" id="17"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_005.png" id="18"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_006.png" id="19"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_007.png" id="20"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_008.png" id="21"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_009.png" id="22"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_010.png" id="23"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_011.png" id="24"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_012.png" id="25"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_013.png" id="26"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_014.png" id="27"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Run/run_015.png" id="28"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_001.png" id="29"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_002.png" id="30"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_003.png" id="31"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_004.png" id="32"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_005.png" id="33"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_006.png" id="34"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_007.png" id="35"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Walk/walk_008.png" id="36"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_001.png" id="37"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_002.png" id="38"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_003.png" id="39"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_004.png" id="40"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_005.png" id="41"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_006.png" id="42"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_007.png" id="43"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_008.png" id="44"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_009.png" id="45"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_010.png" id="46"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Jump/jump_011.png" id="47"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_001.png" id="48"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_002.png" id="49"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_003.png" id="50"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_004.png" id="51"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_005.png" id="52"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_006.png" id="53"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_007.png" id="54"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_008.png" id="55"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_009.png" id="56"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_010.png" id="57"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_011.png" id="58"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_012.png" id="59"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_013.png" id="60"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_014.png" id="61"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_015.png" id="62"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_016.png" id="63"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_017.png" id="64"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_018.png" id="65"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_019.png" id="66"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_020.png" id="67"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_021.png" id="68"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_022.png" id="69"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_023.png" id="70"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_024.png" id="71"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_025.png" id="72"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Death/death_026.png" id="73"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_001.png" id="74"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_002.png" id="75"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_003.png" id="76"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_004.png" id="77"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_005.png" id="78"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_006.png" id="79"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_007.png" id="80"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_008.png" id="81"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_009.png" id="82"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_010.png" id="83"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_011.png" id="84"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_012.png" id="85"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_013.png" id="86"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_014.png" id="87"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_015.png" id="88"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_016.png" id="89"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_017.png" id="90"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_018.png" id="91"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_019.png" id="92"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_020.png" id="93"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_021.png" id="94"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_022.png" id="95"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_023.png" id="96"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_024.png" id="97"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_025.png" id="98"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_026.png" id="99"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_027.png" id="100"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_028.png" id="101"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_029.png" id="102"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_030.png" id="103"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_031.png" id="104"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_032.png" id="105"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_033.png" id="106"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_034.png" id="107"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_035.png" id="108"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_036.png" id="109"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_037.png" id="110"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_038.png" id="111"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_039.png" id="112"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_040.png" id="113"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_041.png" id="114"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_042.png" id="115"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_043.png" id="116"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_044.png" id="117"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_045.png" id="118"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_046.png" id="119"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_047.png" id="120"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_048.png" id="121"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_049.png" id="122"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_050.png" id="123"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_051.png" id="124"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_052.png" id="125"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_053.png" id="126"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_054.png" id="127"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_055.png" id="128"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_056.png" id="129"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_057.png" id="130"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_058.png" id="131"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_059.png" id="132"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_060.png" id="133"]
-[ext_resource type="Texture2D" path="res://assets/Characters/Alien01/Impact/IImpact_061.png" id="134"]
+[ext_resource type="Texture2D" uid="uid://d260c7h2743de" path="res://assets/Characters/Alien01/Idle/idle_001.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://xc6s4dv1mwew" path="res://assets/Characters/Alien01/Idle/idle_002.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://bxkg7aqhosdtn" path="res://assets/Characters/Alien01/Idle/idle_003.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://bbr2scof3x2nx" path="res://assets/Characters/Alien01/Idle/idle_004.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://biw4ocjwk82sv" path="res://assets/Characters/Alien01/Idle/idle_005.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://bncytwpoddlk1" path="res://assets/Characters/Alien01/Idle/idle_006.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://d0l3emljml2hh" path="res://assets/Characters/Alien01/Idle/idle_007.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://qvj4sepucl53" path="res://assets/Characters/Alien01/Idle/idle_008.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://b30usbyta6nm4" path="res://assets/Characters/Alien01/Idle/idle_009.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://cuhohy5hpi6e5" path="res://assets/Characters/Alien01/Idle/idle_010.png" id="10"]
+[ext_resource type="Texture2D" uid="uid://d22cv75biqyqk" path="res://assets/Characters/Alien01/Idle/idle_011.png" id="11"]
+[ext_resource type="Texture2D" uid="uid://b0aayjtay8vwc" path="res://assets/Characters/Alien01/Idle/idle_012.png" id="12"]
+[ext_resource type="Texture2D" uid="uid://dsexyj5mvktdb" path="res://assets/Characters/Alien01/Idle/idle_013.png" id="13"]
+[ext_resource type="Texture2D" uid="uid://baoagdsw8om5s" path="res://assets/Characters/Alien01/Run/run_001.png" id="14"]
+[ext_resource type="Texture2D" uid="uid://bihh12vhwugv6" path="res://assets/Characters/Alien01/Run/run_002.png" id="15"]
+[ext_resource type="Texture2D" uid="uid://b5yytlbsy6vpt" path="res://assets/Characters/Alien01/Run/run_003.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://dn1wggtdrxwks" path="res://assets/Characters/Alien01/Run/run_004.png" id="17"]
+[ext_resource type="Texture2D" uid="uid://ww68ewt8tid1" path="res://assets/Characters/Alien01/Run/run_005.png" id="18"]
+[ext_resource type="Texture2D" uid="uid://bgc3570dp28k3" path="res://assets/Characters/Alien01/Run/run_006.png" id="19"]
+[ext_resource type="Texture2D" uid="uid://cpj53gwuuxqd5" path="res://assets/Characters/Alien01/Run/run_007.png" id="20"]
+[ext_resource type="Texture2D" uid="uid://b5mj56l8pywjg" path="res://assets/Characters/Alien01/Run/run_008.png" id="21"]
+[ext_resource type="Texture2D" uid="uid://i8anw4t1io0a" path="res://assets/Characters/Alien01/Run/run_009.png" id="22"]
+[ext_resource type="Texture2D" uid="uid://df8jrsd5mn853" path="res://assets/Characters/Alien01/Run/run_010.png" id="23"]
+[ext_resource type="Texture2D" uid="uid://brwi45leqowyt" path="res://assets/Characters/Alien01/Run/run_011.png" id="24"]
+[ext_resource type="Texture2D" uid="uid://dog32wvfwd42u" path="res://assets/Characters/Alien01/Run/run_012.png" id="25"]
+[ext_resource type="Texture2D" uid="uid://djhq048mn0swb" path="res://assets/Characters/Alien01/Run/run_013.png" id="26"]
+[ext_resource type="Texture2D" uid="uid://bj61cb0pvth36" path="res://assets/Characters/Alien01/Run/run_014.png" id="27"]
+[ext_resource type="Texture2D" uid="uid://sd5phtob8kjl" path="res://assets/Characters/Alien01/Run/run_015.png" id="28"]
+[ext_resource type="Texture2D" uid="uid://ccf3x45508sth" path="res://assets/Characters/Alien01/Walk/walk_001.png" id="29"]
+[ext_resource type="Texture2D" uid="uid://btrgmyoxdsxq5" path="res://assets/Characters/Alien01/Walk/walk_002.png" id="30"]
+[ext_resource type="Texture2D" uid="uid://xhr8xnxplvdx" path="res://assets/Characters/Alien01/Walk/walk_003.png" id="31"]
+[ext_resource type="Texture2D" uid="uid://dhxao8iao67go" path="res://assets/Characters/Alien01/Walk/walk_004.png" id="32"]
+[ext_resource type="Texture2D" uid="uid://dgijpurqyjkni" path="res://assets/Characters/Alien01/Walk/walk_005.png" id="33"]
+[ext_resource type="Texture2D" uid="uid://f57dyi5qwa6w" path="res://assets/Characters/Alien01/Walk/walk_006.png" id="34"]
+[ext_resource type="Texture2D" uid="uid://dkb62ln5t0vws" path="res://assets/Characters/Alien01/Walk/walk_007.png" id="35"]
+[ext_resource type="Texture2D" uid="uid://bwyart0u1b0os" path="res://assets/Characters/Alien01/Walk/walk_008.png" id="36"]
+[ext_resource type="Texture2D" uid="uid://323r300o4efy" path="res://assets/Characters/Alien01/Jump/jump_001.png" id="37"]
+[ext_resource type="Texture2D" uid="uid://bcjxsmp0nlh6l" path="res://assets/Characters/Alien01/Jump/jump_002.png" id="38"]
+[ext_resource type="Texture2D" uid="uid://ypyokaccs4ln" path="res://assets/Characters/Alien01/Jump/jump_003.png" id="39"]
+[ext_resource type="Texture2D" uid="uid://ocy8r1cnfcnc" path="res://assets/Characters/Alien01/Jump/jump_004.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://dj24w55pxdh1h" path="res://assets/Characters/Alien01/Jump/jump_005.png" id="41"]
+[ext_resource type="Texture2D" uid="uid://bp54riffwjak2" path="res://assets/Characters/Alien01/Jump/jump_006.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://fxf2a5ywwxhm" path="res://assets/Characters/Alien01/Jump/jump_007.png" id="43"]
+[ext_resource type="Texture2D" uid="uid://b3dmlv3qkl0km" path="res://assets/Characters/Alien01/Jump/jump_008.png" id="44"]
+[ext_resource type="Texture2D" uid="uid://c2ljdh1n2bfb7" path="res://assets/Characters/Alien01/Jump/jump_009.png" id="45"]
+[ext_resource type="Texture2D" uid="uid://7wa4gqjf2qmk" path="res://assets/Characters/Alien01/Jump/jump_010.png" id="46"]
+[ext_resource type="Texture2D" uid="uid://dbke1dgnc4syk" path="res://assets/Characters/Alien01/Jump/jump_011.png" id="47"]
+[ext_resource type="Texture2D" uid="uid://pf1n75shi614" path="res://assets/Characters/Alien01/Death/death_001.png" id="48"]
+[ext_resource type="Texture2D" uid="uid://c3qpqrqwge7ds" path="res://assets/Characters/Alien01/Death/death_002.png" id="49"]
+[ext_resource type="Texture2D" uid="uid://cwv7irxr3us6a" path="res://assets/Characters/Alien01/Death/death_003.png" id="50"]
+[ext_resource type="Texture2D" uid="uid://doltyk4xpdu85" path="res://assets/Characters/Alien01/Death/death_004.png" id="51"]
+[ext_resource type="Texture2D" uid="uid://duy8j1vno7sn" path="res://assets/Characters/Alien01/Death/death_005.png" id="52"]
+[ext_resource type="Texture2D" uid="uid://byryhb48ngy04" path="res://assets/Characters/Alien01/Death/death_006.png" id="53"]
+[ext_resource type="Texture2D" uid="uid://b2ic8422uvu52" path="res://assets/Characters/Alien01/Death/death_007.png" id="54"]
+[ext_resource type="Texture2D" uid="uid://b2uh4b6kjmfgy" path="res://assets/Characters/Alien01/Death/death_008.png" id="55"]
+[ext_resource type="Texture2D" uid="uid://cpexfffc84f18" path="res://assets/Characters/Alien01/Death/death_009.png" id="56"]
+[ext_resource type="Texture2D" uid="uid://codg7ovv4ebu3" path="res://assets/Characters/Alien01/Death/death_010.png" id="57"]
+[ext_resource type="Texture2D" uid="uid://dn25q1i8frmll" path="res://assets/Characters/Alien01/Death/death_011.png" id="58"]
+[ext_resource type="Texture2D" uid="uid://dslv0gqup2brc" path="res://assets/Characters/Alien01/Death/death_012.png" id="59"]
+[ext_resource type="Texture2D" uid="uid://bpvp6ndemm0yy" path="res://assets/Characters/Alien01/Death/death_013.png" id="60"]
+[ext_resource type="Texture2D" uid="uid://d2so3j243773f" path="res://assets/Characters/Alien01/Death/death_014.png" id="61"]
+[ext_resource type="Texture2D" uid="uid://7ivafyvprhy2" path="res://assets/Characters/Alien01/Death/death_015.png" id="62"]
+[ext_resource type="Texture2D" uid="uid://bx8bdomafvq8g" path="res://assets/Characters/Alien01/Death/death_016.png" id="63"]
+[ext_resource type="Texture2D" uid="uid://bm3lb0dgnxygv" path="res://assets/Characters/Alien01/Death/death_017.png" id="64"]
+[ext_resource type="Texture2D" uid="uid://yrjww0bqirfs" path="res://assets/Characters/Alien01/Death/death_018.png" id="65"]
+[ext_resource type="Texture2D" uid="uid://ks628fu4q83w" path="res://assets/Characters/Alien01/Death/death_019.png" id="66"]
+[ext_resource type="Texture2D" uid="uid://da7ex5346qd55" path="res://assets/Characters/Alien01/Death/death_020.png" id="67"]
+[ext_resource type="Texture2D" uid="uid://q5jrndg6ddwd" path="res://assets/Characters/Alien01/Death/death_021.png" id="68"]
+[ext_resource type="Texture2D" uid="uid://byrtetd3od36u" path="res://assets/Characters/Alien01/Death/death_022.png" id="69"]
+[ext_resource type="Texture2D" uid="uid://cfe73kxma5ay7" path="res://assets/Characters/Alien01/Death/death_023.png" id="70"]
+[ext_resource type="Texture2D" uid="uid://cy1v6lladlkqy" path="res://assets/Characters/Alien01/Death/death_024.png" id="71"]
+[ext_resource type="Texture2D" uid="uid://bwps4jh4xf0ft" path="res://assets/Characters/Alien01/Death/death_025.png" id="72"]
+[ext_resource type="Texture2D" uid="uid://c7ntnhcpb2vig" path="res://assets/Characters/Alien01/Death/death_026.png" id="73"]
+[ext_resource type="Texture2D" uid="uid://cc5x5j0gpkf4s" path="res://assets/Characters/Alien01/Impact/IImpact_001.png" id="74"]
+[ext_resource type="Texture2D" uid="uid://c3lk4vgd1sqp" path="res://assets/Characters/Alien01/Impact/IImpact_002.png" id="75"]
+[ext_resource type="Texture2D" uid="uid://y7oem3udwc0r" path="res://assets/Characters/Alien01/Impact/IImpact_003.png" id="76"]
+[ext_resource type="Texture2D" uid="uid://862xq0ldipvy" path="res://assets/Characters/Alien01/Impact/IImpact_004.png" id="77"]
+[ext_resource type="Texture2D" uid="uid://b0jvhnway6vb7" path="res://assets/Characters/Alien01/Impact/IImpact_005.png" id="78"]
+[ext_resource type="Texture2D" uid="uid://xpdxk1a1gtmf" path="res://assets/Characters/Alien01/Impact/IImpact_006.png" id="79"]
+[ext_resource type="Texture2D" uid="uid://cdj2yvs6mvclp" path="res://assets/Characters/Alien01/Impact/IImpact_007.png" id="80"]
+[ext_resource type="Texture2D" uid="uid://chjiuka6rftas" path="res://assets/Characters/Alien01/Impact/IImpact_008.png" id="81"]
+[ext_resource type="Texture2D" uid="uid://bw5j6hgetxxr" path="res://assets/Characters/Alien01/Impact/IImpact_009.png" id="82"]
+[ext_resource type="Texture2D" uid="uid://d3bp21wydfm5m" path="res://assets/Characters/Alien01/Impact/IImpact_010.png" id="83"]
+[ext_resource type="Texture2D" uid="uid://ct07hgkc5j36m" path="res://assets/Characters/Alien01/Impact/IImpact_011.png" id="84"]
+[ext_resource type="Texture2D" uid="uid://cp4o7s5ukdoh" path="res://assets/Characters/Alien01/Impact/IImpact_012.png" id="85"]
+[ext_resource type="Texture2D" uid="uid://bkwjmrneh845" path="res://assets/Characters/Alien01/Impact/IImpact_013.png" id="86"]
+[ext_resource type="Texture2D" uid="uid://y6jquiehib6v" path="res://assets/Characters/Alien01/Impact/IImpact_014.png" id="87"]
+[ext_resource type="Texture2D" uid="uid://dmt1mvi2lyivl" path="res://assets/Characters/Alien01/Impact/IImpact_015.png" id="88"]
+[ext_resource type="Texture2D" uid="uid://bcat1da6637ak" path="res://assets/Characters/Alien01/Impact/IImpact_016.png" id="89"]
+[ext_resource type="Texture2D" uid="uid://daee61gtg37dp" path="res://assets/Characters/Alien01/Impact/IImpact_017.png" id="90"]
+[ext_resource type="Texture2D" uid="uid://dnom8m7smtx2" path="res://assets/Characters/Alien01/Impact/IImpact_018.png" id="91"]
+[ext_resource type="Texture2D" uid="uid://im5gbsssngsm" path="res://assets/Characters/Alien01/Impact/IImpact_019.png" id="92"]
+[ext_resource type="Texture2D" uid="uid://bnsxbdpc01xen" path="res://assets/Characters/Alien01/Impact/IImpact_020.png" id="93"]
+[ext_resource type="Texture2D" uid="uid://dogkegbfuwi30" path="res://assets/Characters/Alien01/Impact/IImpact_021.png" id="94"]
+[ext_resource type="Texture2D" uid="uid://bv53wewxgsfk5" path="res://assets/Characters/Alien01/Impact/IImpact_022.png" id="95"]
+[ext_resource type="Texture2D" uid="uid://6m7eootdfcyc" path="res://assets/Characters/Alien01/Impact/IImpact_023.png" id="96"]
+[ext_resource type="Texture2D" uid="uid://cggdjxmgx7rra" path="res://assets/Characters/Alien01/Impact/IImpact_024.png" id="97"]
+[ext_resource type="Texture2D" uid="uid://de1jmkidw3h5" path="res://assets/Characters/Alien01/Impact/IImpact_025.png" id="98"]
+[ext_resource type="Texture2D" uid="uid://doj21mncql01r" path="res://assets/Characters/Alien01/Impact/IImpact_026.png" id="99"]
+[ext_resource type="Texture2D" uid="uid://ccf6a0idt13b1" path="res://assets/Characters/Alien01/Impact/IImpact_027.png" id="100"]
+[ext_resource type="Texture2D" uid="uid://bxgjfjloqc7qv" path="res://assets/Characters/Alien01/Impact/IImpact_028.png" id="101"]
+[ext_resource type="Texture2D" uid="uid://dpaxhoa3g44v5" path="res://assets/Characters/Alien01/Impact/IImpact_029.png" id="102"]
+[ext_resource type="Texture2D" uid="uid://cmkhyfwfip8xs" path="res://assets/Characters/Alien01/Impact/IImpact_030.png" id="103"]
+[ext_resource type="Texture2D" uid="uid://xob503afp7ni" path="res://assets/Characters/Alien01/Impact/IImpact_031.png" id="104"]
+[ext_resource type="Texture2D" uid="uid://c8rtnr6m8kf8j" path="res://assets/Characters/Alien01/Impact/IImpact_032.png" id="105"]
+[ext_resource type="Texture2D" uid="uid://cdjapf7d5adnc" path="res://assets/Characters/Alien01/Impact/IImpact_033.png" id="106"]
+[ext_resource type="Texture2D" uid="uid://bbkv1p4lrxq0k" path="res://assets/Characters/Alien01/Impact/IImpact_034.png" id="107"]
+[ext_resource type="Texture2D" uid="uid://cnuluv1471h6p" path="res://assets/Characters/Alien01/Impact/IImpact_035.png" id="108"]
+[ext_resource type="Texture2D" uid="uid://dnu4fxr1ge716" path="res://assets/Characters/Alien01/Impact/IImpact_036.png" id="109"]
+[ext_resource type="Texture2D" uid="uid://b67bn532bgiw" path="res://assets/Characters/Alien01/Impact/IImpact_037.png" id="110"]
+[ext_resource type="Texture2D" uid="uid://dmyvk3etl87u4" path="res://assets/Characters/Alien01/Impact/IImpact_038.png" id="111"]
+[ext_resource type="Texture2D" uid="uid://8surt7li3qhd" path="res://assets/Characters/Alien01/Impact/IImpact_039.png" id="112"]
+[ext_resource type="Texture2D" uid="uid://fnn2fty0mu07" path="res://assets/Characters/Alien01/Impact/IImpact_040.png" id="113"]
+[ext_resource type="Texture2D" uid="uid://y7p2xidgkilf" path="res://assets/Characters/Alien01/Impact/IImpact_041.png" id="114"]
+[ext_resource type="Texture2D" uid="uid://df144hrqjwgt8" path="res://assets/Characters/Alien01/Impact/IImpact_042.png" id="115"]
+[ext_resource type="Texture2D" uid="uid://bdeks7prl8e6c" path="res://assets/Characters/Alien01/Impact/IImpact_043.png" id="116"]
+[ext_resource type="Texture2D" uid="uid://6a8busx0y7ql" path="res://assets/Characters/Alien01/Impact/IImpact_044.png" id="117"]
+[ext_resource type="Texture2D" uid="uid://bsd7gw3acq4h7" path="res://assets/Characters/Alien01/Impact/IImpact_045.png" id="118"]
+[ext_resource type="Texture2D" uid="uid://rbugqd6x6yfu" path="res://assets/Characters/Alien01/Impact/IImpact_046.png" id="119"]
+[ext_resource type="Texture2D" uid="uid://y46m6x6b07pg" path="res://assets/Characters/Alien01/Impact/IImpact_047.png" id="120"]
+[ext_resource type="Texture2D" uid="uid://d2ye6p1fne4f2" path="res://assets/Characters/Alien01/Impact/IImpact_048.png" id="121"]
+[ext_resource type="Texture2D" uid="uid://jww7l62g3jcr" path="res://assets/Characters/Alien01/Impact/IImpact_049.png" id="122"]
+[ext_resource type="Texture2D" uid="uid://sb1x0xnswj8f" path="res://assets/Characters/Alien01/Impact/IImpact_050.png" id="123"]
+[ext_resource type="Texture2D" uid="uid://bv5vd6h31lj00" path="res://assets/Characters/Alien01/Impact/IImpact_051.png" id="124"]
+[ext_resource type="Texture2D" uid="uid://cba2qpcpcqxd" path="res://assets/Characters/Alien01/Impact/IImpact_052.png" id="125"]
+[ext_resource type="Texture2D" uid="uid://bubnwj6bexpqd" path="res://assets/Characters/Alien01/Impact/IImpact_053.png" id="126"]
+[ext_resource type="Texture2D" uid="uid://dftg7o730rqi6" path="res://assets/Characters/Alien01/Impact/IImpact_054.png" id="127"]
+[ext_resource type="Texture2D" uid="uid://b750rgixxdvsl" path="res://assets/Characters/Alien01/Impact/IImpact_055.png" id="128"]
+[ext_resource type="Texture2D" uid="uid://biobcwind2e4k" path="res://assets/Characters/Alien01/Impact/IImpact_056.png" id="129"]
+[ext_resource type="Texture2D" uid="uid://bnc72pdratyca" path="res://assets/Characters/Alien01/Impact/IImpact_057.png" id="130"]
+[ext_resource type="Texture2D" uid="uid://d0xblegwpx64t" path="res://assets/Characters/Alien01/Impact/IImpact_058.png" id="131"]
+[ext_resource type="Texture2D" uid="uid://dkfku58r3m2dl" path="res://assets/Characters/Alien01/Impact/IImpact_059.png" id="132"]
+[ext_resource type="Texture2D" uid="uid://caxntswjevq84" path="res://assets/Characters/Alien01/Impact/IImpact_060.png" id="133"]
+[ext_resource type="Texture2D" uid="uid://bv3kqqj38dcqa" path="res://assets/Characters/Alien01/Impact/IImpact_061.png" id="134"]
 
 [resource]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10")
-}, {
-"duration": 1.0,
-"texture": ExtResource("11")
-}, {
-"duration": 1.0,
-"texture": ExtResource("12")
-}, {
-"duration": 1.0,
-"texture": ExtResource("13")
-}],
-"loop": true,
-"name": &"Idle",
-"speed": 10.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("14")
-}, {
-"duration": 1.0,
-"texture": ExtResource("15")
-}, {
-"duration": 1.0,
-"texture": ExtResource("16")
-}, {
-"duration": 1.0,
-"texture": ExtResource("17")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18")
-}, {
-"duration": 1.0,
-"texture": ExtResource("19")
-}, {
-"duration": 1.0,
-"texture": ExtResource("20")
-}, {
-"duration": 1.0,
-"texture": ExtResource("21")
-}, {
-"duration": 1.0,
-"texture": ExtResource("22")
-}, {
-"duration": 1.0,
-"texture": ExtResource("23")
-}, {
-"duration": 1.0,
-"texture": ExtResource("24")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28")
-}],
-"loop": true,
-"name": &"Run",
-"speed": 14.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("29")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32")
-}, {
-"duration": 1.0,
-"texture": ExtResource("33")
-}, {
-"duration": 1.0,
-"texture": ExtResource("34")
-}, {
-"duration": 1.0,
-"texture": ExtResource("35")
-}, {
-"duration": 1.0,
-"texture": ExtResource("36")
-}],
-"loop": true,
-"name": &"Walk",
-"speed": 10.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("37")
-}, {
-"duration": 1.0,
-"texture": ExtResource("38")
-}, {
-"duration": 1.0,
-"texture": ExtResource("39")
-}, {
-"duration": 1.0,
-"texture": ExtResource("40")
-}, {
-"duration": 1.0,
-"texture": ExtResource("41")
-}, {
-"duration": 1.0,
-"texture": ExtResource("42")
-}, {
-"duration": 1.0,
-"texture": ExtResource("43")
-}, {
-"duration": 1.0,
-"texture": ExtResource("44")
-}, {
-"duration": 1.0,
-"texture": ExtResource("45")
-}, {
-"duration": 1.0,
-"texture": ExtResource("46")
-}, {
-"duration": 1.0,
-"texture": ExtResource("47")
-}],
-"loop": false,
-"name": &"Jump",
-"speed": 12.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("44")
-}, {
-"duration": 1.0,
-"texture": ExtResource("45")
-}, {
-"duration": 1.0,
-"texture": ExtResource("46")
-}, {
-"duration": 1.0,
-"texture": ExtResource("47")
-}],
-"loop": true,
-"name": &"Fall",
-"speed": 8.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("29")
@@ -426,6 +248,67 @@ animations = [{
 "loop": false,
 "name": &"Death",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47")
+}],
+"loop": true,
+"name": &"Fall",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -614,4 +497,121 @@ animations = [{
 "loop": false,
 "name": &"Impact",
 "speed": 24.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("37")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47")
+}],
+"loop": false,
+"name": &"Jump",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28")
+}],
+"loop": true,
+"name": &"Run",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("29")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36")
+}],
+"loop": true,
+"name": &"Walk",
+"speed": 10.0
 }]

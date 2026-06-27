@@ -24,7 +24,7 @@ static func attach_definition_popups(
 	parent: Node,
 	word_controller: WordGameController,
 ) -> CanvasLayer:
-	var popup: CanvasLayer = DefinitionPopupPlayerScript.new()
+	var popup: DefinitionPopupPlayer = DefinitionPopupPlayerScript.new()
 	parent.add_child(popup)
 	popup.bind_player_words(word_controller)
 	return popup

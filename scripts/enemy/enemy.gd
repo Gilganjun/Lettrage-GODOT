@@ -62,6 +62,7 @@ var _action_approach_stuck_time := 0.0
 var _action_impact_sync: RefCounted
 var _action_facing_locked := false
 var _action_facing_target: Node2D
+var _action_defender_facing_hold := false
 var _finisher_survivor_active := false
 var _finisher_victim: Node2D = null
 var _finisher_arrived := false
@@ -348,6 +349,7 @@ func set_action_sequence_targeted(active: bool) -> void:
 	if active:
 		refresh_action_facing_lock()
 	else:
+		_action_defender_facing_hold = false
 		unlock_action_facing()
 		end_action_strike_freeze()
 		_end_action_impact_sync_after_sequence()
@@ -380,10 +382,17 @@ func lock_action_facing_toward(target: Node2D) -> void:
 func unlock_action_facing() -> void:
 	_action_facing_locked = false
 	_action_facing_target = null
+	_action_defender_facing_hold = false
+
+
+func set_action_defender_facing_hold(hold: bool) -> void:
+	_action_defender_facing_hold = hold
 
 
 func refresh_action_facing_lock() -> void:
 	if not _action_facing_locked or _action_facing_target == null:
+		return
+	if _action_defender_facing_hold:
 		return
 	facing = 1 if _action_facing_target.global_position.x >= global_position.x else -1
 	if sprite:

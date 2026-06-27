@@ -135,7 +135,10 @@ func has_pending_action_death() -> bool:
 
 func owns_action_sprite_presentation() -> bool:
 	_ensure_initialized()
-	return _health().is_dead or not _pending_action_death_source.is_empty() or _word_stun_active
+	# Mid-combo ACTION kills defer presentation until commit_deferred_action_death().
+	if has_pending_action_death():
+		return false
+	return _health().is_dead or _word_stun_active
 
 
 func is_enemy_stun_active() -> bool:
@@ -182,6 +185,9 @@ func apply_action_damage(
 	if _health().is_dead and not has_pending_action_death():
 		return 0
 	var dealt: int = (_health() as HealthComponent).apply_damage(amount, source)
+	if has_pending_action_death() and dealt <= 0:
+		_hit_feedback().play_hit(true)
+		return 0
 	if dealt <= 0:
 		return dealt
 	_hit_feedback().play_hit(true)

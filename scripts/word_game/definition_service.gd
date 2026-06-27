@@ -1,9 +1,10 @@
 class_name DefinitionService
 extends RefCounted
 
-## Loads Definitions.txt (WORD<TAB>short definition) for valid-word popups.
+## Loads Definitions.txt (WORD<TAB>sense1|sense2|...) for valid-word popups.
 
 const DEFINITIONS_PATH := "res://dictionary/Definitions.txt"
+const SENSE_DELIMITER := "|"
 
 var _definitions: Dictionary = {}
 var definition_count: int = 0
@@ -31,11 +32,19 @@ func load_definitions() -> bool:
 		if tab < 1:
 			continue
 		var word := line.substr(0, tab).strip_edges().to_upper()
-		var definition := line.substr(tab + 1).strip_edges()
-		if word.is_empty() or definition.is_empty():
+		var payload := line.substr(tab + 1).strip_edges()
+		if word.is_empty() or payload.is_empty():
 			continue
-		if not _definitions.has(word):
-			_definitions[word] = definition
+		if _definitions.has(word):
+			continue
+		var senses: PackedStringArray = PackedStringArray()
+		for part in payload.split(SENSE_DELIMITER):
+			var sense := part.strip_edges()
+			if sense.is_empty() or _should_skip_sense(sense):
+				continue
+			senses.append(sense)
+		if not senses.is_empty():
+			_definitions[word] = senses
 	file.close()
 	definition_count = _definitions.size()
 	load_time_ms = float(Time.get_ticks_msec() - start)
@@ -43,14 +52,18 @@ func load_definitions() -> bool:
 	return true
 
 
-func get_definition(word: String) -> String:
+func get_senses(word: String) -> PackedStringArray:
 	if not loaded:
-		return ""
+		return PackedStringArray()
 	var normalized := word.strip_edges().to_upper()
 	if normalized.is_empty():
-		return ""
-	return str(_definitions.get(normalized, ""))
+		return PackedStringArray()
+	return _definitions.get(normalized, PackedStringArray())
 
 
 func has_definition(word: String) -> bool:
-	return not get_definition(word).is_empty()
+	return get_senses(word).size() > 0
+
+
+func _should_skip_sense(sense: String) -> bool:
+	return sense.to_lower().begins_with("paper size")
