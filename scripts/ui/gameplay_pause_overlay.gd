@@ -5,7 +5,6 @@ extends CanvasLayer
 
 signal pause_state_changed(is_paused: bool)
 
-@onready var _pause_button: Button = $Root/PauseButton
 @onready var _pause_panel: Control = $PausePanel
 @onready var _resume_button: Button = $PausePanel/Center/VBox/ResumeButton
 
@@ -17,7 +16,6 @@ func _ready() -> void:
 	layer = 45
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_unhandled_input(true)
-	_pause_button.pressed.connect(pause)
 	_resume_button.pressed.connect(resume)
 	_update_ui()
 
@@ -59,5 +57,4 @@ func is_gameplay_paused() -> bool:
 
 
 func _update_ui() -> void:
-	_pause_button.visible = not _is_paused
 	_pause_panel.visible = _is_paused

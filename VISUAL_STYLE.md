@@ -10,7 +10,7 @@ Readable playable screens take priority over beautiful backgrounds. This documen
 | Rainbow sticker letters | Unified glowing alphabet tiles |
 | Platforms blend into scenery | Strong top edge, dark underside |
 | Raw yellow HUD text | Framed panels and word slots |
-| Small characters lost in mid-tones | Same designs, brighter with soft outline |
+| Small characters lost in mid-tones | Same designs, brighter with soft backlight |
 
 ## Layer hierarchy
 
@@ -44,8 +44,8 @@ Prototype values (`GameplayFocusBand`):
 ## Characters
 
 - Keep existing fox and enemy designs
-- Subtle warm outline / rim light via shader
-- Slight visual scale boost (~8%) for readability
+- Subtle diffused backlight and top rim via shader (no hard outline)
+- Slight visual scale boost (~5%) for readability
 - Do not change character art assets in the first pass
 
 ## Letters
@@ -74,7 +74,7 @@ Dictionary lookup is used **only when the player submits a word** — not while 
 | `VISUAL_STYLE.md` | This guide |
 | `scripts/visual/gameplay_focus_band.gd` | Background recede + play-band overlay |
 | `scripts/visual/platform_readability.gd` | Platform rim lines and underside shadow |
-| `scripts/visual/character_readability.gd` | Character outline shader |
+| `scripts/visual/character_readability.gd` | Character backlight + rim shader |
 | `scripts/visual/phase2c1_visual_pass.gd` | Scene orchestrator |
 | `scenes/visual/phase2c1_visual_pass.tscn` | Instanced by phase2c1 test scene |
-| `shaders/character_outline.gdshader` | Soft character outline |
+| `shaders/character_outline.gdshader` | Diffused backlight + subtle rim |

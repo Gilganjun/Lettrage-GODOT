@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-MAX_DEFINITION_LEN = 80
+MAX_DEFINITION_LEN = 320
 MAX_SENSES_COMPREHENSIVE = 10
 MAX_SENSES_TOP3 = 3
 # Backward-compatible alias used by older scripts.
@@ -111,15 +111,21 @@ def split_numbered_senses(text: str) -> list[str]:
 
 
 def shorten_definition(text: str, max_len: int = MAX_DEFINITION_LEN) -> str:
+    """Normalize a gloss for storage. Does not append ellipsis or cut mid-phrase."""
+    from definition_quality import is_oxford_junk_gloss
+
     text = strip_display_prefixes(text)
-    if not text:
+    if not text or is_oxford_junk_gloss(text):
         return ""
     if len(text) <= max_len:
         return text
     cut = text[: max_len - 1]
     if " " in cut:
         cut = cut.rsplit(" ", 1)[0]
-    return cut.rstrip(".,;:") + "…"
+    cut = cut.rstrip(".,;:")
+    if len(cut) < 20:
+        return ""
+    return cut
 
 
 def encode_senses(senses: list[str]) -> str:

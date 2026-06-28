@@ -4,6 +4,7 @@ extends AudioStreamPlayer
 
 @export_range(0.0, 1.0, 0.01) var ambient_level := 0.2
 @export var loop_track := true
+@export var autostart := true
 
 
 func _ready() -> void:
@@ -13,4 +14,5 @@ func _ready() -> void:
 		if playable is AudioStreamMP3:
 			playable.loop = true
 		stream = playable
-	play()
+	if autostart:
+		play()

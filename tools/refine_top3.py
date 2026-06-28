@@ -18,9 +18,13 @@ DEFAULT_TOP3 = Path(r"C:\Lettrage\Dictionary\DefinitionsTop3.txt")
 DEFAULT_REPORT = Path(r"C:\Lettrage\Dictionary\DEFINITIONS_TOP3_REFINE_REPORT.txt")
 DEFAULT_LIVE = ROOT / "dictionary" / "EnglishWords5.txt"
 DEFAULT_PROJECT_TOP3 = ROOT / "dictionary" / "Definitions.txt"
+DEFAULT_PROJECT_MAIN = ROOT / "dictionary" / "DefinitionsMain.txt"
 
 PILOT_WORDS = ("A", "I", "THE", "BE", "BANK", "BARK", "DATE", "LIGHT", "CRACK", "FAIR", "NOVEL")
 REVIEW_WORDS = (
+    "NO",
+    "GIG",
+    "BYE",
     "BAB",
     "RIB",
     "FUSE",
@@ -72,7 +76,7 @@ def refine_top3(
         senses = comprehensive.get(word, [])
         if not senses:
             continue
-        picked = select_game_top3_from_senses(word, senses)
+        picked = select_game_top3_from_senses(word, senses, comprehensive)
         if picked:
             top3[word] = picked
     return top3
@@ -135,11 +139,22 @@ def main() -> None:
     written = write_top3(args.output, live_words, top3)
     write_report(args.report, top3, written, len(live_words))
 
+    external_main = args.output.parent / "DefinitionsMain.txt"
+    external_main.write_text(args.output.read_text(encoding="utf-8"), encoding="utf-8")
+    DEFAULT_PROJECT_MAIN.parent.mkdir(parents=True, exist_ok=True)
+    DEFAULT_PROJECT_MAIN.write_text(args.output.read_text(encoding="utf-8"), encoding="utf-8")
+
     if args.copy_to_project:
         DEFAULT_PROJECT_TOP3.write_text(args.output.read_text(encoding="utf-8"), encoding="utf-8")
         print(f"Copied Top 3 dictionary to {DEFAULT_PROJECT_TOP3}")
 
     print(f"Refined Top 3: {written:,} entries -> {args.output}")
+
+    audit_script = ROOT / "tools" / "audit_top3_ranking.py"
+    if audit_script.is_file():
+        import subprocess
+
+        subprocess.run([sys.executable, str(audit_script)], check=False)
 
 
 if __name__ == "__main__":

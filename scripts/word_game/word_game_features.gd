@@ -19,11 +19,11 @@ static func attach_profanity_reactions(
 	return reaction
 
 
-## Attaches definition popup UI for player valid-word submissions.
+## Attaches definition popup under UI CanvasLayer, anchored below the platform.
 static func attach_definition_popups(
 	parent: Node,
 	word_controller: WordGameController,
-) -> CanvasLayer:
+) -> DefinitionPopupPlayer:
 	var popup: DefinitionPopupPlayer = DefinitionPopupPlayerScript.new()
 	parent.add_child(popup)
 	popup.bind_player_words(word_controller)

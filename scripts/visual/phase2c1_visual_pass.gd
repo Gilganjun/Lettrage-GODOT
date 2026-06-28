@@ -33,8 +33,8 @@ func _apply_character_readability(player_root: Node2D, enemy_root: Node2D) -> vo
 	for child in player_root.get_children():
 		if child is CharacterBody2D:
 			var sprite := child.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
-			CharacterReadability.apply(sprite, CharacterReadability.PLAYER_OUTLINE)
+			CharacterReadability.apply_player(sprite)
 	for child in enemy_root.get_children():
 		if child is CharacterBody2D:
 			var sprite := child.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
-			CharacterReadability.apply(sprite, CharacterReadability.ENEMY_OUTLINE)
+			CharacterReadability.apply_enemy(sprite)

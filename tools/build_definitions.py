@@ -31,6 +31,7 @@ from definition_common import (
     split_numbered_senses,
     strip_display_prefixes,
 )
+from definition_quality import is_acceptable_gloss, is_oxford_junk_gloss
 from definition_ranking import SenseEntry, select_game_top3
 
 LIVE_PATH = ROOT / "dictionary" / "EnglishWords5.txt"
@@ -99,8 +100,10 @@ class SenseCollector:
             return
         if is_paper_size_gloss(text):
             return
+        if is_oxford_junk_gloss(text):
+            return
         short = shorten_definition(text)
-        if not short:
+        if not short or not is_acceptable_gloss(short):
             return
         key = short.lower()
         if key in self._seen[word]:
@@ -122,14 +125,22 @@ class SenseCollector:
         comprehensive: dict[str, list[str]] = {}
         top3: dict[str, list[str]] = {}
         abbrev_only: set[str] = set()
+        sorted_entries: dict[str, list[SenseEntry]] = {}
         for word, entries in self.senses.items():
             entries.sort(key=lambda item: (item.is_abbrev, item.order))
+            sorted_entries[word] = entries
             ordered = [entry.text for entry in entries]
             if ordered:
                 comprehensive[word] = ordered[:MAX_SENSES_COMPREHENSIVE]
-                top3[word] = select_game_top3(word, entries)[:MAX_SENSES_TOP3]
                 if all(entry.is_abbrev for entry in entries):
                     abbrev_only.add(word)
+        for word, entries in sorted_entries.items():
+            if word in comprehensive:
+                top3[word] = select_game_top3(
+                    word,
+                    entries,
+                    comprehensive=comprehensive,
+                )[:MAX_SENSES_TOP3]
         return comprehensive, top3, abbrev_only
 
 

@@ -1,15 +1,21 @@
 class_name DefinitionPopupPlayer
 extends CanvasLayer
 
-## Definition bar near the bottom: WORD - sense, with optional continuation row and ◀ ▶ / , . keys.
+## Screen-bottom definition bar: WORD - sense, optional continuation row, ◀ ▶ / , . keys.
 
 signal definition_shown(word: String, definition: String, sense_index: int)
 
 const DefinitionServiceScript := preload("res://scripts/word_game/definition_service.gd")
+const DEFINITION_FONT := preload("res://assets/PTSans-Bold.ttf")
+const PANEL_PAD_X := 28.0
+const PANEL_STYLE_PAD_H := 28.0
+const SPLIT_WIDTH_MARGIN := 8.0
+const ROW1_MAX_INNER_RATIO := 0.62
 
 @export var idle_seconds := 4.0
 @export var fade_seconds := 0.35
-@export var bottom_margin := 80.0
+@export var below_platform_offset := 112.0
+@export var bottom_margin := 140.0
 @export var max_panel_width := 1100.0
 @export var viewport_width_ratio := 0.9
 @export var compact_width_threshold := 820.0
@@ -21,6 +27,7 @@ const NARROW_FONT_SIZE := 18
 
 var definitions: DefinitionService = DefinitionServiceScript.new()
 
+var _screen_root: Control
 var _panel: PanelContainer
 var _content: VBoxContainer
 var _row: HBoxContainer
@@ -37,6 +44,9 @@ var _is_fading := false
 var _show_token := 0
 var _last_layout_width := -1.0
 var _last_font_size := -1
+var _anchor_world := Vector2.ZERO
+var _has_platform_anchor := false
+var _layout_sync_queued := false
 
 
 func _ready() -> void:
@@ -44,17 +54,29 @@ func _ready() -> void:
 	if not definitions.load_definitions():
 		push_warning(definitions.error_message)
 	_build_ui()
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
 
 
 func _process(delta: float) -> void:
-	if _panel == null:
+	if _panel == null or not _panel.visible:
 		return
-	if _panel.visible:
-		_position_panel()
-		if not _is_fading and _idle_timer > 0.0:
-			_idle_timer -= delta
-			if _idle_timer <= 0.0:
-				_begin_fade_out()
+	_sync_panel_position()
+	if not _is_fading and _idle_timer > 0.0:
+		_idle_timer -= delta
+		if _idle_timer <= 0.0:
+			_begin_fade_out()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_SIZE_CHANGED:
+		_on_viewport_size_changed()
+
+
+func _on_viewport_size_changed() -> void:
+	if _panel == null or not _panel.visible or _current_word.is_empty():
+		return
+	_last_layout_width = -1.0
+	_refresh_row()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -77,6 +99,13 @@ func bind_player_words(word_controller: WordGameController) -> void:
 		word_controller.valid_word_submitted.connect(_on_player_valid_word)
 
 
+func set_anchor_world_position(world_position: Vector2) -> void:
+	_anchor_world = world_position
+	_has_platform_anchor = true
+	if _panel != null and _panel.visible:
+		_sync_panel_position()
+
+
 func show_definition(word: String) -> void:
 	var senses := definitions.get_senses(word)
 	if senses.is_empty():
@@ -89,11 +118,10 @@ func show_definition(word: String) -> void:
 	_sense_index = 0
 	_last_layout_width = -1.0
 	_last_font_size = -1
-	_refresh_row()
 	_panel.visible = true
 	_panel.modulate.a = 1.0
+	_refresh_row()
 	_reset_idle_timer()
-	_position_panel()
 	definition_shown.emit(word, _senses[_sense_index], _sense_index)
 
 
@@ -131,45 +159,152 @@ func _refresh_row() -> void:
 
 
 func _apply_display_text(word: String, sense: String) -> void:
-	_apply_responsive_font()
-	var split := _split_display_text(word, sense)
+	var metrics := _layout_metrics()
+	var max_content_width: float = metrics.content_width
+	_apply_responsive_font(metrics.font_size)
+	if absf(max_content_width - _last_layout_width) > 1.0:
+		_last_layout_width = max_content_width
+
+	_panel.custom_minimum_size = Vector2.ZERO
+	_content.custom_minimum_size = Vector2.ZERO
+	_row.custom_minimum_size = Vector2.ZERO
+
+	var split := _split_display_text(word, sense, metrics.font_size)
 	_primary_label.text = split[0]
 	var continuation: String = split[1]
 	_continuation_label.text = continuation
-	_continuation_label.visible = not continuation.is_empty()
-	var content_width := _content_inner_width()
-	_continuation_label.custom_minimum_size.x = content_width
+	var has_continuation := not continuation.is_empty()
+	_continuation_label.visible = has_continuation
+	_primary_label.custom_minimum_size.x = 0
+	_primary_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	var panel_width := _measure_panel_width(split, metrics)
+	_apply_panel_width(panel_width)
+	if has_continuation:
+		_row.custom_minimum_size.x = _panel_inner_width(panel_width)
+	else:
+		_row.custom_minimum_size.x = 0
+	_queue_layout_sync()
 
 
-func _split_display_text(word: String, sense: String) -> Array[String]:
+func _queue_layout_sync() -> void:
+	if not is_inside_tree():
+		return
+	_content.update_minimum_size()
+	_panel.update_minimum_size()
+	if _layout_sync_queued:
+		return
+	_layout_sync_queued = true
+	call_deferred("_sync_panel_layout")
+
+
+func _sync_panel_layout() -> void:
+	_layout_sync_queued = false
+	if _panel == null or not _panel.visible:
+		return
+	if _continuation_label.visible and not _continuation_label.text.is_empty():
+		var inner_width := _panel_inner_width(_panel.custom_minimum_size.x)
+		var wrapped_height := _measure_wrapped_height(
+			_continuation_label.text,
+			inner_width,
+			_continuation_label.get_theme_font_size("font_size"),
+		)
+		_continuation_label.custom_minimum_size.y = maxf(wrapped_height, 1.0)
+	else:
+		_continuation_label.custom_minimum_size.y = 0.0
+	_panel.update_minimum_size()
+	_panel.reset_size()
+	var panel_size := _panel.get_combined_minimum_size()
+	if panel_size == Vector2.ZERO:
+		panel_size = _panel.size
+	_panel.size = panel_size
+	_sync_panel_position()
+
+
+func _measure_panel_width(split: Array[String], metrics: Dictionary) -> float:
+	var font_size: int = metrics.font_size
+	var max_panel_width_px: float = metrics.content_width + PANEL_PAD_X
+	var row1_width := _measure_text_at(split[0], font_size)
+	var nav_width := 0.0
+	if _prev_button.visible:
+		nav_width = (
+			_prev_button.custom_minimum_size.x
+			+ _next_button.custom_minimum_size.x
+			+ float(_row.get_theme_constant("separation")) * 2.0
+		)
+	var row_width := row1_width
+	if nav_width > 0.0:
+		row_width += nav_width + float(_row.get_theme_constant("separation")) * 2.0
+	var text_width := row_width
+	if not split[1].is_empty():
+		text_width = maxf(row_width, _measure_text_at(split[1], font_size))
+	return clampf(text_width + PANEL_PAD_X + PANEL_STYLE_PAD_H, 120.0, max_panel_width_px)
+
+
+func _resolve_panel_width(max_content_width: float, use_full_width: bool) -> float:
+	var max_panel_width_px := max_content_width + PANEL_PAD_X
+	if use_full_width:
+		return max_panel_width_px
+	_panel.reset_size()
+	var natural := _panel.get_combined_minimum_size()
+	if natural.x <= 0.0:
+		natural.x = _panel.size.x
+	return clampf(natural.x, 120.0, max_panel_width_px)
+
+
+func _apply_panel_width(panel_width: float) -> void:
+	var inner_width := _panel_inner_width(panel_width)
+	_panel.custom_minimum_size.x = panel_width
+	if _continuation_label.visible:
+		_continuation_label.custom_minimum_size.x = inner_width
+	else:
+		_continuation_label.custom_minimum_size.x = 0
+
+
+func _panel_inner_width(panel_width: float) -> float:
+	return maxf(panel_width - PANEL_PAD_X - PANEL_STYLE_PAD_H, 80.0)
+
+
+func _split_display_text(word: String, sense: String, font_size: int = BASE_FONT_SIZE) -> Array[String]:
+	var cleaned := sense.strip_edges()
+	if cleaned.ends_with("…"):
+		cleaned = cleaned.substr(0, cleaned.length() - 1).strip_edges()
 	var prefix := "%s - " % word
-	var full := prefix + sense
+	var full := prefix + cleaned
 	var budget := _primary_line_budget()
-	if _measure_text(full, _primary_label) <= budget:
+	if _measure_text_at(full, font_size) <= budget:
 		return [full, ""]
-	var sense_words := sense.split(" ", false)
+
+	var sense_words := cleaned.split(" ", false)
 	var line_words: PackedStringArray = PackedStringArray()
 	for sense_word in sense_words:
 		var trial_words := line_words.duplicate()
 		trial_words.append(sense_word)
 		var trial_sense := " ".join(trial_words)
-		if _measure_text(prefix + trial_sense, _primary_label) <= budget:
+		if _measure_text_at(prefix + trial_sense, font_size) <= budget:
 			line_words = trial_words
 		else:
 			break
+
 	if line_words.is_empty():
-		return _split_display_by_characters(prefix, sense, budget)
+		return _split_display_by_characters(prefix, cleaned, budget, font_size)
+
 	var used_count := line_words.size()
 	var continuation_words := sense_words.slice(used_count)
 	var continuation := " ".join(PackedStringArray(continuation_words))
 	return [prefix + " ".join(line_words), continuation]
 
 
-func _split_display_by_characters(prefix: String, sense: String, budget: float) -> Array[String]:
+func _split_display_by_characters(
+	prefix: String,
+	sense: String,
+	budget: float,
+	font_size: int = BASE_FONT_SIZE,
+) -> Array[String]:
 	var chunk := ""
 	for i in range(sense.length()):
 		var next := chunk + sense[i]
-		if _measure_text(prefix + next, _primary_label) <= budget:
+		if _measure_text_at(prefix + next, font_size) <= budget:
 			chunk = next
 		else:
 			break
@@ -179,24 +314,18 @@ func _split_display_by_characters(prefix: String, sense: String, budget: float) 
 	return [prefix + chunk, continuation]
 
 
-func _content_inner_width() -> float:
-	var metrics := _layout_metrics()
-	return metrics.content_width
-
-
 func _layout_metrics() -> Dictionary:
 	var viewport := get_viewport()
 	if viewport == null:
 		return {
-			"rect": Rect2(Vector2.ZERO, Vector2(960.0, 540.0)),
+			"viewport_size": Vector2(960.0, 540.0),
 			"content_width": 520.0,
 			"bottom_margin": bottom_margin,
-			"side_inset": 0.0,
 			"font_size": BASE_FONT_SIZE,
 		}
-	var rect := viewport.get_visible_rect()
-	var width := rect.size.x
-	var height := rect.size.y
+	var viewport_size := viewport.get_visible_rect().size
+	var width := viewport_size.x
+	var height := viewport_size.y
 	var is_compact := width < compact_width_threshold or height < compact_height_threshold
 	var side_inset := _side_inset(width, is_compact)
 	var width_ratio := 0.94 if is_compact else viewport_width_ratio
@@ -210,10 +339,9 @@ func _layout_metrics() -> Dictionary:
 	elif is_compact:
 		font_size = NARROW_FONT_SIZE
 	return {
-		"rect": rect,
+		"viewport_size": viewport_size,
 		"content_width": maxf(content_width, 200.0),
 		"bottom_margin": resolved_bottom,
-		"side_inset": side_inset,
 		"font_size": font_size,
 	}
 
@@ -224,8 +352,11 @@ func _side_inset(viewport_width: float, is_compact: bool) -> float:
 	return maxf(12.0, viewport_width * 0.03)
 
 
-func _apply_responsive_font() -> void:
-	var font_size: int = _layout_metrics().font_size
+func _content_inner_width() -> float:
+	return _layout_metrics().content_width
+
+
+func _apply_responsive_font(font_size: int) -> void:
 	if font_size == _last_font_size:
 		return
 	_last_font_size = font_size
@@ -234,22 +365,78 @@ func _apply_responsive_font() -> void:
 
 
 func _primary_line_budget() -> float:
-	var budget := _content_inner_width()
+	var inner := _content_inner_width() - PANEL_STYLE_PAD_H
+	var nav := 0.0
 	if _prev_button.visible:
-		budget -= _prev_button.custom_minimum_size.x
-		budget -= _next_button.custom_minimum_size.x
-		budget -= _row.get_theme_constant("separation") * 2.0
-	return maxf(budget, 120.0)
+		nav += _prev_button.custom_minimum_size.x
+		nav += _next_button.custom_minimum_size.x
+		nav += _row.get_theme_constant("separation") * 2.0
+	var usable := inner - nav
+	var readable_cap := inner * ROW1_MAX_INNER_RATIO
+	return maxf(minf(usable, readable_cap) - SPLIT_WIDTH_MARGIN, 80.0)
 
 
-func _measure_text(text: String, label: Label) -> float:
+func _measure_text_at(text: String, font_size: int) -> float:
 	if text.is_empty():
 		return 0.0
-	var font: Font = label.get_theme_font("font")
-	var font_size := label.get_theme_font_size("font_size")
-	if font == null:
-		return float(text.length()) * 10.0
-	return font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	return DEFINITION_FONT.get_string_size(
+		text,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		font_size,
+	).x
+
+
+func _measure_text(text: String, _label: Label = null) -> float:
+	var font_size := BASE_FONT_SIZE
+	if _primary_label:
+		font_size = _primary_label.get_theme_font_size("font_size")
+	return _measure_text_at(text, font_size)
+
+
+func _measure_wrapped_height(text: String, width: float, font_size: int) -> float:
+	if text.is_empty() or width <= 0.0:
+		return 0.0
+	var font := DEFINITION_FONT
+	return font.get_multiline_string_size(
+		text,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		width,
+		font_size,
+	).y
+
+
+func _label_font(_label: Label) -> Font:
+	return DEFINITION_FONT
+
+
+func _sync_panel_position() -> void:
+	if _panel == null or _screen_root == null:
+		return
+	var viewport := get_viewport()
+	if viewport == null:
+		return
+	var metrics := _layout_metrics()
+	var rect := viewport.get_visible_rect()
+
+	var panel_size := _panel.size
+	if panel_size.x <= 0.0 or panel_size.y <= 0.0:
+		_panel.reset_size()
+		panel_size = _panel.get_combined_minimum_size()
+		if panel_size == Vector2.ZERO:
+			panel_size = _panel.size
+		_panel.size = panel_size
+
+	var x := rect.position.x + (rect.size.x - panel_size.x) * 0.5
+	var y: float
+	if _has_platform_anchor:
+		var world_pos := _anchor_world + Vector2(0.0, below_platform_offset)
+		var screen_pos: Vector2 = viewport.get_canvas_transform() * world_pos
+		y = screen_pos.y
+	else:
+		y = rect.position.y + rect.size.y - panel_size.y - metrics.bottom_margin
+
+	_panel.global_position = Vector2(x, y)
 
 
 func _begin_fade_out() -> void:
@@ -291,10 +478,15 @@ func _cancel_fade_tween() -> void:
 
 
 func _build_ui() -> void:
+	_screen_root = Control.new()
+	_screen_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_screen_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_screen_root)
+
 	_panel = PanelContainer.new()
 	_panel.visible = false
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_panel)
+	_screen_root.add_child(_panel)
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.06, 0.09, 0.14, 0.92)
@@ -321,6 +513,7 @@ func _build_ui() -> void:
 	_row.add_child(_prev_button)
 
 	_primary_label = _make_text_label()
+	_primary_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_row.add_child(_primary_label)
 
 	_next_button = _make_nav_button("▶", _show_next_sense)
@@ -328,6 +521,7 @@ func _build_ui() -> void:
 
 	_continuation_label = _make_text_label()
 	_continuation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_continuation_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_continuation_label.visible = false
 	_content.add_child(_continuation_label)
 
@@ -337,8 +531,12 @@ func _build_ui() -> void:
 
 func _make_text_label() -> Label:
 	var label := Label.new()
+	label.add_theme_font_override("font", DEFINITION_FONT)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = false
+	label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 	label.add_theme_font_size_override("font_size", 20)
 	label.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0, 1.0))
 	return label
@@ -353,31 +551,3 @@ func _make_nav_button(caption: String, callback: Callable) -> Button:
 		callback.call()
 	)
 	return button
-
-
-func _position_panel() -> void:
-	if _panel == null or not _panel.visible:
-		return
-	var viewport := get_viewport()
-	if viewport == null:
-		return
-	var metrics := _layout_metrics()
-	var content_width: float = metrics.content_width
-	var font_size: int = metrics.font_size
-	if (
-		absf(content_width - _last_layout_width) > 1.0
-		or font_size != _last_font_size
-	) and not _current_word.is_empty() and _sense_index < _senses.size():
-		_last_layout_width = content_width
-		_apply_display_text(_current_word, _senses[_sense_index])
-	_panel.reset_size()
-	var panel_size := _panel.get_combined_minimum_size()
-	if panel_size == Vector2.ZERO:
-		panel_size = _panel.size
-	var rect: Rect2 = metrics.rect
-	var side_inset: float = metrics.side_inset
-	var resolved_bottom: float = metrics.bottom_margin
-	var usable_width := rect.size.x - side_inset * 2.0
-	var x := rect.position.x + side_inset + (usable_width - panel_size.x) * 0.5
-	var y := rect.position.y + rect.size.y - panel_size.y - resolved_bottom
-	_panel.global_position = Vector2(x, y)

@@ -37,6 +37,8 @@ static func get_sections() -> Array[Dictionary]:
 			"title": "Match Flow",
 			"entries": [
 				{"keys": "Enter / J / Space", "desc": "Continue after winning a round"},
+				{"keys": "P", "desc": "Pause / resume gameplay"},
+				{"keys": "M / MUSIC button", "desc": "Open / close music player"},
 			],
 		},
 		{

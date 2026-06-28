@@ -18,6 +18,8 @@ const LetterBackdropRegistry := preload("res://scripts/letters/letter_backdrop_r
 const TRANSFORMS_PATH := "res://resources/phase2a/instance_transforms.json"
 const ENEMY_SPAWN_PATH := "res://resources/enemy/enemy_spawn.json"
 const LANE_PROFILE := preload("res://resources/letters/lane_rain_spawn_profile.tres")
+const MatchMusicPlayerScript := preload("res://scripts/audio/match_music_player.gd")
+const MusicPlayerPanelScript := preload("res://scripts/ui/music_player_panel.gd")
 const POP_SOUNDS := [
 	preload("res://assets/463388__vilkas-sound__vs-pop-4.mp3"),
 	preload("res://assets/463389__vilkas-sound__vs-pop-3.mp3"),
@@ -44,6 +46,9 @@ const POP_SOUNDS := [
 @onready var match_overlay: MatchOverlay = $UI/MatchOverlay
 @onready var round_intro_backdrop: RoundIntroBackdrop = $UI/RoundIntroBackdrop
 @onready var match_controller: MatchController = $MatchController
+@onready var scene_ambient: AudioStreamPlayer = $SceneAmbientAudio
+var match_music: AudioStreamPlayer
+var music_panel: CanvasLayer
 @onready var action_spawner: Node = $World/ActionCollectibleSpawner
 @onready var claw_spawner: Node = $World/ClawCollectibleSpawner
 
@@ -66,6 +71,7 @@ var _player_claw: PlayerClawController
 var _player_spawn := Vector2(279.0, 231.0)
 var _player_platform_landing := Vector2(279.0, 413.0)
 var _enemy_spawn := Vector2(740.0, 406.0)
+var _definition_popup: DefinitionPopupPlayer
 
 
 func _ready() -> void:
@@ -101,6 +107,7 @@ func _ready() -> void:
 		)
 	_apply_debug_visibility()
 	match_controller.config = level_config
+	_prepare_match_audio()
 	call_deferred("_begin_match_after_level_ready")
 	# Player._ready() already enables the follow camera — do not call activate_follow_camera
 	# again after the match intro starts or it resets zoom to base immediately.
@@ -291,7 +298,7 @@ func _wire_hud() -> void:
 	if word_garble_player and word_garble_player.has_method("setup"):
 		word_garble_player.setup(combat_hud, word_controller)
 	WordGameFeatures.attach_profanity_reactions($UI, word_controller, _enemy)
-	WordGameFeatures.attach_definition_popups($UI, word_controller)
+	_definition_popup = WordGameFeatures.attach_definition_popups($UI, word_controller)
 	combat_hud.set_debug_visible(debug_mode)
 
 
@@ -348,6 +355,25 @@ func _refresh_debug_dock() -> void:
 	debug_dock.set_body_text("\n\n".join(sections))
 
 
+func _prepare_match_audio() -> void:
+	if scene_ambient != null:
+		scene_ambient.set("autostart", false)
+		scene_ambient.stop()
+	match_music = get_node_or_null("MatchMusicPlayer") as AudioStreamPlayer
+	if match_music == null:
+		match_music = MatchMusicPlayerScript.new()
+		match_music.name = "MatchMusicPlayer"
+		match_music.music_level = 0.3
+		add_child(match_music)
+	var ui_layer := get_node_or_null("UI")
+	if ui_layer != null:
+		music_panel = ui_layer.get_node_or_null("MusicPlayerPanel") as CanvasLayer
+		if music_panel == null:
+			music_panel = MusicPlayerPanelScript.new()
+			music_panel.name = "MusicPlayerPanel"
+			ui_layer.add_child(music_panel)
+
+
 func _begin_match_after_level_ready() -> void:
 	_resolve_player_platform_landing()
 	if level_root.has_method("reset_scroll_presentation"):
@@ -358,6 +384,10 @@ func _begin_match_after_level_ready() -> void:
 		enemy_action = _enemy.get_action_controller()
 	match_controller.wire_round_ledger(damage_bridge, _player_action, enemy_action)
 	match_controller.wire_action_exchanges(combat_hud, _player_action, enemy_action)
+	if match_music != null:
+		match_music.setup(match_controller, scene_ambient)
+	if music_panel != null and music_panel.has_method("setup"):
+		music_panel.setup(match_music)
 	if level_root.has_method("reset_scroll_presentation"):
 		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
 			match_controller.round_started.connect(_on_round_started_refresh_scroll)
@@ -378,6 +408,8 @@ func _resolve_player_platform_landing() -> void:
 		_player.global_position = _player_platform_landing
 	if _player_combat and _player_combat.has_method("configure_spawn"):
 		_player_combat.configure_spawn(_player_platform_landing)
+	if _definition_popup:
+		_definition_popup.set_anchor_world_position(_player_platform_landing)
 	if collision_debug and _player:
 		collision_debug.set_player(_player)
 

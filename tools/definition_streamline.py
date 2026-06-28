@@ -5,13 +5,11 @@ from __future__ import annotations
 import re
 
 from definition_common import (
-    MAX_DEFINITION_LEN,
     SENSE_DELIMITER,
     clean_tsv_field,
     strip_display_prefixes,
 )
-
-STREAMLINED_MAX_LEN = 48
+from definition_quality import is_acceptable_gloss, is_oxford_junk_gloss
 
 _FILLER_RE = re.compile(
     r"\b(?:colloq|esp|e\.g|etc|i\.e|viz|cf|foll|predic|often offens|offens|abbr|symb)\.?\s*",
@@ -25,6 +23,28 @@ _EXAMPLE_PAREN_RE = re.compile(r"\([^)]{8,}\)")
 _TRAILING_CLAUSE_RE = re.compile(r"\s*[;,]\s*(?:especially|particularly|including|such as|e\.g\.).*$", re.I)
 _ARTICLE_VERB_RE = re.compile(r"^(?:a|an)\s+(?=[a-z]{3,}\b)", re.I)
 _MULTI_SPACE_RE = re.compile(r"\s+")
+_OXFORD_CROSSREF_RE = re.compile(
+    r"(?:"
+    r"^\s*(?:=|\&|pl\.?\s*=|us\s*=|var\.?\s*of)\s*\*|"
+    r"^\s*objective case of \*|"
+    r"^\s*pl\.?\s*of \*"
+    r")",
+    re.I,
+)
+_COMMA_CAP_WORDS = frozenset(
+    "from of as in to for with on at one boldly usu including social english a an the".split()
+)
+
+
+def _fix_esp_comma_artifacts(text: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        word = match.group(1)
+        if word.lower() in _COMMA_CAP_WORDS:
+            return " " + word.lower()
+        return match.group(0)
+
+    text = re.sub(r",\s+([A-Z][a-z]+)", repl, text)
+    return re.sub(r"\s+,", ",", text)
 
 _SIMPLE_REPLACEMENTS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\butiliz(?:e|es|ed|ing)\b", re.I), "use"),
@@ -89,22 +109,20 @@ def _apply_simple_words(text: str) -> str:
     return text
 
 
-def _cap_length(text: str, max_len: int = STREAMLINED_MAX_LEN) -> str:
-    if len(text) <= max_len:
-        return text
-    cut = text[: max_len - 1]
-    if " " in cut:
-        cut = cut.rsplit(" ", 1)[0]
-    return cut.rstrip(".,;:") + "…"
-
-
-def streamline_definition(text: str, max_len: int = STREAMLINED_MAX_LEN) -> str:
+def streamline_definition(text: str) -> str:
     text = strip_display_prefixes(text)
     if not text:
+        return ""
+    if is_oxford_junk_gloss(text):
+        return ""
+    if _OXFORD_CROSSREF_RE.search(text):
+        return ""
+    if re.search(r"\*[a-z0-9]+\b", text, re.I) and len(text) < 55:
         return ""
     text = _FILLER_RE.sub(" ", text)
     text = _ORPHAN_PUNCT_RE.sub(",", text)
     text = _DOUBLE_PUNCT_RE.sub(" ", text)
+    text = _fix_esp_comma_artifacts(text)
     text = _POS_TAIL_RE.sub("", text)
     text = _TRAILING_CLAUSE_RE.sub("", text)
     text = _EXAMPLE_PAREN_RE.sub("", text)
@@ -117,7 +135,9 @@ def streamline_definition(text: str, max_len: int = STREAMLINED_MAX_LEN) -> str:
         return ""
     if text and text[0].islower():
         text = text[0].upper() + text[1:]
-    return _cap_length(text, max_len)
+    if not is_acceptable_gloss(text):
+        return ""
+    return text
 
 
 def streamline_senses(senses: list[str]) -> list[str]:

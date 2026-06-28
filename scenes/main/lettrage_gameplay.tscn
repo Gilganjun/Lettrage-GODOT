@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://lettrage_gameplay_main"]
+[gd_scene load_steps=23 format=3 uid="uid://lettrage_gameplay_main"]
 
 [ext_resource type="Script" path="res://scripts/main/lettrage_gameplay.gd" id="1_root"]
 [ext_resource type="PackedScene" path="res://scenes/levels/main2_heallthbartest_level.tscn" id="2_level"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/viewport_backdrop_fill.tscn" id="10_backdrop"]
 [ext_resource type="AudioStream" path="res://assets/609250__aemyn__journey-to-the-interweb.mp3" id="11_ambient"]
 [ext_resource type="Script" path="res://scripts/audio/scene_ambient_audio.gd" id="12_ambient"]
+[ext_resource type="Script" path="res://scripts/audio/match_music_player.gd" id="12_music"]
 [ext_resource type="Script" path="res://scripts/letters/letter_cannon.gd" id="13_cannon"]
 [ext_resource type="PackedScene" path="res://scenes/visual/phase2c1_visual_pass.tscn" id="14_visual"]
 [ext_resource type="Script" path="res://scripts/collectibles/action_collectible_spawner.gd" id="15_action_spawner"]
@@ -33,7 +34,12 @@ level_config = ExtResource("18_level_cfg")
 [node name="SceneAmbientAudio" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("11_ambient")
 ambient_level = 0.2
+autostart = false
 script = ExtResource("12_ambient")
+
+[node name="MatchMusicPlayer" type="AudioStreamPlayer" parent="."]
+music_level = 0.3
+script = ExtResource("12_music")
 
 [node name="ViewportBackdropFill" parent="." instance=ExtResource("10_backdrop")]
 

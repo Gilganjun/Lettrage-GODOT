@@ -11,9 +11,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 
 from definition_common import decode_senses, encode_senses
-from definition_streamline import STREAMLINED_MAX_LEN, streamline_senses
+from definition_streamline import streamline_senses
 
-DEFAULT_INPUT = Path(r"C:\Lettrage\Dictionary\DefinitionsMain.txt")
+DEFAULT_INPUT = Path(r"C:\Lettrage\Dictionary\DefinitionsTop3.txt")
+DEFAULT_FALLBACK_INPUT = Path(r"C:\Lettrage\Dictionary\DefinitionsMain.txt")
 DEFAULT_OUTPUT = Path(r"C:\Lettrage\Dictionary\DefinitionsStreamlined.txt")
 DEFAULT_REPORT = Path(r"C:\Lettrage\Dictionary\DEFINITIONS_STREAMLINE_REPORT.txt")
 DEFAULT_LIVE = ROOT / "dictionary" / "EnglishWords5.txt"
@@ -92,7 +93,7 @@ def write_report(
         "DEFINITIONS STREAMLINE REPORT",
         "=" * 72,
         f"Entries:              {written:,}",
-        f"Max length:           {STREAMLINED_MAX_LEN} chars",
+        f"Max length:           none (UI wraps long glosses)",
         f"Avg sense length:     {avg_before:.1f} -> {avg_after:.1f} chars",
         f"Senses shortened:     {shortened:,}",
         "",
@@ -126,6 +127,8 @@ def main() -> None:
     args = parser.parse_args()
 
     input_path = args.input
+    if not input_path.is_file() and DEFAULT_FALLBACK_INPUT.is_file():
+        input_path = DEFAULT_FALLBACK_INPUT
     if not input_path.is_file() and DEFAULT_PROJECT_MAIN.is_file():
         input_path = DEFAULT_PROJECT_MAIN
     if not input_path.is_file():
