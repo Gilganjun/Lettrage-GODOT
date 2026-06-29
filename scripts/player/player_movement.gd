@@ -593,6 +593,9 @@ func _update_movement_state() -> void:
 		return
 	if _action_strike_frozen or _action_sequence_targeted:
 		return
+	var roll := _get_roll()
+	if roll and roll.has_method("is_rolling") and roll.is_rolling():
+		return
 	var combat := get_node_or_null("CharacterCombat")
 	if combat and combat.has_method("is_word_stun_active") and combat.is_word_stun_active():
 		return
@@ -787,7 +790,8 @@ func _process_roll(delta: float) -> bool:
 	if roll.process_roll(self, delta):
 		move_and_slide()
 		floor_snap_length = FLOOR_SNAP
-		_update_movement_state()
+		if not roll.is_rolling():
+			_update_movement_state()
 		return true
 	return false
 

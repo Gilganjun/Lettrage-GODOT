@@ -17,8 +17,9 @@ static func get_sections() -> Array[Dictionary]:
 				{"keys": "D / Right", "desc": "Walk right"},
 				{"keys": "W / Up", "desc": "Climb up / ladder"},
 				{"keys": "S / Down", "desc": "Climb down / fast fall (air)"},
+				{"keys": "S / Down + A", "desc": "Roll left (ground)"},
+				{"keys": "S / Down + D", "desc": "Roll right (ground)"},
 				{"keys": "Space", "desc": "Jump"},
-				{"keys": "R", "desc": "Roll"},
 			],
 		},
 		{
