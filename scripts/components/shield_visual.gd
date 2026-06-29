@@ -21,6 +21,13 @@ const ENEMY_GLOW_ALPHA := 0.04
 const ENEMY_GLOW_ALPHA_PULSE := 0.02
 const ENEMY_FIZZ_ALPHA := 0.18
 const GLOW_SCALE_MUL := 0.82
+const ROLL_BODY_FIT := 0.96
+const ROLL_WIDTH_MUL := 1.14
+const ROLL_FACE_ALPHA_MUL := 0.32
+const ROLL_GLOW_ALPHA_MUL := 0.22
+const ROLL_FIZZ_ALPHA_MUL := 0.12
+const ROLL_Z_INDEX := 6
+const NORMAL_Z_INDEX := 50
 
 const PLAYER_TINT := Color(0.72, 0.9, 1.0, 1.0)
 const ENEMY_TINT := Color(1.0, 0.55, 0.28, 1.0)
@@ -34,6 +41,7 @@ var _activate_burst: CPUParticles2D
 var _impact_burst: CPUParticles2D
 var _pulse_time := 0.0
 var _add_material: CanvasItemMaterial
+var _roll_mode := false
 
 
 func _ready() -> void:
@@ -100,12 +108,22 @@ func _build_visuals() -> void:
 	_apply_layout()
 
 
+func set_roll_presentation(on: bool) -> void:
+	_roll_mode = on
+	z_index = ROLL_Z_INDEX if on else NORMAL_Z_INDEX
+	_apply_layout()
+
+
 func _apply_layout() -> void:
 	var tint := ENEMY_TINT if _is_enemy else PLAYER_TINT
 	_face.sprite_frames = _build_face_frames()
 	var face_tex := _face.sprite_frames.get_frame_texture("shield", 0)
 	var fit_mul := ENEMY_BODY_FIT if _is_enemy else BODY_FIT
+	if _roll_mode and not _is_enemy:
+		fit_mul = ROLL_BODY_FIT
 	var body_fit := _size * fit_mul
+	if _roll_mode and not _is_enemy:
+		body_fit.x *= ROLL_WIDTH_MUL
 	_face.scale = _fit_texture_to_rect(face_tex, body_fit, _is_enemy)
 	var face_c := tint
 	face_c.a = _face_alpha_base()
@@ -121,7 +139,9 @@ func _apply_layout() -> void:
 	_fizz.emission_shape = CPUParticles2D.EMISSION_SHAPE_POINTS
 	_fizz.emission_points = _rect_edge_points(body_fit, 14)
 	_fizz.color = tint
-	_fizz.color.a = ENEMY_FIZZ_ALPHA if _is_enemy else 0.38
+	_fizz.color.a = (ENEMY_FIZZ_ALPHA if _is_enemy else 0.38)
+	if _roll_mode and not _is_enemy:
+		_fizz.color.a *= ROLL_FIZZ_ALPHA_MUL
 
 	var burst_half := half * 0.72
 	for burst in [_activate_burst, _impact_burst]:
@@ -167,19 +187,31 @@ func _process(delta: float) -> void:
 
 
 func _face_alpha_base() -> float:
-	return ENEMY_FACE_ALPHA if _is_enemy else FACE_ALPHA
+	var base := ENEMY_FACE_ALPHA if _is_enemy else FACE_ALPHA
+	if _roll_mode and not _is_enemy:
+		return base * ROLL_FACE_ALPHA_MUL
+	return base
 
 
 func _face_alpha_pulse() -> float:
-	return ENEMY_FACE_ALPHA_PULSE if _is_enemy else FACE_ALPHA_PULSE
+	var base := ENEMY_FACE_ALPHA_PULSE if _is_enemy else FACE_ALPHA_PULSE
+	if _roll_mode and not _is_enemy:
+		return base * ROLL_FACE_ALPHA_MUL
+	return base
 
 
 func _glow_alpha_base() -> float:
-	return ENEMY_GLOW_ALPHA if _is_enemy else GLOW_ALPHA
+	var base := ENEMY_GLOW_ALPHA if _is_enemy else GLOW_ALPHA
+	if _roll_mode and not _is_enemy:
+		return base * ROLL_GLOW_ALPHA_MUL
+	return base
 
 
 func _glow_alpha_pulse() -> float:
-	return ENEMY_GLOW_ALPHA_PULSE if _is_enemy else GLOW_ALPHA_PULSE
+	var base := ENEMY_GLOW_ALPHA_PULSE if _is_enemy else GLOW_ALPHA_PULSE
+	if _roll_mode and not _is_enemy:
+		return base * ROLL_GLOW_ALPHA_MUL
+	return base
 
 
 func _build_face_frames() -> SpriteFrames:

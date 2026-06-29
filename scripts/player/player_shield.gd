@@ -155,6 +155,16 @@ func restore_after_action_sequence() -> void:
 	_set_latched(true)
 
 
+func apply_roll_presentation(size: Vector2, local_position: Vector2) -> void:
+	if shield:
+		shield.apply_roll_presentation(size, local_position)
+
+
+func clear_roll_presentation() -> void:
+	if shield:
+		shield.clear_roll_presentation()
+
+
 func get_debug_info() -> Dictionary:
 	if shield == null:
 		return {

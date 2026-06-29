@@ -28,6 +28,7 @@ var _target_x := 0.0
 var _saved_collision_size := Vector2.ZERO
 var _saved_collision_position := Vector2.ZERO
 var _collision_applied := false
+var _saved_sprite_z := 0
 
 
 func _physics_process(delta: float) -> void:
@@ -36,10 +37,6 @@ func _physics_process(delta: float) -> void:
 
 
 func is_rolling() -> bool:
-	return _rolling
-
-
-func blocks_collection() -> bool:
 	return _rolling
 
 
@@ -93,7 +90,11 @@ func _begin_roll(player: PlayerMovement, dir: int) -> void:
 	player.velocity = Vector2.ZERO
 	_cancel_player_aim(player)
 	_play_roll_animation(player)
-	_apply_low_collision(player)
+	var roll_layout := _apply_low_collision(player)
+	_apply_roll_shield(player, roll_layout)
+	if player.sprite:
+		_saved_sprite_z = player.sprite.z_index
+		player.sprite.z_index = 14
 	_play_swish()
 	roll_started.emit()
 
@@ -118,7 +119,11 @@ func _finish_roll() -> void:
 	if not _rolling:
 		return
 	_rolling = false
+	_restore_roll_shield()
 	_restore_collision()
+	var player := get_parent() as PlayerMovement
+	if player and player.sprite:
+		player.sprite.z_index = _saved_sprite_z
 	roll_ended.emit()
 
 
@@ -132,10 +137,10 @@ func _play_roll_animation(player: PlayerMovement) -> void:
 	sprite.play(ANIM_ROLL)
 
 
-func _apply_low_collision(player: PlayerMovement) -> void:
+func _apply_low_collision(player: PlayerMovement) -> Dictionary:
 	var shape_node := player.get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node == null or not shape_node.shape is RectangleShape2D:
-		return
+		return {}
 	var rect := shape_node.shape as RectangleShape2D
 	if not _collision_applied:
 		_saved_collision_size = rect.size
@@ -147,6 +152,24 @@ func _apply_low_collision(player: PlayerMovement) -> void:
 		_saved_collision_position.x,
 		_saved_collision_position.y + (_saved_collision_size.y - low_h) * 0.5,
 	)
+	return {"size": rect.size, "position": shape_node.position}
+
+
+func _apply_roll_shield(player: PlayerMovement, layout: Dictionary) -> void:
+	if layout.is_empty():
+		return
+	var player_shield := PlayerShield.find_on_body(player)
+	if player_shield:
+		player_shield.apply_roll_presentation(layout["size"], layout["position"])
+
+
+func _restore_roll_shield() -> void:
+	var player := get_parent() as PlayerMovement
+	if player == null:
+		return
+	var player_shield := PlayerShield.find_on_body(player)
+	if player_shield:
+		player_shield.clear_roll_presentation()
 
 
 func _restore_collision() -> void:

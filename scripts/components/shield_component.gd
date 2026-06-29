@@ -37,6 +37,10 @@ var _shield_visual: ShieldVisual
 var _audio: AudioStreamPlayer
 var _hit_size := Vector2(40, 80)
 var _processed_this_frame: Dictionary = {}
+var _roll_presentation_active := false
+var _roll_saved_position := Vector2.ZERO
+var _roll_saved_hit_size := Vector2(40, 80)
+var _roll_saved_z_index := 0
 
 
 func _ready() -> void:
@@ -63,6 +67,32 @@ func configure_body_shape(size: Vector2) -> void:
 		(_collision_shape.shape as RectangleShape2D).size = size
 	if _shield_visual:
 		_shield_visual.configure(size, owner_group == "enemy")
+
+
+func apply_roll_presentation(size: Vector2, local_position: Vector2) -> void:
+	if not _roll_presentation_active:
+		_roll_saved_position = position
+		_roll_saved_hit_size = _hit_size
+		_roll_saved_z_index = z_index
+		_roll_presentation_active = true
+	position = local_position
+	if owner_group == "player":
+		z_index = 4
+	configure_body_shape(size)
+	if _shield_visual:
+		_shield_visual.set_roll_presentation(true)
+
+
+func clear_roll_presentation() -> void:
+	if not _roll_presentation_active:
+		return
+	_roll_presentation_active = false
+	position = _roll_saved_position
+	if owner_group == "player":
+		z_index = _roll_saved_z_index
+	configure_body_shape(_roll_saved_hit_size)
+	if _shield_visual:
+		_shield_visual.set_roll_presentation(false)
 
 
 func activate(reason: String = "manual", duration: float = -1.0) -> bool:
