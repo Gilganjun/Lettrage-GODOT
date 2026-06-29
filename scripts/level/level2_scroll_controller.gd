@@ -45,7 +45,11 @@ func _visible_half_width() -> float:
 	if _camera == null:
 		return VIEWPORT_WIDTH * 0.5
 	var zoom_x := maxf(_camera.zoom.x, 0.01)
-	return (VIEWPORT_WIDTH * 0.5) / zoom_x
+	var viewport_width := VIEWPORT_WIDTH
+	var viewport := get_viewport()
+	if viewport:
+		viewport_width = viewport.get_visible_rect().size.x
+	return (viewport_width * 0.5) / zoom_x
 
 
 func _apply_scroll_offset(_snap: bool) -> void:
@@ -59,7 +63,12 @@ func _apply_scroll_offset(_snap: bool) -> void:
 		_camera.position_smoothing_enabled = false
 	var half_w := _visible_half_width()
 	var min_x := half_w
-	var max_x := maxf(min_x, level_width - half_w)
+	var max_x := level_width - half_w
+	if max_x < min_x:
+		# Wider than the level (expand aspect) — keep the runway centered in view.
+		var offset_x := (level_width * 0.5) - _player.global_position.x
+		_camera.position = Vector2(offset_x, 0.0)
+		return
 	var desired_global_x := clampf(_player.global_position.x, min_x, max_x)
 	var offset_x := desired_global_x - _player.global_position.x
 	_camera.position = Vector2(offset_x, 0.0)

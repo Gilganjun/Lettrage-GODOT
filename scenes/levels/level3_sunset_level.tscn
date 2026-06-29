@@ -1,0 +1,120 @@
+[gd_scene load_steps=13 format=3 uid="uid://c8k3sunset_level01"]
+
+[ext_resource type="Script" path="res://scripts/level/level3_sunset_level.gd" id="1_level"]
+[ext_resource type="Texture2D" path="res://assets/Level 3 Sunset/Level3_BG1.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/Level 3 Sunset/Level3_BG1_water.png" id="2_water"]
+[ext_resource type="Texture2D" path="res://assets/Level 3 Sunset/Level3_Platform1.png" id="4_platform"]
+[ext_resource type="Script" path="res://scripts/level/level2_scroll_controller.gd" id="6_scroll"]
+[ext_resource type="Script" path="res://scripts/level/level2_main_platform.gd" id="7_platform"]
+[ext_resource type="Shader" path="res://shaders/level3_water_shimmer.gdshader" id="8_shader"]
+[ext_resource type="Script" path="res://scripts/level/level3_water_shimmer_sprite.gd" id="9_water_shimmer"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky"]
+atlas = ExtResource("2_bg")
+region = Rect2(0, 0, 1024, 288)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sky_ext"]
+atlas = ExtResource("2_bg")
+region = Rect2(0, 0, 1024, 176)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+shader = ExtResource("8_shader")
+shader_parameter/shimmer_strength = 0.035
+shader_parameter/highlight_strength = 0.22
+shader_parameter/ripple_scale = 8.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1920, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 360)
+
+[node name="Level3SunsetLevel" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="Backgrounds" type="Node2D" parent="."]
+
+[node name="SunsetBG" type="Node2D" parent="Backgrounds"]
+z_index = -2
+position = Vector2(0, -60)
+scale = Vector2(1.875, 1.875)
+
+[node name="SkyExtension" type="Sprite2D" parent="Backgrounds/SunsetBG"]
+z_index = -1
+position = Vector2(0, -384)
+scale = Vector2(1, 2.1818182)
+flip_v = true
+texture = SubResource("AtlasTexture_sky_ext")
+centered = false
+
+[node name="Sky" type="Sprite2D" parent="Backgrounds/SunsetBG"]
+texture = SubResource("AtlasTexture_sky")
+centered = false
+
+[node name="WaterBase" type="Sprite2D" parent="Backgrounds/SunsetBG"]
+position = Vector2(0, 288)
+texture = ExtResource("2_water")
+centered = false
+material = SubResource("ShaderMaterial_water")
+script = ExtResource("9_water_shimmer")
+
+[node name="Platforms" type="Node2D" parent="."]
+
+[node name="MainPlatform" type="Node2D" parent="Platforms"]
+z_index = 3
+position = Vector2(0, 276)
+script = ExtResource("7_platform")
+walk_surface_texture_y = 268.0
+floor_collision_width = 1920.0
+enable_edge_walls = true
+walk_edge_left_texture_x = 27.0
+walk_edge_right_texture_x = 1004.0
+
+[node name="Sprite2D" type="Sprite2D" parent="Platforms/MainPlatform"]
+scale = Vector2(1.875, 0.48)
+texture = ExtResource("4_platform")
+centered = false
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Platforms/MainPlatform"]
+collision_layer = 1
+collision_mask = 4
+metadata/collision_type = "floor"
+metadata/platform_type = "NormalPlatform"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/MainPlatform/StaticBody2D"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Boundaries" type="Node2D" parent="."]
+
+[node name="LeftBoundary" type="Node2D" parent="Boundaries"]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Boundaries/LeftBoundary"]
+position = Vector2(16, 370)
+collision_layer = 1
+collision_mask = 4
+metadata/collision_type = "wall"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/LeftBoundary/StaticBody2D"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightBoundary" type="Node2D" parent="Boundaries"]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Boundaries/RightBoundary"]
+position = Vector2(1904, 370)
+collision_layer = 1
+collision_mask = 4
+metadata/collision_type = "wall"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Boundaries/RightBoundary/StaticBody2D"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="PlayerSpawn" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(520, 320)
+
+[node name="EnemySpawn" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1400, 320)
+
+[node name="ScrollController" type="Node" parent="."]
+script = ExtResource("6_scroll")

@@ -1,7 +1,7 @@
-[gd_scene load_steps=24 format=3 uid="uid://lettrage_gameplay_level2_test"]
+[gd_scene load_steps=24 format=3 uid="uid://c8k3sunset_gameplay"]
 
-[ext_resource type="Script" path="res://scripts/main/lettrage_gameplay_level2_test.gd" id="1_root"]
-[ext_resource type="PackedScene" path="res://scenes/levels/level2_test_level.tscn" id="2_level"]
+[ext_resource type="Script" path="res://scripts/main/lettrage_gameplay_level3_test.gd" id="1_root"]
+[ext_resource type="PackedScene" path="res://scenes/levels/level3_sunset_level.tscn" id="2_level"]
 [ext_resource type="Script" path="res://scripts/test/phase2a_collision_debug_draw.gd" id="3_coldebug"]
 [ext_resource type="Script" path="res://scripts/letters/letter_spawner.gd" id="4_spawner"]
 [ext_resource type="Script" path="res://scripts/word_game/word_game_controller.gd" id="5_controller"]
@@ -20,12 +20,12 @@
 [ext_resource type="Script" path="res://scripts/collectibles/claw_collectible_spawner.gd" id="15_claw_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/ui/match_overlay.tscn" id="16_match_overlay"]
 [ext_resource type="Script" path="res://scripts/gameplay/match_controller.gd" id="17_match"]
-[ext_resource type="Resource" path="res://resources/gameplay/level2_test_config.tres" id="18_level_cfg"]
+[ext_resource type="Resource" path="res://resources/gameplay/level3_sunset_config.tres" id="18_level_cfg"]
 [ext_resource type="PackedScene" path="res://scenes/ui/gameplay_debug_dock.tscn" id="19_debug_dock"]
 [ext_resource type="PackedScene" path="res://scenes/ui/round_intro_backdrop.tscn" id="20_round_intro"]
 [ext_resource type="PackedScene" path="res://scenes/ui/gameplay_pause_overlay.tscn" id="21_pause"]
 
-[node name="LettrageGameplayLevel2Test" type="Node2D"]
+[node name="LettrageGameplayLevel3Sunset" type="Node2D"]
 script = ExtResource("1_root")
 level_scene = ExtResource("2_level")
 level_config = ExtResource("18_level_cfg")
@@ -55,7 +55,7 @@ config = ExtResource("18_level_cfg")
 
 [node name="World" type="Node2D" parent="."]
 
-[node name="Level" type="Node2D" parent="World"]
+[node name="Level" parent="World" instance=ExtResource("2_level")]
 
 [node name="LetterSpawner" type="Node2D" parent="World"]
 script = ExtResource("4_spawner")

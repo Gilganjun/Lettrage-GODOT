@@ -1,26 +1,24 @@
 extends "res://scripts/main/lettrage_gameplay.gd"
 
-## Full gameplay loop wired to the Level 2 test scene (does not touch production Level 1).
+## Full gameplay loop wired to Level 3 Sunset (does not touch production Level 1).
 
-const LEVEL2_LEVEL_SCENE := preload("res://scenes/levels/level2_test_level.tscn")
-const LEVEL2_GAMEPLAY_SCENE := "res://scenes/test/level2_test_gameplay.tscn"
+const LEVEL3_LEVEL_SCENE := preload("res://scenes/levels/level3_sunset_level.tscn")
+const LEVEL3_GAMEPLAY_SCENE := "res://scenes/test/level3_sunset_gameplay.tscn"
 
 
 func _enter_tree() -> void:
-	level_scene = LEVEL2_LEVEL_SCENE
+	level_scene = LEVEL3_LEVEL_SCENE
 
 
 func _ready() -> void:
-	_configure_level2_visual_defaults()
+	_configure_level3_visual_defaults()
 	super._ready()
-	_configure_level2_spawners()
-	_configure_level2_letter_vfx()
-	_assert_level2_mounted()
+	_configure_level3_spawners()
+	_configure_level3_letter_vfx()
+	_assert_level3_mounted()
 
 
-func _configure_level2_letter_vfx() -> void:
-	# Foreground parallax uses z_as_relative=false at z_index 85, which draws over the
-	# default LetterSpawner layer and hides shatter/rebound collect VFX on the platform.
+func _configure_level3_letter_vfx() -> void:
 	if letter_spawner:
 		letter_spawner.z_as_relative = false
 		letter_spawner.z_index = 100
@@ -42,10 +40,10 @@ func _spawn_enemy() -> void:
 		_enemy_spawn = landing
 		if _enemy_combat and _enemy_combat.has_method("configure_spawn"):
 			_enemy_combat.configure_spawn(landing)
-	_configure_level2_enemy_patrol()
+	_configure_level3_enemy_patrol()
 
 
-func _configure_level2_enemy_patrol() -> void:
+func _configure_level3_enemy_patrol() -> void:
 	if _enemy == null or level_root == null:
 		return
 	if not level_root.has_method("get_patrol_bounds"):
@@ -96,14 +94,14 @@ func _on_round_started_refresh_scroll(round_number: int) -> void:
 	super._on_round_started_refresh_scroll(round_number)
 	if level_root.has_method("sync_layout_from_platform"):
 		level_root.sync_layout_from_platform()
-	_configure_level2_enemy_patrol()
+	_configure_level3_enemy_patrol()
 	if _enemy and level_root.has_method("get_enemy_platform_landing_position"):
 		var landing: Vector2 = level_root.get_enemy_platform_landing_position(_enemy)
 		_enemy.global_position = landing
 		_enemy_spawn = landing
 
 
-func _configure_level2_visual_defaults() -> void:
+func _configure_level3_visual_defaults() -> void:
 	if visual_pass == null:
 		return
 	var blur := visual_pass.get_node_or_null("BackgroundBlur") as BackgroundBlur
@@ -111,7 +109,6 @@ func _configure_level2_visual_defaults() -> void:
 		blur.enabled = false
 	var band := visual_pass.get_node_or_null("GameplayFocusBand") as GameplayFocusBand
 	if band:
-		# Level 1 play-band overlay (y=180 hard edge + grey modulate) fights Level 2 art.
 		band.background_modulate = Color(1.0, 1.0, 1.0, 1.0)
 		band.decoration_modulate = Color(1.0, 1.0, 1.0, 1.0)
 		band.play_band_color = Color(0.0, 0.0, 0.0, 0.0)
@@ -120,7 +117,7 @@ func _configure_level2_visual_defaults() -> void:
 		platform_pass.enabled = false
 
 
-func _configure_level2_spawners() -> void:
+func _configure_level3_spawners() -> void:
 	var cannon_left := world.get_node_or_null("CannonLeft") as Node2D
 	if cannon_left:
 		cannon_left.position = Vector2(120.0, 300.0)
@@ -138,12 +135,12 @@ func _configure_level2_spawners() -> void:
 		letter_spawner.profile.spawn_x_max = 1800.0
 
 
-func _assert_level2_mounted() -> void:
+func _assert_level3_mounted() -> void:
 	if level_root == null:
-		push_error("Level 2 test: level_root is missing — open %s and press F6" % LEVEL2_GAMEPLAY_SCENE)
+		push_error("Level 3 Sunset: level_root is missing — open %s and press F6" % LEVEL3_GAMEPLAY_SCENE)
 		return
-	if level_root.get_scene_file_path() != LEVEL2_LEVEL_SCENE.resource_path:
+	if level_root.get_scene_file_path() != LEVEL3_LEVEL_SCENE.resource_path:
 		push_error(
-			"Level 2 test mounted wrong level scene: %s (expected %s)"
-			% [level_root.get_scene_file_path(), LEVEL2_LEVEL_SCENE.resource_path]
+			"Level 3 Sunset mounted wrong level scene: %s (expected %s)"
+			% [level_root.get_scene_file_path(), LEVEL3_LEVEL_SCENE.resource_path]
 		)

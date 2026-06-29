@@ -115,14 +115,20 @@ func _ready() -> void:
 
 func _ensure_level_mounted() -> void:
 	if level_scene == null:
+		level_root = world.get_node_or_null("Level") as Node2D
 		return
 	var existing := world.get_node_or_null("Level") as Node2D
-	if existing != null and existing.get_scene_file_path() == level_scene.resource_path:
+	var scene_path := level_scene.resource_path
+	if existing != null and existing.get_scene_file_path() == scene_path:
 		level_root = existing
 		return
 	if existing != null:
 		existing.queue_free()
 	var level := level_scene.instantiate() as Node2D
+	if level == null:
+		push_error("Failed to instantiate level scene: %s" % scene_path)
+		level_root = world.get_node_or_null("Level") as Node2D
+		return
 	level.name = "Level"
 	world.add_child(level)
 	world.move_child(level, 0)
@@ -376,9 +382,25 @@ func _prepare_match_audio() -> void:
 
 func _begin_match_after_level_ready() -> void:
 	_resolve_player_platform_landing()
-	if level_root.has_method("reset_scroll_presentation"):
-		level_root.reset_scroll_presentation()
+	_reset_scroll_presentation()
 	match_controller.setup(match_overlay, _round_reset_context())
+	_wire_match_controller_services()
+	if level_root.has_method("reset_scroll_presentation"):
+		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
+			match_controller.round_started.connect(_on_round_started_refresh_scroll)
+	_start_match()
+
+
+func _get_scroll_presentation_player() -> Node2D:
+	return null
+
+
+func _reset_scroll_presentation() -> void:
+	if level_root.has_method("reset_scroll_presentation"):
+		level_root.reset_scroll_presentation(_get_scroll_presentation_player())
+
+
+func _wire_match_controller_services() -> void:
 	var enemy_action: Node = null
 	if _enemy and _enemy.has_method("get_action_controller"):
 		enemy_action = _enemy.get_action_controller()
@@ -388,15 +410,10 @@ func _begin_match_after_level_ready() -> void:
 		match_music.setup(match_controller, scene_ambient)
 	if music_panel != null and music_panel.has_method("setup"):
 		music_panel.setup(match_music)
-	if level_root.has_method("reset_scroll_presentation"):
-		if not match_controller.round_started.is_connected(_on_round_started_refresh_scroll):
-			match_controller.round_started.connect(_on_round_started_refresh_scroll)
-	_start_match()
 
 
 func _on_round_started_refresh_scroll(_round_number: int) -> void:
-	if level_root.has_method("reset_scroll_presentation"):
-		level_root.reset_scroll_presentation()
+	_reset_scroll_presentation()
 
 
 func _resolve_player_platform_landing() -> void:
