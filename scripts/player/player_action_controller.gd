@@ -19,6 +19,8 @@ const ATTACK2_PATH := "res://assets/Characters/Player/Attack2/Attack2_%03d.png"
 const ATTACK3_FRAME_COUNT := 61
 const ATTACK3_PATH := "res://assets/Characters/Player/Attack3/Attack3_%03d.png"
 const ATTACK3_ANIMATION_FPS := 16.8 ## 24 fps slowed by 30%.
+const SUPER_JUMP_H_STOP := 36.0
+const ACTION_FACING_DEADZONE := 24.0
 
 @export var max_action_charges: int = 1
 @export var attack_pick_mode: AttackPickMode = AttackPickMode.ROTATE
@@ -68,6 +70,7 @@ var _round_ledger: RoundCombatLedger
 var _exchange_registry: ActionExchangeRegistry
 var _active_exchange: ActionExchange
 var _block_feedback: Node
+var _super_jump_locked_facing := 1
 
 
 func _ready() -> void:
@@ -106,7 +109,7 @@ func get_state() -> State:
 
 
 func locks_movement_animation() -> bool:
-	return _state == State.STRIKE or _state == State.RECOVER
+	return _state == State.STRIKE or _state == State.RECOVER or _state == State.SUPER_JUMP
 
 
 func uses_side_slide_strike() -> bool:
@@ -332,8 +335,7 @@ func _tick_approach(delta: float) -> void:
 	if _player.is_on_floor() and to.y < -super_jump_y_threshold:
 		_state = State.SUPER_JUMP
 		_state_time = 0.0
-		var horiz := signf(to.x) if absf(to.x) > 4.0 else float(_player.facing)
-		_player.velocity = Vector2(horiz * super_jump_horizontal_speed, -super_jump_impulse)
+		_begin_super_jump(to)
 		return
 	var cfg := _player.movement_config
 	if cfg == null:
@@ -352,18 +354,55 @@ func _tick_approach(delta: float) -> void:
 func _tick_super_jump(delta: float) -> void:
 	var target := _enemy.global_position
 	var to := target - _player.global_position
-	_player.facing = 1 if to.x >= 0.0 else -1
+	_apply_locked_facing(_super_jump_locked_facing)
+	_tick_super_jump_horizontal(delta, to)
 	var cfg := _player.movement_config
 	if cfg == null:
 		cfg = load("res://resources/player/movement_config.tres")
-	var horiz := signf(to.x) if absf(to.x) > 4.0 else float(_player.facing)
-	_player.velocity.x = horiz * super_jump_horizontal_speed
 	_player.velocity.y = minf(
 		_player.velocity.y + cfg.gravity * delta,
 		cfg.max_falling_speed * 0.35,
 	)
 	if to.length() <= connect_distance or (_player.is_on_floor() and _state_time > 0.2):
 		_begin_strike()
+
+
+func _begin_super_jump(to: Vector2) -> void:
+	_super_jump_locked_facing = _resolve_approach_facing(to)
+	_apply_locked_facing(_super_jump_locked_facing)
+	var launch_x := 0.0
+	if absf(to.x) > SUPER_JUMP_H_STOP:
+		launch_x = float(_super_jump_locked_facing) * super_jump_horizontal_speed
+	_player.velocity = Vector2(launch_x, -super_jump_impulse)
+	_player.movement_state = PlayerAnimation.MovementState.JUMP
+	_player.animation_controller.force_apply_state(
+		PlayerAnimation.MovementState.JUMP,
+		_super_jump_locked_facing,
+	)
+
+
+func _tick_super_jump_horizontal(delta: float, to: Vector2) -> void:
+	var brake := super_jump_horizontal_speed * 3.5 * delta
+	if absf(to.x) <= SUPER_JUMP_H_STOP:
+		_player.velocity.x = move_toward(_player.velocity.x, 0.0, brake)
+		return
+	var target_vx := signf(to.x) * super_jump_horizontal_speed
+	var accel := super_jump_horizontal_speed * 2.0 * delta
+	_player.velocity.x = move_toward(_player.velocity.x, target_vx, accel)
+
+
+func _resolve_approach_facing(to: Vector2) -> int:
+	if absf(to.x) <= ACTION_FACING_DEADZONE:
+		return _player.facing if _player != null else 1
+	return 1 if to.x > 0.0 else -1
+
+
+func _apply_locked_facing(side: int) -> void:
+	if _player == null or side == 0:
+		return
+	_player.facing = side
+	if _player.sprite:
+		_player.sprite.flip_h = side < 0
 
 
 func _begin_strike() -> void:

@@ -2,6 +2,7 @@ class_name MatchController
 extends Node
 
 signal round_started(round_number: int)
+signal round_countdown_started(round_number: int)
 signal round_ended(player_won_round: bool)
 signal match_ended(player_won_match: bool)
 
@@ -111,6 +112,7 @@ func _begin_next_round() -> void:
 	_phase_timer = 0.0
 	GameplayRoundReset.begin_round_intro(_ctx, config)
 	_update_countdown_display()
+	round_countdown_started.emit(_current_round)
 
 
 func _process(delta: float) -> void:

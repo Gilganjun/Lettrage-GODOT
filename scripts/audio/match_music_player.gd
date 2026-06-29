@@ -47,6 +47,8 @@ func _ready() -> void:
 
 func setup(match_controller: MatchController, scene_ambient: AudioStreamPlayer = null) -> void:
 	if match_controller != null:
+		if not match_controller.round_countdown_started.is_connected(_on_round_countdown_started):
+			match_controller.round_countdown_started.connect(_on_round_countdown_started)
 		if not match_controller.round_started.is_connected(_on_round_started):
 			match_controller.round_started.connect(_on_round_started)
 		if not match_controller.round_ended.is_connected(_on_round_ended):
@@ -173,9 +175,17 @@ func _on_round_ended(player_won_round: bool) -> void:
 	play_you_win_track()
 
 
-func _on_round_started(round_number: int) -> void:
+func _on_round_countdown_started(_round_number: int) -> void:
+	if not _in_you_win_mode:
+		return
 	_in_you_win_mode = false
 	stop_track()
+
+
+func _on_round_started(round_number: int) -> void:
+	_in_you_win_mode = false
+	if playing:
+		stop_track()
 	reset_default_volume()
 	if _all_tracks.is_empty():
 		return

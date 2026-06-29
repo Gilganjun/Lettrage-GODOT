@@ -226,7 +226,10 @@ func is_action_facing_locked() -> bool:
 func refresh_action_facing_toward(target: Node2D) -> void:
 	if not _action_facing_locked or target == null:
 		return
-	facing = 1 if target.global_position.x >= global_position.x else -1
+	var to_x := target.global_position.x - global_position.x
+	if absf(to_x) < 24.0:
+		return
+	facing = 1 if to_x > 0.0 else -1
 	if sprite:
 		sprite.flip_h = facing < 0
 
